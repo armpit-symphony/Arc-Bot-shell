@@ -219,6 +219,14 @@ The shell may use public-facing language in demos, but its roadmap should stay h
 
 This repo is currently a roadmap/staging repo for the Arc Bot business worker-bot shell. It should remain documentation-only until the shell boundaries, client-safe configuration model, and LIMA Office/LIMA AI OS integration contracts are approved.
 
+## Current Foundation Docs
+
+- [Arc Bot Operator Console Foundation](docs/OPERATOR_CONSOLE_FOUNDATION.md)
+- [Arc Bot Operator Console State Contract](docs/contracts/ARC_BOT_OPERATOR_CONSOLE_STATE.md)
+- [Arc Bot Reconstruction Docs And Source Map](docs/audits/ARC_BOT_RECONSTRUCTION_DOCS_AND_SOURCE_MAP.md)
+
+The operator-console foundation defines the first office-worker control-room surfaces and server-side state boundary. It is not a frontend, backend, persistence layer, worker runtime, connector, model router, scheduler, Guardian implementation, or LIMA runtime integration.
+
 ## Development Principles
 
 - Strict by default
