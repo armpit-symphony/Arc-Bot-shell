@@ -2,7 +2,7 @@
 
 Branch: `define-arc-lima-readiness-static-proof-boundary`
 
-Commit: `<COMMIT_SHA_TBD>`
+Commit: `ea3b02b`
 
 Target status: `READY_FOR_ARC_READINESS_DOCS_AND_STATIC_PROOF_ONLY`
 
@@ -146,16 +146,29 @@ The approval boundary example file documents:
 
 All docs/examples are static, dry-run, preview-only artifacts for readiness planning.
 
-## Validation evidence
+## Validation results
 
-- `git status --short --branch`: checked at report close.
-- `git diff --check`: checked at report close.
-- Changed-file list: captured in this report.
-- Targeted secret-pattern scan: executed.
-- Browser-storage scan for `localStorage|sessionStorage|IndexedDB|document.cookie`: executed.
-- Runtime/action scan for LIMA imports, provider/model calls, connector calls, subprocesses, browser automation, network/file mutation, schedulers, workers, device actions, and external sends: executed.
-- Frontend build/test: not run (no frontend stack in branch scope).
-- Backend tests: not run (no backend stack in branch scope).
+- `git status --short --branch`: clean after commit on this branch.
+- `git diff --check`: passed.
+- Changed-file list:
+  - `docs/readiness/ARC_LIMA_READY_NOT_INTEGRATED.md`
+  - `docs/readiness/ARC_LIMA_STATIC_PROOF_PACKET.md`
+  - `docs/readiness/ARC_LIMA_FUTURE_IMPORT_CALL_SHAPE.md`
+  - `docs/examples/arc_lima/normalized_office_task_metadata.examples.json`
+  - `docs/examples/arc_lima/capability_profile_expectations.examples.json`
+  - `docs/examples/arc_lima/approval_boundary_expectations.examples.json`
+  - `docs/audits/ARC_LIMA_READINESS_STATIC_PROOF_REPORT.md`
+- Targeted secret-pattern scan command:
+  `rg -n "sk-[A-Za-z0-9_-]{20,}|AKIA[0-9A-Z]{16}|BEGIN [A-Z0-9 ]*PRIVATE KEY|password\\s*=|secret_value|api_key\\s*=|token\\s*=" C:\Users\limap\Arc-Bot-shell`
+- Result: no matches.
+- Browser-storage scan command:
+  `rg -n "localStorage|sessionStorage|IndexedDB|document.cookie" C:\Users\limap\Arc-Bot-shell`
+- Result: matches are policy text in previous documents and docs-only warnings, no implementation.
+- Runtime/action scan command:
+  `rg -n "lima import|from lima|import .*lima|openai|anthropic|ollama|provider call|connector write|connector read|subprocess|child_process|Start-Process|browser\\.automation|automation action|scheduler|background execution|worker dispatch|network action|file write|file mutation|external send|HumanInput" C:\Users\limap\Arc-Bot-shell`
+- Result: matches are non-executable static boundary text in docs/examples, no runtime integration paths.
+- Frontend build/test: not applicable. No frontend stack exists in this branch scope.
+- Backend tests: not applicable. No backend stack exists in this branch scope.
 
 ## Recommended next branch
 

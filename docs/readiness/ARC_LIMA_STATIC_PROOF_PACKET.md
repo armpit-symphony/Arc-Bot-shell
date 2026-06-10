@@ -58,7 +58,7 @@ See [`capability_profile_expectations.examples.json`](C:/Users/limap/Arc-Bot-she
 
 ## Approval boundary expectations
 
-See [`approval_boundary_expectations.examples.json`](C:/Users\limap\Arc-Bot-shell\docs/examples/arc_lima/approval_boundary_expectations.examples.json) for static approval authority controls:
+See [`approval_boundary_expectations.examples.json`](C:/Users/limap/Arc-Bot-shell/docs/examples/arc_lima/approval_boundary_expectations.examples.json) for static approval authority controls:
 
 - Arc approval request remains Arc-owned,
 - Arc Guardian and execution decision remains Arc-owned,
