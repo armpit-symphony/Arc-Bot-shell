@@ -1,0 +1,263 @@
+{
+  "metadata_schema_version": "arc-lima-readiness-static-v1",
+  "tenant_scope": "tenant_demo_arc",
+  "office_boundary": "single_tenant_single_scope",
+  "examples": [
+    {
+      "example_id": "draft_customer_reply",
+      "intent_category": "customer_reply_draft",
+      "description": "Prepare a draft customer reply for operator review.",
+      "dry_run": true,
+      "simulated_only": true,
+      "preview_only": true,
+      "input_payload": {
+        "tenant_id": "tenant_demo_arc",
+        "operator_id": "operator_demo_01",
+        "task_id": "task-001",
+        "request_text": "Customer requested status on service desk response.",
+        "requested_capabilities": ["compose_text", "summarize_context"]
+      },
+      "required_guardian_approval": {
+        "approval_required": true,
+        "approval_scope": "operator_review",
+        "guardian_required": true,
+        "guardian_mode": "arc_owned"
+      },
+      "proof_constraints": {
+        "execution_authority": false,
+        "customer_data_included": false,
+        "customer_credentials_included": false,
+        "no_credentials": true,
+        "external_send": false,
+        "connector_write": false,
+        "file_mutation": false,
+        "browser_action": false,
+        "network_action": false,
+        "device_action": false,
+        "automation_action": false
+      },
+      "expected_output_shape": {
+        "type": "draft_reply",
+        "confidence": "preview",
+        "requires_operator_send": true,
+        "evidence_ref": "evidence://arc-lima/static/customer-reply-draft",
+        "audit_ref": "audit://arc-lima/static/customer-reply-draft",
+        "approval_ref": "approval://arc-lima/static/customer-reply-draft"
+      }
+    },
+    {
+      "example_id": "classify_incoming_request",
+      "intent_category": "incoming_request_classification",
+      "description": "Classify an inbound support request for routing review.",
+      "dry_run": true,
+      "simulated_only": true,
+      "preview_only": true,
+      "input_payload": {
+        "tenant_id": "tenant_demo_arc",
+        "operator_id": "operator_demo_01",
+        "task_id": "task-002",
+        "request_text": "Inbound request from shared mailbox for invoice correction.",
+        "risk_hint": "medium",
+        "routing_hint": "customer_service"
+      },
+      "required_guardian_approval": {
+        "approval_required": true,
+        "approval_scope": "operator_review",
+        "guardian_required": true,
+        "guardian_mode": "arc_owned"
+      },
+      "proof_constraints": {
+        "execution_authority": false,
+        "customer_data_included": false,
+        "customer_credentials_included": false,
+        "no_credentials": true,
+        "external_send": false,
+        "connector_write": false,
+        "file_mutation": false,
+        "browser_action": false,
+        "network_action": false,
+        "device_action": false,
+        "automation_action": false
+      },
+      "expected_output_shape": {
+        "type": "classification_preview",
+        "risk_level": "medium",
+        "route_candidate": "queue.customer_service",
+        "requires_operator_send": false,
+        "evidence_ref": "evidence://arc-lima/static/request-classification",
+        "audit_ref": "audit://arc-lima/static/request-classification",
+        "approval_ref": "approval://arc-lima/static/request-classification"
+      }
+    },
+    {
+      "example_id": "prepare_owner_briefing",
+      "intent_category": "owner_briefing_preview",
+      "description": "Generate a read-only owner briefing summary for an internal task list.",
+      "dry_run": true,
+      "simulated_only": true,
+      "preview_only": true,
+      "input_payload": {
+        "tenant_id": "tenant_demo_arc",
+        "operator_id": "operator_demo_01",
+        "task_id": "task-003",
+        "briefing_scope": "weekly_updates",
+        "source_scope": "sanitized_notes_only"
+      },
+      "required_guardian_approval": {
+        "approval_required": true,
+        "approval_scope": "operator_review",
+        "guardian_required": true,
+        "guardian_mode": "arc_owned"
+      },
+      "proof_constraints": {
+        "execution_authority": false,
+        "customer_data_included": false,
+        "customer_credentials_included": false,
+        "no_credentials": true,
+        "external_send": false,
+        "connector_write": false,
+        "file_mutation": false,
+        "browser_action": false,
+        "network_action": false,
+        "device_action": false,
+        "automation_action": false
+      },
+      "expected_output_shape": {
+        "type": "briefing_preview",
+        "includes_open_items": true,
+        "risk_summary": "none",
+        "requires_operator_confirmation": true,
+        "evidence_ref": "evidence://arc-lima/static/owner-briefing",
+        "audit_ref": "audit://arc-lima/static/owner-briefing",
+        "approval_ref": "approval://arc-lima/static/owner-briefing"
+      }
+    },
+    {
+      "example_id": "prepare_scheduling_proposal",
+      "intent_category": "scheduling_proposal_preview",
+      "description": "Prepare a scheduling proposal draft without sending calendar invites.",
+      "dry_run": true,
+      "simulated_only": true,
+      "preview_only": true,
+      "input_payload": {
+        "tenant_id": "tenant_demo_arc",
+        "operator_id": "operator_demo_01",
+        "task_id": "task-004",
+        "proposed_window": "2026-06-10T14:00:00-04:00 to 15:00:00-04:00",
+        "participants": ["operator_demo_01", "owner_demo"]
+      },
+      "required_guardian_approval": {
+        "approval_required": true,
+        "approval_scope": "operator_review",
+        "guardian_required": true,
+        "guardian_mode": "arc_owned"
+      },
+      "proof_constraints": {
+        "execution_authority": false,
+        "customer_data_included": false,
+        "customer_credentials_included": false,
+        "no_credentials": true,
+        "external_send": false,
+        "connector_write": false,
+        "file_mutation": false,
+        "browser_action": false,
+        "network_action": false,
+        "device_action": false,
+        "automation_action": false
+      },
+      "expected_output_shape": {
+        "type": "scheduling_draft",
+        "calendar_invite_created": false,
+        "send_initiated": false,
+        "requires_operator_send": true,
+        "evidence_ref": "evidence://arc-lima/static/scheduling-proposal",
+        "audit_ref": "audit://arc-lima/static/scheduling-proposal",
+        "approval_ref": "approval://arc-lima/static/scheduling-proposal"
+      }
+    },
+    {
+      "example_id": "summarize_intake_note",
+      "intent_category": "intake_note_summary_preview",
+      "description": "Summarize an intake note for operator handoff.",
+      "dry_run": true,
+      "simulated_only": true,
+      "preview_only": true,
+      "input_payload": {
+        "tenant_id": "tenant_demo_arc",
+        "operator_id": "operator_demo_01",
+        "task_id": "task-005",
+        "source_note": "Raw note received from public intake queue.",
+        "redaction_mode": "sanitized"
+      },
+      "required_guardian_approval": {
+        "approval_required": true,
+        "approval_scope": "operator_review",
+        "guardian_required": true,
+        "guardian_mode": "arc_owned"
+      },
+      "proof_constraints": {
+        "execution_authority": false,
+        "customer_data_included": false,
+        "customer_credentials_included": false,
+        "no_credentials": true,
+        "external_send": false,
+        "connector_write": false,
+        "file_mutation": false,
+        "browser_action": false,
+        "network_action": false,
+        "device_action": false,
+        "automation_action": false
+      },
+      "expected_output_shape": {
+        "type": "intake_summary_preview",
+        "evidence_notes": "redacted_context_only",
+        "requires_operator_confirmation": true,
+        "evidence_ref": "evidence://arc-lima/static/intake-summary",
+        "audit_ref": "audit://arc-lima/static/intake-summary",
+        "approval_ref": "approval://arc-lima/static/intake-summary"
+      }
+    },
+    {
+      "example_id": "prepare_evidence_summary",
+      "intent_category": "evidence_summary_preview",
+      "description": "Prepare a read-only evidence summary for later audit handoff.",
+      "dry_run": true,
+      "simulated_only": true,
+      "preview_only": true,
+      "input_payload": {
+        "tenant_id": "tenant_demo_arc",
+        "operator_id": "operator_demo_01",
+        "task_id": "task-006",
+        "source_event_ids": ["evt-001", "evt-002"],
+        "redaction_required": true
+      },
+      "required_guardian_approval": {
+        "approval_required": true,
+        "approval_scope": "operator_review",
+        "guardian_required": true,
+        "guardian_mode": "arc_owned"
+      },
+      "proof_constraints": {
+        "execution_authority": false,
+        "customer_data_included": false,
+        "customer_credentials_included": false,
+        "no_credentials": true,
+        "external_send": false,
+        "connector_write": false,
+        "file_mutation": false,
+        "browser_action": false,
+        "network_action": false,
+        "device_action": false,
+        "automation_action": false
+      },
+      "expected_output_shape": {
+        "type": "evidence_summary_preview",
+        "redaction_applied": true,
+        "requires_operator_export_approval": true,
+        "evidence_ref": "evidence://arc-lima/static/evidence-summary",
+        "audit_ref": "audit://arc-lima/static/evidence-summary",
+        "approval_ref": "approval://arc-lima/static/evidence-summary"
+      }
+    }
+  ]
+}

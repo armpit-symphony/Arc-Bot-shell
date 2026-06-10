@@ -1,0 +1,93 @@
+{
+  "approval_boundary_profile": {
+    "profile_id": "arc_lima_approval_boundary_v1",
+    "status": "READY_FOR_ARC_READINESS_DOCS_AND_STATIC_PROOF_ONLY",
+    "ownership": {
+      "approval_owner": "arc",
+      "guardian_owner": "arc",
+      "lima_authority": "future_explicit",
+      "runtime_authority": "none"
+    },
+    "principles": [
+      "Arc approval request remains Arc-owned",
+      "Arc Guardian/execution decision remains Arc-owned",
+      "No external runtime can bypass Arc approval gates",
+      "No preview metadata can be promoted to live execution",
+      "No connector writes via LIMA until runtime approval is explicitly granted",
+      "No external send actions via LIMA in readiness proof phase",
+      "No file, browser, network, device, or automation actions via LIMA in readiness proof phase"
+    ],
+    "checks": [
+      {
+        "check_id": "operator_owned_request",
+        "description": "Arc operator request object must be the first authority for all actions.",
+        "required": true,
+        "expected": {
+          "arc_operator_confirmation": true,
+          "arc_approval_ref_required": true,
+          "arc_audit_ref_required": true
+        }
+      },
+      {
+        "check_id": "arc_owned_guardian",
+        "description": "Arc Guardian must decide before any consequential action.",
+        "required": true,
+        "expected": {
+          "guardian_decision_required": true,
+          "guardian_decision_owner": "arc",
+          "decision_status": "bound_to_preview"
+        }
+      },
+      {
+        "check_id": "no_lima_bypass",
+        "description": "LIMA cannot bypass Arc approval or guardian checks.",
+        "required": true,
+        "expected": {
+          "lima_can_publish_preview_only": true,
+          "lima_can_execute_live": false,
+          "lima_requires_arc_binding": true
+        }
+      },
+      {
+        "check_id": "no_preview_to_execution",
+        "description": "Preview and dry-run metadata cannot trigger execution authority.",
+        "required": true,
+        "expected": {
+          "execution_authority": false,
+          "dry_run_required": true,
+          "simulated_only": true
+        }
+      },
+      {
+        "check_id": "consequential_action_gate",
+        "description": "All future consequential actions require explicit evidence and approvals.",
+        "required": true,
+        "expected": {
+          "guardian_decision_ref_required": true,
+          "approval_ref_required": true,
+          "evidence_ref_required": true,
+          "audit_ref_required": true,
+          "operator_confirmation_required": true
+        }
+      }
+    ],
+    "prohibited_action_channels": [
+      "lima_connector_write",
+      "lima_external_send",
+      "lima_file_write",
+      "lima_browser_action",
+      "lima_network_action",
+      "lima_device_action",
+      "lima_automation_action",
+      "lima_worker_dispatch"
+    ],
+    "evidence_required_fields": [
+      "evidence_ref",
+      "audit_ref",
+      "guardian_ref",
+      "approval_ref",
+      "operator_confirmation_ref",
+      "tenant_id"
+    ]
+  }
+}

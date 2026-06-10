@@ -1,0 +1,100 @@
+{
+  "capability_profile": {
+    "profile_id": "arc_readiness_static_capability_v1",
+    "status": "READY_FOR_ARC_READINESS_DOCS_AND_STATIC_PROOF_ONLY",
+    "owner": "arc",
+    "mode": "static_proof_only",
+    "allowed_display_only_capabilities": [
+      "overview_snapshot",
+      "task_surface_preview",
+      "approval_queue_preview",
+      "guardian_decision_status_preview",
+      "connector_readiness_preview",
+      "model_route_posture_preview",
+      "evidence_chain_preview",
+      "audit_footprint_preview"
+    ],
+    "allowed_dry_run_preview_capabilities": [
+      "draft_text_generation_preview",
+      "request_classification_preview",
+      "scheduling_proposal_preview",
+      "briefing_preparation_preview",
+      "note_summary_preview",
+      "evidence_summary_preview"
+    ],
+    "blocked_live_capabilities": [
+      "send_to_customer",
+      "send_external_email",
+      "send_sms",
+      "connector_write",
+      "customer_data_enrichment_call",
+      "file_system_write",
+      "browser_navigation_action",
+      "network_mutation_request",
+      "device_command",
+      "automation_execution",
+      "worker_dispatch",
+      "job_execution",
+      "subprocess_spawn",
+      "background_scheduler"
+    ],
+    "approval_required_capabilities": [
+      "draft_text_generation_preview",
+      "request_classification_preview",
+      "scheduling_proposal_preview",
+      "note_summary_preview",
+      "evidence_summary_preview",
+      "briefing_preparation_preview"
+    ],
+    "forbidden_capabilities": [
+      "live_connector_bridge",
+      "live_humaninput_bridge",
+      "lima_runtime_authority",
+      "live_model_routing",
+      "customer_data_export",
+      "secret_handling",
+      "token_relay"
+    ],
+    "tenant_office_boundary": {
+      "scope": "single_tenant_per_operator_session",
+      "cross_tenant_routing": false,
+      "customer_data_projection": "redacted_only",
+      "external_customer_send": "disallowed"
+    },
+    "worker_role_boundary": {
+      "arc_operator_role_required": true,
+      "worker_dispatch_allowed": false,
+      "worker_task_view_mode": "read_only",
+      "worker_capability_escalation": "arc_authorized_only"
+    },
+    "model_route_boundary": {
+      "model_route_status": "posture_only",
+      "provider_calls": "disallowed",
+      "local_model_calls": "disallowed",
+      "local_model_readiness_preview": true,
+      "route_decision_effective": "preview_only"
+    },
+    "connector_scope_boundary": {
+      "connector_setup_preview": true,
+      "connector_write": false,
+      "connector_read": false,
+      "connector_scope_review": "operator_preview_only",
+      "external_send_authorized": false,
+      "connector_token_handling": "disallowed"
+    },
+    "evidence_audit_boundary": {
+      "evidence_mode": "metadata_only",
+      "audit_mode": "preview",
+      "requires_evidence_refs": true,
+      "requires_audit_refs": true,
+      "requires_guardian_reference": true,
+      "execution_event_logging": "blocked"
+    },
+    "controls": {
+      "approval_request_owner": "arc",
+      "guardian_owner": "arc",
+      "lima_role": "future_dependency_readiness",
+      "runtime_authority": "none"
+    }
+  }
+}
