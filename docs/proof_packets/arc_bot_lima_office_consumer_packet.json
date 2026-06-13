@@ -1,0 +1,81 @@
+{
+  "consumer_name": "Arc Bot Shell",
+  "repo": "https://github.com/armpit-symphony/Arc-Bot-shell",
+  "shell_type": "office_worker_operator_console",
+  "current_status": "READY_FOR_ARC_READINESS_DOCS_AND_STATIC_PROOF_ONLY",
+  "runtime_integration_status": "NOT_READY_FOR_RUNTIME_INTEGRATION",
+  "public_api_expectation": {
+    "consumer_request_required": true,
+    "allowed_statuses": [
+      "preview_only",
+      "explain_plan",
+      "blocked",
+      "deferred"
+    ],
+    "runtime_execution": "blocked"
+  },
+  "proposed_contracts": {
+    "consumer_request": {
+      "required": [
+        "tenant_id",
+        "customer_context_id",
+        "operator_id",
+        "request_text",
+        "requested_capabilities",
+        "risk_hint"
+      ]
+    },
+    "lima_vocabulary": {
+      "human_input": true,
+      "typed_intent_envelope_or_task_intent": true,
+      "candidate_preview": true,
+      "runtime_state_snapshot": true,
+      "guardian_decision": true,
+      "audit_spine_event": true
+    },
+    "candidate_preview_must_include": [
+      "embodiment_profile"
+    ]
+  },
+  "blocked_surfaces": [
+    "execution_dispatch",
+    "connector_write",
+    "connector_read_write_live",
+    "external_send",
+    "provider_call",
+    "model_call",
+    "file_mutation",
+    "browser_action",
+    "network_action",
+    "device_action",
+    "automation_action",
+    "shell_command",
+    "diagnostics_execution",
+    "production_runtime_touch"
+  ],
+  "office_workflow_needs": [
+    "task_intake_and_classification",
+    "operator_confirmation",
+    "approval_queue_display",
+    "health_overview_preview",
+    "helpdesk_diagnostic_planning",
+    "evidence_lineage_tracking",
+    "runbook_guidance_for_blocked_paths"
+  ],
+  "proof_files": [
+    "docs/proof_packets/ARC_BOT_LIMA_OFFICE_CONSUMER_PROOF_PACKET.md",
+    "docs/audits/ARC_BOT_LIMA_OFFICE_CONSUMER_PACKET_AUDIT.md",
+    "docs/proof_packets/arc_bot_lima_office_consumer_packet.json",
+    "docs/readiness/ARC_LIMA_STATIC_PROOF_PACKET.md",
+    "docs/readiness/ARC_LIMA_READY_NOT_INTEGRATED.md",
+    "docs/readiness/ARC_LIMA_FUTURE_IMPORT_CALL_SHAPE.md",
+    "docs/examples/arc_lima/normalized_office_task_metadata.examples.json",
+    "docs/examples/arc_lima/capability_profile_expectations.examples.json",
+    "docs/examples/arc_lima/approval_boundary_expectations.examples.json"
+  ],
+  "validation_commands": [
+    "python3 --version || python --version",
+    "git diff --check"
+  ],
+  "recommended_next_step": "Create a read-only integration harness that validates ConsumerRequest -> HumanInput -> Intent -> CandidatePreview (with embodiment_profile) and RuntimeStateSnapshot ingestion in a mock-safe mode only."
+}
