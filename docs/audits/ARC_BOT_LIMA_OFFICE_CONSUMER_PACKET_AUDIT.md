@@ -150,4 +150,3 @@ These proofs should be independently repeatable and version-anchored before Arc 
 - **Arc-Bot-shell can inform LIMA API freeze with evidence-oriented requirements and safe boundary assumptions.**
 - **Arc-Bot-shell cannot yet consume LIMA Runtime for live office-worker automation.**
 - Next safe step: implement a static-to-runtime adapter shim contract test bench (read-only) that proves the four-stage boundary flow above, without adding any execution path.
-

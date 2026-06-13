@@ -367,4 +367,3 @@ must use `blocked` in this phase and route to runbook/deferred path.
 - Deterministic snapshot freshness and blocked reason model
 - Durable event spine for audit lineage
 - Stable operator confirmation/approval binding chain
-
