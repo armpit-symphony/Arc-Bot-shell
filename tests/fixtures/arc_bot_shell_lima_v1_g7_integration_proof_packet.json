@@ -1,0 +1,177 @@
+{
+  "proof_gap_id": "V1-G7",
+  "shell_repo": "Arc-Bot-shell",
+  "proof_branch": "v1-g7-arc-bot-shell-integration-proof-packet",
+  "proof_commit": "recorded_by_lima_intake_after_commit",
+  "proof_base_commit": "913d3072adde3e4f7fa80b799316265389dda999",
+  "proof_packet_files": [
+    "docs/proof_packets/ARC_BOT_SHELL_LIMA_V1_G7_INTEGRATION_PROOF_PACKET.md",
+    "docs/audits/ARC_BOT_SHELL_LIMA_V1_G7_INTEGRATION_PROOF_AUDIT.md",
+    "tests/fixtures/arc_bot_shell_lima_v1_g7_integration_proof_packet.json",
+    "tests/test_arc_bot_shell_lima_v1_g7_integration_proof_packet.py"
+  ],
+  "supporting_evidence_files": [
+    "README.md",
+    "docs/OPERATOR_CONSOLE_FOUNDATION.md",
+    "docs/contracts/ARC_BOT_OPERATOR_CONSOLE_STATE.md",
+    "docs/proof_packets/ARC_BOT_LIMA_OFFICE_CONSUMER_PROOF_PACKET.md",
+    "docs/proof_packets/arc_bot_lima_office_consumer_packet.json",
+    "docs/readiness/ARC_LIMA_STATIC_PROOF_PACKET.md",
+    "docs/readiness/ARC_LIMA_READY_NOT_INTEGRATED.md",
+    "docs/readiness/ARC_LIMA_FUTURE_IMPORT_CALL_SHAPE.md",
+    "docs/examples/arc_lima/normalized_office_task_metadata.examples.json",
+    "docs/examples/arc_lima/capability_profile_expectations.examples.json",
+    "docs/examples/arc_lima/approval_boundary_expectations.examples.json",
+    "docs/audits/ARC_BOT_LIMA_OFFICE_CONSUMER_PACKET_AUDIT.md",
+    "docs/audits/ARC_LIMA_READINESS_STATIC_PROOF_REPORT.md",
+    "docs/audits/ARC_BOT_RECONSTRUCTION_DOCS_AND_SOURCE_MAP.md"
+  ],
+  "validation_commands": [
+    "cmd /c \"python3 --version || python --version\"",
+    "cmd /c \"python3 -m pytest -q || python -m pytest -q\"",
+    "git diff --check"
+  ],
+  "validation_results": [
+    {
+      "command": "cmd /c \"python3 --version || python --version\"",
+      "result": "passed: Python 3.12.10, with known trailing Windows environment message"
+    },
+    {
+      "command": "cmd /c \"python3 -m pytest -q || python -m pytest -q\"",
+      "result": "passed: 5 passed in 0.02s, with known trailing Windows environment message"
+    },
+    {
+      "command": "git diff --check",
+      "result": "passed: clean"
+    }
+  ],
+  "can_consume_lima_contract_outputs_as_static_evidence": true,
+  "can_consume_lima_runtime_outputs_live": false,
+  "lima_runtime_wiring_added": false,
+  "lima_runtime_behavior_added": false,
+  "runtime_exports_required_from_lima": false,
+  "runtime_exports_changed_in_lima": false,
+  "shell_response_states_evaluated": [
+    "received",
+    "thinking",
+    "preview_ready",
+    "blocked",
+    "needs_approval",
+    "completed",
+    "failed_safe",
+    "deferred"
+  ],
+  "source_backed_shell_response_states": [],
+  "docs_fixture_only_shell_response_states": [
+    "received",
+    "thinking",
+    "preview_ready",
+    "blocked",
+    "needs_approval",
+    "completed",
+    "failed_safe",
+    "deferred"
+  ],
+  "missing_shell_response_states": [],
+  "missing_runtime_behavior_states": [
+    "received",
+    "thinking",
+    "preview_ready",
+    "blocked",
+    "needs_approval",
+    "completed",
+    "failed_safe",
+    "deferred"
+  ],
+  "kernel_status_mappings": {
+    "proposed": "preview_only",
+    "needs_review": "explain_plan",
+    "blocked": "blocked",
+    "completed": "completed",
+    "deferred": "deferred"
+  },
+  "packet_statuses": [
+    "preview_only",
+    "explain_plan",
+    "blocked",
+    "completed",
+    "deferred"
+  ],
+  "currently_allowed_packet_statuses": [
+    "preview_only",
+    "explain_plan",
+    "blocked",
+    "deferred"
+  ],
+  "completed_status_currently_runtime_backed": false,
+  "haptic_intent_metadata_supported": false,
+  "shell_owns_haptics": true,
+  "lima_owns_haptic_device_behavior": false,
+  "haptic_device_behavior_added": false,
+  "device_haptic_command_added": false,
+  "destructive_edit_delete_requires_operator_approval": true,
+  "destructive_edit_delete_current_behavior": "blocked_until_future_operator_approval_and_guardian_gate",
+  "approval_enforcement_status": "docs_only_blocked_no_real_enforcement",
+  "guardian_decision_status": "docs_only_future_required_missing_real_authority",
+  "provider_model_routing_status": "absent_docs_only_blocked_no_provider_model_routing",
+  "audit_evidence_status": "static_only_reference_based_no_durable_persistence",
+  "tool_pack_scope_status": "docs_only_allowed_blocked_future_tool_pack_boundaries",
+  "connector_file_browser_network_device_robotics_status": "absent_or_blocked_docs_only_no_runtime_behavior",
+  "raw_natural_language_to_tool_execution_allowed": false,
+  "sparkbot_code_copied_to_lima": false,
+  "sparkbot_imported_by_lima": false,
+  "lima_imported_by_shell_runtime": false,
+  "production_readiness_claimed": false,
+  "v1_product_readiness_claimed": false,
+  "accepted_as_static_shell_evidence": true,
+  "accepted_as_live_runtime_parity": false,
+  "runtime_behavior_added": false,
+  "provider_model_calls_added": false,
+  "approval_enforcement_added": false,
+  "guardian_decision_runtime_added": false,
+  "audit_persistence_added": false,
+  "connector_behavior_added": false,
+  "file_browser_network_device_robotics_behavior_added": false,
+  "physical_world_behavior_added": false,
+  "runtime_export_cleanup_approved": false,
+  "final_freeze_approved": false,
+  "accepted_evidence": [
+    "Arc-Bot-shell V1-G7 proof packet delivered",
+    "Arc-Bot-shell V1-G7 audit delivered",
+    "machine-readable fixture delivered",
+    "static proof test delivered",
+    "all required response states evaluated",
+    "required kernel status mappings evaluated",
+    "haptics remain shell-owned",
+    "destructive edit/delete blocked unless future operator approval and Guardian gate exist",
+    "provider/model, connector, file, browser, network, device, robotics, shell execution, and physical-world behavior classified as absent or blocked"
+  ],
+  "rejected_claims": [
+    "live_lima_runtime_parity",
+    "runtime_source_backed_arc_shell_behavior",
+    "real_approval_enforcement",
+    "real_guardian_decision_authority",
+    "provider_model_routing",
+    "provider_model_calls",
+    "durable_audit_persistence",
+    "connector_behavior",
+    "file_browser_network_device_robotics_behavior",
+    "haptic_device_behavior",
+    "v1_product_readiness",
+    "production_readiness",
+    "runtime_export_cleanup_approval",
+    "final_api_freeze"
+  ],
+  "blockers": [
+    "no_live_lima_runtime_wiring",
+    "no_runtime_source_backed_arc_shell_states",
+    "no_real_approval_enforcement",
+    "no_real_guardian_decision_path",
+    "no_provider_model_runtime_routing",
+    "no_audit_persistence",
+    "no_haptic_device_behavior",
+    "no_connector_file_browser_network_device_robotics_runtime",
+    "no_production_behavior"
+  ],
+  "recommended_next_step": "LIMA should intake this packet as static Arc-Bot-shell V1-G7 evidence, then complete a consolidated V1-G7 closeout across Sparkbot_shell, Sparkbot, and Arc-Bot-shell."
+}
