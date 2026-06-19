@@ -23,6 +23,12 @@ from .phase2_runtime_control import (
     build_phase2_runtime_control_projection,
     run_phase2_runtime_control_preview,
 )
+from .runtime_control_consumer import (
+    Phase2RuntimeControlConsumerError,
+    Phase2RuntimeControlConsumerShapeError,
+    build_phase2_runtime_control_consumer_projection,
+    run_runtime_control_consumer_preview,
+)
 
 __all__ = [
     "build_phase0_readonly_projection",
@@ -42,4 +48,8 @@ __all__ = [
     "Phase2RuntimeControlShapeError",
     "build_phase2_runtime_control_projection",
     "run_phase2_runtime_control_preview",
+    "Phase2RuntimeControlConsumerError",
+    "Phase2RuntimeControlConsumerShapeError",
+    "build_phase2_runtime_control_consumer_projection",
+    "run_runtime_control_consumer_preview",
 ]

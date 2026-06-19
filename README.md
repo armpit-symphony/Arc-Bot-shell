@@ -253,6 +253,7 @@ The operator-console foundation defines the first office-worker control-room sur
 - Phase-1 read-feed seam preview: `python -m phase0_runtime_ui_scaffold.read_feed`.
 - Phase-1 runtime consumer preview (for downstream UI/runtime handoff): `python -m phase0_runtime_ui_scaffold.runtime_consumer`.
 - Phase-2 runtime-control seam preview (downstream UI state handoff): `python -m phase0_runtime_ui_scaffold.phase2_runtime_control`.
+- Phase-2 runtime-control consumer handoff preview (for downstream bounded UI control consumer): `python -m phase0_runtime_ui_scaffold.runtime_control_consumer`.
 
 ## Reference Context (For Next Phase)
 

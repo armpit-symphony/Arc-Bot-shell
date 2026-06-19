@@ -81,6 +81,7 @@ Lock down runtime scope for the shell user surface so no action path can infer r
   - [x] Add migration gate tests so runtime authority cannot appear without guardrail updates.
   - [x] Add a preview interface/entrypoint to render the read-only projection for downstream consumers.
   - [x] Add a runtime-control handoff proof seam and validation checks for UI state transfer.
+  - [x] Implement phase-2 runtime-control seam consumer integration for downstream UI state handoff (still execution-disabled).
 
 ## External Reference Alignment
 
