@@ -239,6 +239,7 @@ The operator-console foundation defines the first office-worker control-room sur
 - Runtime authority is deferred to approved LIMA-Guardian-Suite / LIMA-Guardian Spine integration phases.
 - The current shell scope remains documentation-first and fail-closed.
 - Preview entrypoint (no execution): `python -m phase0_runtime_ui_scaffold.preview`.
+- Phase-1 read-feed seam preview: `python -m phase0_runtime_ui_scaffold.read_feed`.
 
 ## Reference Context (For Next Phase)
 

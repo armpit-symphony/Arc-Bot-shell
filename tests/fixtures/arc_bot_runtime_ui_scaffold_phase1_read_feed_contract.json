@@ -1,0 +1,86 @@
+{
+  "artifact_id": "arc_bot_runtime_ui_scaffold_phase1_read_feed_contract_v1",
+  "artifact_type": "read_feed_contract",
+  "api_status": "CANDIDATE_ONLY",
+  "phase": "phase-1",
+  "projection_scope": "read_only",
+  "runtime_authority_enabled": false,
+  "runtime_authority_required_for_execution": true,
+  "projection_gate_name": "RUNTIME_UI_SCAFFOLD_PHASE1_FEED",
+  "projection_gate_required": true,
+  "source_reference": "app.services.guardian.suite",
+  "source_access_mode": "read_only",
+  "spine_sources": [
+    "guardian_spine_tasks",
+    "guardian_spine_events",
+    "guardian_spine_approvals",
+    "guardian_spine_projects"
+  ],
+  "surface_read_paths": {
+    "work_queue": {
+      "contract_refs": [
+        "task.execution",
+        "guardian.decision",
+        "approval.request",
+        "approval.result",
+        "approval.token",
+        "token.verification"
+      ],
+      "spine_sources": [
+        "guardian_spine_tasks",
+        "guardian_spine_events",
+        "guardian_spine_approvals"
+      ],
+      "required_envelope_fields": [
+        "tenant_id",
+        "customer_context_id",
+        "environment",
+        "operator_role"
+      ],
+      "blocked_runtime_actions": [
+        "dispatch_to_worker",
+        "persist_queue_to_customer_system",
+        "send_external_messages",
+        "tool_execution",
+        "provider_model_calls"
+      ],
+      "notes": "Phase-1 read-feed preview should only project status and metadata."
+    },
+    "runtime_settings": {
+      "contract_refs": [
+        "model.route",
+        "supervisor.health",
+        "worker.lifecycle"
+      ],
+      "spine_sources": [
+        "guardian_spine_tasks",
+        "guardian_spine_projects"
+      ],
+      "required_envelope_fields": [
+        "tenant_id",
+        "customer_context_id",
+        "environment",
+        "operator_role"
+      ],
+      "blocked_runtime_actions": [
+        "perform_live_inference",
+        "store_provider_tokens",
+        "persist_runtime_payload",
+        "tool_execution",
+        "runtime_route_mutation"
+      ],
+      "notes": "Phase-1 read-feed preview should only project status and metadata."
+    }
+  },
+  "metadata_policy": {
+    "require_policy_refs": true,
+    "require_evidence_refs": true,
+    "require_runbook_refs": true
+  },
+  "evidence_refs": [
+    "tests/fixtures/arc_bot_runtime_ui_scaffold_preview_contract.json",
+    "tests/fixtures/arc_bot_runtime_ui_scaffold_phase0_adapter_packet.json",
+    "tests/fixtures/arc_bot_runtime_ui_scaffold_contract_pack.json"
+  ],
+  "recommended_next_step": "Implement read-only projection ingest from read-only guardian-spine snapshots behind an explicit phase-1 gate."
+}

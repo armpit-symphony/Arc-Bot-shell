@@ -66,16 +66,19 @@ Lock down runtime scope for the shell user surface so no action path can infer r
 - [x] Add snapshot fixtures for Work Queue and Runtime Settings.
 - [x] Add contract checks that assert no runtime authority in the snapshots.
 - [x] Add a single proof-pack fixture that bundles scope lock, schemas, and snapshot references for read-only scaffold handoff.
-- [x] Add a proof-only adapter payload contract for surface read-only projection (`work_queue`, `runtime_settings`).
-- [x] Add a no-execution preview interface for phase-gated projection rendering.
+  - [x] Add a proof-only adapter payload contract for surface read-only projection (`work_queue`, `runtime_settings`).
+  - [x] Add a no-execution preview interface for phase-gated projection rendering.
+  - [x] Add a phase-1 read-feed runtime-seam projection wrapper for downstream runtime UI consumers.
 
 ## 2) Next Milestones (post-scope lock)
 
 - [x] Add mock/read-only contract fixtures for full shell-state envelope.
 - [x] Add adapter contract package and proof packet for surface snapshots.
-- [x] Implement a phase-gated read-only render harness from adapter payload (mock-safe).
-- [x] Add migration gate tests so runtime authority cannot appear without guardrail updates.
-- [x] Add a preview interface/entrypoint to render the read-only projection for downstream consumers.
+  - [x] Implement a phase-gated read-only render harness from adapter payload (mock-safe).
+  - [x] Add read-feed runtime-seam projection helper behind phase gate for preview-only UI handoff.
+  - [x] Add migration gate tests so runtime authority cannot appear without guardrail updates.
+  - [x] Add a preview interface/entrypoint to render the read-only projection for downstream consumers.
+  - [x] Add an end-to-end phase-chain continuity test across all preview/control seams.
 
 ## External Reference Alignment
 
