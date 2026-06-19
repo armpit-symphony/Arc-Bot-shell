@@ -59,6 +59,11 @@ without wiring it in this phase.
 - [x] Add a small execution checklist in project docs for the next operator who
   inherits this phase boundary.
 - [x] Add deterministic status snapshot export path support for fixture refresh.
+- [x] Include runtime authority-gating readiness projection in the Phase-1
+  readiness bundle default handoff.
+  - Evidence: `phase1_readiness/bundle.py`,
+    `tests/test_arc_bot_phase1_readiness_bundle.py`,
+    `tests/fixtures/arc_bot_phase1_readiness_bundle_projection.json`.
 
 ## Phase-0 Operator Checklist
 

@@ -11,6 +11,7 @@ from typing import Any
 from phase0_runtime_ui_scaffold import build_phase0_runtime_ui_scaffold_status_snapshot
 from phase1_business_shell_inventory import build_phase1_business_inventory_projection
 from phase1_client_configuration import build_phase1_client_configuration_projection
+from phase1_runtime_authority_gating import build_phase1_runtime_authority_gating_projection
 
 PHASE1_READINESS_BUNDLE_ID = "arc_bot_phase1_readiness_bundle_v1"
 EXPECTED_PHASE = "phase-1"
@@ -22,8 +23,7 @@ class Phase1ReadinessBundleError(RuntimeError):
 
 def _compact_projection(projection: dict[str, Any]) -> dict[str, Any]:
     """Collapse large read-only projections to deterministic bundle metadata."""
-
-    return {
+    compacted_projection = {
         "artifact_id": projection["artifact_id"],
         "artifact_type": projection["artifact_type"],
         "phase": projection.get("phase"),
@@ -34,6 +34,16 @@ def _compact_projection(projection: dict[str, Any]) -> dict[str, Any]:
         "phase_gate": projection["phase_gate"],
     }
 
+    if projection["artifact_type"] == "phase1_runtime_authority_gating_pack":
+        compacted_projection["required_gates"] = projection["required_gates"]
+        compacted_projection["unresolved_required_gates"] = projection[
+            "unresolved_required_gates"
+        ]
+        compacted_projection["surface_bindings"] = projection["surface_bindings"]
+        compacted_projection["intent_count"] = projection["intent_count"]
+
+    return compacted_projection
+
 
 def build_phase1_readiness_bundle(
     *,
@@ -41,10 +51,16 @@ def build_phase1_readiness_bundle(
     include_business_inventory: bool = True,
     include_scope_lock_snapshot: bool = True,
     include_guardian_suite_seam: bool = True,
+    include_runtime_authority_gating: bool = True,
 ) -> dict[str, Any]:
     """Build the phase-1 readiness bundle from docs-only planning projections."""
 
-    if not include_client_config and not include_business_inventory and not include_scope_lock_snapshot:
+    if (
+        not include_client_config
+        and not include_business_inventory
+        and not include_scope_lock_snapshot
+        and not include_runtime_authority_gating
+    ):
         raise Phase1ReadinessBundleError("Bundle must include at least one projection source")
 
     bundle: dict[str, Any] = {
@@ -96,6 +112,22 @@ def build_phase1_readiness_bundle(
             )
         bundle["projections"]["business_inventory"] = _compact_projection(inventory_projection)
 
+    if include_runtime_authority_gating:
+        authority_projection = build_phase1_runtime_authority_gating_projection(
+            enable_phase_gate=True
+        )
+        if authority_projection["runtime_authority_blocked"] is not True:
+            raise Phase1ReadinessBundleError(
+                "Runtime authority gating projection must remain authority-blocked"
+            )
+        if authority_projection["runtime_execution_blocked"] is not True:
+            raise Phase1ReadinessBundleError(
+                "Runtime authority gating projection must keep execution blocked"
+            )
+        bundle["projections"]["runtime_authority_gating"] = _compact_projection(
+            authority_projection
+        )
+
     included = set(bundle["projections"].keys())
     if include_scope_lock_snapshot and not included:
         raise Phase1ReadinessBundleError("Scope-lock projection requested but not built")
@@ -103,6 +135,10 @@ def build_phase1_readiness_bundle(
         raise Phase1ReadinessBundleError("Client configuration projection requested but missing")
     if include_business_inventory and "business_inventory" not in included:
         raise Phase1ReadinessBundleError("Business inventory projection requested but missing")
+    if include_runtime_authority_gating and "runtime_authority_gating" not in included:
+        raise Phase1ReadinessBundleError(
+            "Runtime authority-gating projection requested but missing"
+        )
 
     return bundle
 
@@ -133,6 +169,11 @@ def run_phase1_readiness_bundle_preview(argv: list[str] | None = None) -> int:
         help="Exclude business inventory projection.",
     )
     parser.add_argument(
+        "--no-runtime-authority-gating",
+        action="store_true",
+        help="Exclude runtime authority gating projection.",
+    )
+    parser.add_argument(
         "--no-scope-lock",
         action="store_true",
         help="Exclude phase-0 scope-lock status snapshot.",
@@ -150,6 +191,7 @@ def run_phase1_readiness_bundle_preview(argv: list[str] | None = None) -> int:
             include_business_inventory=not args.no_business_inventory,
             include_scope_lock_snapshot=not args.no_scope_lock,
             include_guardian_suite_seam=not args.omit_guardian_suite_seam,
+            include_runtime_authority_gating=not args.no_runtime_authority_gating,
         )
     except (Phase1ReadinessBundleError, OSError, ValueError) as err:
         print(f"phase-1 readiness bundle preview failed: {err}", file=sys.stderr)

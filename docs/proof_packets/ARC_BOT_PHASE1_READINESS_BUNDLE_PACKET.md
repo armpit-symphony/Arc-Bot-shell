@@ -19,13 +19,14 @@ and scope-lock snapshot outputs for downstream handoff and operator review.
   - `phase1_business_shell_inventory.inventory`
   - `phase1_client_configuration.configuration`
   - `phase0_runtime_ui_scaffold.phase_chain`
+  - `phase1_runtime_authority_gating.gating`
 - Gate and contract fixtures:
   - `tests/fixtures/arc_bot_phase1_business_inventory.json`
-- `tests/fixtures/arc_bot_phase1_client_configuration.json`
-- `tests/fixtures/arc_bot_runtime_ui_scaffold_phase0_scope_lock_status_snapshot.json`
-- `tests/fixtures/arc_bot_phase1_readiness_bundle_projection.json`
-- `tests/fixtures/arc_bot_phase1_client_configuration_migration_gate_packet.json`
-- `tests/fixtures/arc_bot_phase1_runtime_authority_gating_packet.json`
+  - `tests/fixtures/arc_bot_phase1_client_configuration.json`
+  - `tests/fixtures/arc_bot_runtime_ui_scaffold_phase0_scope_lock_status_snapshot.json`
+  - `tests/fixtures/arc_bot_phase1_readiness_bundle_projection.json`
+  - `tests/fixtures/arc_bot_phase1_client_configuration_migration_gate_packet.json`
+  - `tests/fixtures/arc_bot_phase1_runtime_authority_gating_packet.json`
 - Proof packets:
   - `docs/proof_packets/ARC_BOT_PHASE1_MVP_ROADMAP_PACKET.md`
   - `docs/proof_packets/ARC_BOT_PHASE1_CLIENT_CONFIGURATION_MIGRATION_GATE_PACKET.md`
@@ -45,6 +46,7 @@ All readiness projections are locked to planning/read-only posture with explicit
 ## Validation Checks
 
 - `python -m phase1_readiness.bundle --compact`
+- `python -B -m phase1_runtime_authority_gating.gating --compact`
 - `python -B -m pytest -q tests/test_arc_bot_phase1_readiness_bundle.py tests/test_arc_bot_phase1_readiness_bundle_packet.py -p no:cacheprovider --basetemp=.pytest-arc-phase1-readiness`
 - `python -B -m pytest -q tests/test_arc_bot_phase1_business_inventory_contracts.py -p no:cacheprovider --basetemp=.pytest-arc-business-inventory-contracts`
 - `python -B -m pytest -q tests/test_arc_bot_phase1_client_configuration_contracts.py -p no:cacheprovider --basetemp=.pytest-arc-client-config-contracts`

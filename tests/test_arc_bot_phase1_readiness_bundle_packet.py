@@ -25,6 +25,14 @@ def test_phase1_readiness_bundle_packet_and_projection_references() -> None:
         in packet_text
     )
     assert (
+        "docs/proof_packets/ARC_BOT_PHASE1_RUNTIME_AUTHORITY_GATING_PACKET.md"
+        in packet_text
+    )
+    assert (
+        "tests/fixtures/arc_bot_phase1_runtime_authority_gating_packet.json"
+        in packet_text
+    )
+    assert (
         "tests/fixtures/arc_bot_runtime_ui_scaffold_phase0_scope_lock_status_snapshot.json"
         in packet_text
     )
