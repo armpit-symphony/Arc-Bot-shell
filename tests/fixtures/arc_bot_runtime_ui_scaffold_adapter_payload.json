@@ -1,0 +1,98 @@
+{
+  "payload_id": "arc_bot_runtime_ui_scaffold_readonly_adapter_v1",
+  "api_status": "CANDIDATE_ONLY",
+  "adapter_name": "arc-bot-runtime-ui-scaffold",
+  "adapter_phase": "phase-0",
+  "adapter_mode": "fixture_backed_read_only_projection",
+  "target_build_surface": "work_queue_and_runtime_settings",
+  "phase_gate_required": true,
+  "phase_gate_flag": "runtime_ui_scaffold_only_preview",
+  "snapshot_schema_contracts": [
+    "docs/contracts/schemas/arc_bot_work_queue_state.schema.json",
+    "docs/contracts/schemas/arc_bot_runtime_settings_state.schema.json",
+    "docs/contracts/schemas/arc_bot_console_state_envelope.schema.json"
+  ],
+  "surface_payloads": [
+    {
+      "surface": "work_queue",
+      "view_type": "work_queue",
+      "schema": "docs/contracts/schemas/arc_bot_work_queue_state.schema.json",
+      "snapshot_file": "tests/fixtures/arc_bot_phase0_work_queue_state_snapshot.json",
+      "snapshot_contract_binding": "docs/contracts/schemas/arc_bot_work_queue_state.schema.json",
+      "runtime_authority_enforced_false": true,
+      "requires_phase_gate": true,
+      "allowed_metadata_actions": [
+        "reorder_programs",
+        "update_readiness_tags",
+        "attach_sop_reference"
+      ],
+      "blocked_runtime_actions": [
+        "dispatch_to_worker",
+        "persist_queue_to_customer_system",
+        "send_external_messages",
+        "provider_model_calls",
+        "connector_writes",
+        "tool_execution"
+      ],
+      "required_envelope_status_modes": [
+        "review_required",
+        "blocked"
+      ],
+      "read_only_projection_only": true
+    },
+    {
+      "surface": "runtime_settings",
+      "view_type": "runtime_settings",
+      "schema": "docs/contracts/schemas/arc_bot_runtime_settings_state.schema.json",
+      "snapshot_file": "tests/fixtures/arc_bot_phase0_runtime_settings_state_snapshot.json",
+      "snapshot_contract_binding": "docs/contracts/schemas/arc_bot_runtime_settings_state.schema.json",
+      "runtime_authority_enforced_false": true,
+      "requires_phase_gate": true,
+      "allowed_metadata_actions": [
+        "annotate_readiness_notes",
+        "stage_setup_blocker",
+        "attach_readiness_reference"
+      ],
+      "blocked_runtime_actions": [
+        "perform_live_inference",
+        "store_provider_tokens",
+        "persist_runtime_payload",
+        "provider_model_calls",
+        "tool_execution",
+        "connector_writes"
+      ],
+      "required_envelope_status_modes": [
+        "rendered",
+        "review_required",
+        "degraded"
+      ],
+      "read_only_projection_only": true
+    }
+  ],
+  "blocked_runtime_actions": [
+    "provider_model_calls",
+    "connector_reads",
+    "connector_writes",
+    "tool_execution",
+    "runtime_route_mutation",
+    "credential_storage",
+    "customer_system_mutation"
+  ],
+  "allowed_local_runtime_actions": [
+    "annotate_readiness",
+    "update_review_notes",
+    "attach_runbook_ref"
+  ],
+  "metadata_policy": {
+    "require_policy_refs": true,
+    "require_evidence_refs": true,
+    "require_runbook_refs": true
+  },
+  "future_read_feed_references": [
+    "app.services.guardian.suite",
+    "guardian_spine_tasks",
+    "guardian_spine_events",
+    "guardian_spine_approvals",
+    "guardian_spine_projects"
+  ]
+}

@@ -36,3 +36,4 @@ def test_arc_bot_scope_lock_documentation_exists() -> None:
     assert "docs/ROADMAP.md" in readme
     assert "phase-0 runtime ui scaffold is locked" in readme.lower()
     assert "LIMA-Guardian-Suite" in readme
+    assert "python -m phase0_runtime_ui_scaffold.preview" in readme

@@ -227,6 +227,7 @@ This repo is currently a roadmap/staging repo for the Arc Bot business worker-bo
   - [work queue snapshot schema](docs/contracts/schemas/arc_bot_work_queue_state.schema.json)
   - [runtime settings snapshot schema](docs/contracts/schemas/arc_bot_runtime_settings_state.schema.json)
 - [Arc Bot Runtime UI Scaffold Contract Pack](tests/fixtures/arc_bot_runtime_ui_scaffold_contract_pack.json)
+- [Arc Bot Runtime UI Scaffold Adapter Proof Packet](docs/proof_packets/ARC_BOT_RUNTIME_UI_SCAFFOLD_PHASE0_ADAPTER_PROOF_PACKET.md)
 - [Arc Bot Reconstruction Docs And Source Map](docs/audits/ARC_BOT_RECONSTRUCTION_DOCS_AND_SOURCE_MAP.md)
 - [Arc Bot Phase-0 Roadmap](docs/ROADMAP.md)
 
@@ -237,6 +238,7 @@ The operator-console foundation defines the first office-worker control-room sur
 - Phase-0 runtime UI scaffold is locked: preview/render-only pages, no live execution.
 - Runtime authority is deferred to approved LIMA-Guardian-Suite / LIMA-Guardian Spine integration phases.
 - The current shell scope remains documentation-first and fail-closed.
+- Preview entrypoint (no execution): `python -m phase0_runtime_ui_scaffold.preview`.
 
 ## Reference Context (For Next Phase)
 

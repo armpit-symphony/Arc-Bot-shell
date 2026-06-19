@@ -88,6 +88,7 @@ Prototype read-feed reference for future phases (not implemented in this branch)
 - `guardian_spine_tasks`, `guardian_spine_events`, `guardian_spine_approvals`, and `guardian_spine_projects` as read-only spine data tables.
 - Surface-only mapping to shell views with no direct `executive`/tool execution calls.
 - Contract bundle anchor (proof-only): `tests/fixtures/arc_bot_runtime_ui_scaffold_contract_pack.json`
+- Adapter payload anchor (proof-only): `tests/fixtures/arc_bot_runtime_ui_scaffold_adapter_payload.json`
 
 ### Cross-repo Runtime Authority Gate
 

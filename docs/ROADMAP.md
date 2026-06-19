@@ -36,6 +36,7 @@ Lock down runtime scope for the shell user surface so no action path can infer r
    - [x] No runtime authority is derived directly in this repo.
 5. Add proof scaffolding
    - [x] Fixture packet records scope constraints for both surfaces.
+   - [x] Preview contract scaffold is pinned in a stable artifact fixture for downstream consumers.
    - [x] Tests assert scope-lock text, boundary flags, and docs-first posture.
    - [x] `README` includes active phase lock and deferred runtime authority note.
 
@@ -58,19 +59,23 @@ Lock down runtime scope for the shell user surface so no action path can infer r
   - LIMA-Guardian-Spine: future read-only state feed
   - LIMA AI OS: future authoritative runtime control plane
 
-### 1.4 Contract-shape scaffolding (next)
+### 1.4 Contract-shape scaffolding
 
 - [x] Add initial Phase-0 schema documents for shared console envelope and surface-specific payloads.
+- [x] Add preview contract artifact pinning required shared envelope fields and blocked runtime actions.
 - [x] Add snapshot fixtures for Work Queue and Runtime Settings.
 - [x] Add contract checks that assert no runtime authority in the snapshots.
 - [x] Add a single proof-pack fixture that bundles scope lock, schemas, and snapshot references for read-only scaffold handoff.
+- [x] Add a proof-only adapter payload contract for surface read-only projection (`work_queue`, `runtime_settings`).
+- [x] Add a no-execution preview interface for phase-gated projection rendering.
 
 ## 2) Next Milestones (post-scope lock)
 
-- Add mock/read-only contract fixtures for full shell-state envelope.
-- Add adapter contract package for surface snapshots (proof-only first).
-- Add UI implementation behind explicit phase gate after approval of runtime integration.
-- Add migration gate tests so runtime authority cannot appear without guardrail updates.
+- [x] Add mock/read-only contract fixtures for full shell-state envelope.
+- [x] Add adapter contract package and proof packet for surface snapshots.
+- [x] Implement a phase-gated read-only render harness from adapter payload (mock-safe).
+- [x] Add migration gate tests so runtime authority cannot appear without guardrail updates.
+- [x] Add a preview interface/entrypoint to render the read-only projection for downstream consumers.
 
 ## External Reference Alignment
 

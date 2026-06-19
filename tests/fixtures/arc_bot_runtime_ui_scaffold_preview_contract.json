@@ -1,0 +1,92 @@
+{
+  "artifact_id": "arc_bot_runtime_ui_scaffold_preview_contract_v1",
+  "payload_id": "arc_bot_runtime_ui_scaffold_readonly_adapter_v1",
+  "adapter_phase": "phase-0",
+  "adapter_mode": "fixture_backed_read_only_projection",
+  "phase_gate_name": "RUNTIME_UI_Scaffold",
+  "phase_gate_required": true,
+  "projection_mode": "read_only",
+  "surfaces": {
+    "work_queue": {
+      "projection_mode": "read_only",
+      "runtime_authority_enforced": false,
+      "read_only_projection_only": true,
+      "required_envelope_status_modes": [
+        "blocked",
+        "review_required"
+      ],
+      "blocked_runtime_actions": [
+        "connector_writes",
+        "dispatch_to_worker",
+        "persist_queue_to_customer_system",
+        "provider_model_calls",
+        "send_external_messages",
+        "tool_execution"
+      ],
+      "snapshot_file": "tests/fixtures/arc_bot_phase0_work_queue_state_snapshot.json",
+      "snapshot_fields": [
+        "tenant_id",
+        "customer_context_id",
+        "environment",
+        "operator_role",
+        "view_type",
+        "status",
+        "policy_refs",
+        "evidence_refs",
+        "runbook_refs",
+        "live_program_execution_allowed",
+        "customer_system_mutation_allowed",
+        "external_message_send_allowed"
+      ]
+    },
+    "runtime_settings": {
+      "projection_mode": "read_only",
+      "runtime_authority_enforced": false,
+      "read_only_projection_only": true,
+      "required_envelope_status_modes": [
+        "degraded",
+        "rendered",
+        "review_required"
+      ],
+      "blocked_runtime_actions": [
+        "connector_writes",
+        "perform_live_inference",
+        "persist_runtime_payload",
+        "provider_model_calls",
+        "store_provider_tokens",
+        "tool_execution"
+      ],
+      "snapshot_file": "tests/fixtures/arc_bot_phase0_runtime_settings_state_snapshot.json",
+      "snapshot_fields": [
+        "tenant_id",
+        "customer_context_id",
+        "environment",
+        "operator_role",
+        "view_type",
+        "status",
+        "policy_refs",
+        "evidence_refs",
+        "runbook_refs",
+        "live_model_inference_allowed",
+        "tool_execution_allowed",
+        "credential_storage_allowed",
+        "provider_token_storage_allowed",
+        "raw_runtime_payload_persistence_allowed",
+        "runtime_route_change_without_approval_allowed"
+      ]
+    }
+  },
+  "shared_envelope_fields": {
+    "tenant_id": "acme-ops-tenant",
+    "customer_context_id": "acme-headquarters",
+    "environment": "phase0_lab",
+    "operator_role": "operator"
+  },
+  "required_authority_actions": [
+    "provider_model_calls",
+    "connector_writes",
+    "tool_execution",
+    "runtime_route_mutation",
+    "customer_system_mutation"
+  ]
+}
