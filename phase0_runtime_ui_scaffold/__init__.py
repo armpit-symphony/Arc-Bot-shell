@@ -32,6 +32,7 @@ from .runtime_control_consumer import (
 from .phase_chain import (
     PhaseChainError,
     build_phase0_runtime_ui_scaffold_chain,
+    build_phase0_runtime_ui_scaffold_status_snapshot,
     run_phase_chain_preview,
 )
 from .guardian_suite_seam import (
@@ -68,6 +69,7 @@ __all__ = [
     "run_runtime_control_consumer_preview",
     "PhaseChainError",
     "build_phase0_runtime_ui_scaffold_chain",
+    "build_phase0_runtime_ui_scaffold_status_snapshot",
     "run_phase_chain_preview",
     "EXPECTED_PHASE_GATE_NAME",
     "EXPECTED_PHASE_GATE_FLAG",

@@ -85,8 +85,20 @@ Lock down runtime scope for the shell user surface so no action path can infer r
   - [x] Add a runtime-control handoff proof seam and validation checks for UI state transfer.
   - [x] Implement phase-2 runtime-control seam consumer integration for downstream UI state handoff (still execution-disabled).
   - [x] Add an end-to-end phase-chain continuity test across all preview/control seams.
-  - [x] Add a full-phase chain preview command for operator review.
-  - [x] Lock all phase-chain and phase outputs to source `app.services.guardian.suite` and `read_only` with execution blocked.
+- [x] Add a full-phase chain preview command for operator review.
+- [x] Lock all phase-chain and phase outputs to source `app.services.guardian.suite` and `read_only` with execution blocked.
+
+## 3) Phase-1 Business Shell Inventory (Planning)
+
+- [x] Define first target business role taxonomy.
+- [x] Define task status model, execution modes, and risk tiers.
+- [x] Define approval posture labels and blocked runtime action baselines.
+- [x] Define evidence and governance readiness requirements.
+- [x] Define connector readiness and tool surface constraints.
+- [x] Define bot role/persona template schema and review posture.
+- [ ] Add phase-1 wireframe artifacts for new inventory surfaces.
+- [ ] Align Phase-1 inventory contract with formal schema and downstream consumer tests.
+- [ ] Add evidence packet tying business inventory snapshot to migration gates.
 
 ## External Reference Alignment
 

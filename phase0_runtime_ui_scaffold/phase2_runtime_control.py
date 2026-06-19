@@ -220,6 +220,10 @@ def _build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Emit compact JSON.",
     )
+    parser.add_argument(
+        "--snapshot-path",
+        help="Write rendered projection JSON to this file.",
+    )
     return parser
 
 
@@ -236,6 +240,16 @@ def run_phase2_runtime_control_preview(argv: list[str] | None = None) -> int:
     except (Phase2RuntimeControlError, Phase2RuntimeControlShapeError, OSError, ValueError) as err:
         print(f"phase2 runtime control preview failed: {err}", file=sys.stderr)
         return 1
+    if args.snapshot_path:
+        Path(args.snapshot_path).write_text(
+            json.dumps(
+                rendered,
+                sort_keys=True,
+                indent=2 if not args.compact else None,
+            )
+            + "\n",
+            encoding="utf-8",
+        )
 
     json.dump(
         rendered,

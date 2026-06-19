@@ -67,6 +67,8 @@ any runtime-control or dispatch work starts.
 ## Verification Commands
 
 - `python -m pytest -q tests/test_arc_bot_runtime_ui_scaffold_phase_chain.py`
+- `python -m phase0_runtime_ui_scaffold.phase_chain --emit-status-snapshot --with-guardian-suite-seam --compact`
+- `python -m phase0_runtime_ui_scaffold.phase_chain --emit-status-snapshot --with-guardian-suite-seam --status-snapshot-path tests/fixtures/arc_bot_runtime_ui_scaffold_phase0_scope_lock_status_snapshot.json --compact`
 - `python -m pytest -q`
 
 ## Recommended Next Step

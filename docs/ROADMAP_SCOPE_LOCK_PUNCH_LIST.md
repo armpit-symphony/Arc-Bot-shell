@@ -58,6 +58,7 @@ without wiring it in this phase.
   `phase_chain`/`phase1`/`phase2` outputs in a single assertion file.
 - [x] Add a small execution checklist in project docs for the next operator who
   inherits this phase boundary.
+- [x] Add deterministic status snapshot export path support for fixture refresh.
 
 ## Phase-0 Operator Checklist
 

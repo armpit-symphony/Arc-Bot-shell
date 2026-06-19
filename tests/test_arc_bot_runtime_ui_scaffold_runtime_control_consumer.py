@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import io
 import json
+from pathlib import Path
 from unittest.mock import patch
 
 import pytest
@@ -130,3 +131,20 @@ def test_run_runtime_control_consumer_preview_cli_bad_payload_path() -> None:
         ]
     )
     assert status == 1
+
+
+def test_run_runtime_control_consumer_preview_cli_snapshot_export(
+    tmp_path: Path,
+) -> None:
+    snapshot_path = tmp_path / "runtime_control_consumer_snapshot.json"
+    output = io.StringIO()
+
+    with patch("sys.stdout", output):
+        status = run_runtime_control_consumer_preview(
+            ["--compact", f"--snapshot-path={snapshot_path}"]
+        )
+
+    assert status == 0
+    cli_payload = json.loads(output.getvalue())
+    file_payload = json.loads(snapshot_path.read_text(encoding="utf-8"))
+    assert cli_payload == file_payload

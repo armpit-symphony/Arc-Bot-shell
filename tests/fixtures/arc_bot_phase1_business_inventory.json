@@ -1,0 +1,373 @@
+{
+  "artifact_id": "arc_bot_phase1_business_shell_inventory_v1",
+  "artifact_type": "phase1_business_shell_inventory_contract",
+  "artifact_version": "phase-1",
+  "artifact_name": "Arc Bot Business Shell Inventory",
+  "source_reference": "docs/OPERATOR_CONSOLE_FOUNDATION.md",
+  "source_access_mode": "docs_only",
+  "phase_gate": {
+    "name": "ARC_BOT_PHASE1_BUSINESS_INVENTORY",
+    "required": true,
+    "flag": "arc_bot_business_inventory_read_only_planning"
+  },
+  "first_customer_role_focus": "Office operations and support with approvals",
+  "business_role_templates": [
+    {
+      "role_id": "office_manager_bot",
+      "name": "Office Manager",
+      "purpose": "Coordinate worker assignments and route daily operational work.",
+      "allowed_task_categories": [
+        "intake",
+        "triage",
+        "queue_management",
+        "status_tracking"
+      ],
+      "forbidden_task_categories": [
+        "connector_secret_ops",
+        "worker_reconfigure",
+        "infrastructure_change"
+      ],
+      "risk_tier": "medium",
+      "escalation_path": "human_runbook_then_supervisor",
+      "persona_notes": [
+        "Prefer review-first handling",
+        "Keep all actions metadata-only until LIMA runtime authority is approved"
+      ]
+    },
+    {
+      "role_id": "billing_assistant_bot",
+      "name": "Billing Assistant",
+      "purpose": "Prepare billing intake summaries and route approval-required handoffs.",
+      "allowed_task_categories": [
+        "intake_summary",
+        "invoice_precheck",
+        "customer_notes",
+        "reconciliation_prep"
+      ],
+      "forbidden_task_categories": [
+        "payment_execution",
+        "ledger_mutation",
+        "customer_record_mutation"
+      ],
+      "risk_tier": "high",
+      "escalation_path": "human_approval_then_guardian",
+      "persona_notes": [
+        "Never execute writes",
+        "Attach evidence bundle for every billing handoff"
+      ]
+    },
+    {
+      "role_id": "it_helpdesk_frontline",
+      "name": "IT Helpdesk",
+      "purpose": "Capture support incidents and prepare operator-ready remediation candidates.",
+      "allowed_task_categories": [
+        "incident_capture",
+        "status_updates",
+        "connector_readiness_checks"
+      ],
+      "forbidden_task_categories": [
+        "remote_remediation",
+        "credential_change",
+        "connector_write"
+      ],
+      "risk_tier": "critical",
+      "escalation_path": "human_operator_queue_then_supervisor",
+      "persona_notes": [
+        "Block execution regardless of status",
+        "Only forward remediation candidates to approval lane"
+      ]
+    }
+  ],
+  "task_model": {
+    "statuses": [
+      "draft",
+      "ready",
+      "active",
+      "completed",
+      "blocked"
+    ],
+    "execution_modes": [
+      "plan_only",
+      "read_only",
+      "draft_only",
+      "mock_only",
+      "blocked_mvp"
+    ],
+    "risk_tiers": [
+      "low",
+      "medium",
+      "high",
+      "critical"
+    ],
+    "approval_labels": [
+      "requires_guardian_review",
+      "requires_operator_approval",
+      "blocked_by_policy",
+      "missing_evidence"
+    ]
+  },
+  "surfaces": {
+    "overview": {
+      "title": "Overview",
+      "current_state_mode": "display_state_only",
+      "runtime_authority_blocked": true,
+      "required_status_modes": ["review_required", "blocked", "degraded", "rendered"],
+      "blocked_runtime_actions": [
+        "clear_alert",
+        "dispatch_to_worker",
+        "execute_remediation",
+        "restart_service",
+        "perform_live_inference"
+      ],
+      "future_seams": [
+        "supervisor.health",
+        "incident.ops",
+        "console.alert"
+      ],
+      "metadata_actions": [
+        "open_runbook",
+        "open_related_record"
+      ]
+    },
+    "workers": {
+      "title": "Workers",
+      "current_state_mode": "display_state_only",
+      "runtime_authority_blocked": true,
+      "required_status_modes": ["review_required", "blocked", "degraded"],
+      "blocked_runtime_actions": [
+        "start_worker_service",
+        "stop_worker_service",
+        "release_quarantined_worker",
+        "modify_worker_states",
+        "broaden_tool_pack",
+        "touch_endpoint"
+      ],
+      "future_seams": [
+        "worker.lifecycle",
+        "worker.heartbeat",
+        "worker.deployment",
+        "worker.attestation"
+      ],
+      "metadata_actions": [
+        "request_enrollment_review",
+        "request_reenrollment_review",
+        "link_worker_evidence"
+      ]
+    },
+    "work_queue": {
+      "title": "Work Queue",
+      "current_state_mode": "display_state_only",
+      "runtime_authority_blocked": true,
+      "required_status_modes": ["rendered", "review_required", "blocked"],
+      "blocked_runtime_actions": [
+        "trigger_program_execution",
+        "persist_queue_to_customer_system",
+        "send_external_messages",
+        "change_active_assignment"
+      ],
+      "future_seams": [
+        "task.execution",
+        "console.view",
+        "queue.intake"
+      ],
+      "metadata_actions": [
+        "create_local_queue_entry",
+        "attach_work_docs",
+        "add_readiness_blocker_note"
+      ]
+    },
+    "tasks": {
+      "title": "Tasks",
+      "current_state_mode": "metadata_only",
+      "runtime_authority_blocked": true,
+      "required_status_modes": ["rendered", "review_required", "blocked"],
+      "blocked_runtime_actions": [
+        "force_task_run",
+        "edit_task_payload_source",
+        "dispatch_to_worker",
+        "external_send",
+        "customer_record_mutation"
+      ],
+      "future_seams": [
+        "task.execution",
+        "guardian.decision",
+        "approval.request"
+      ],
+      "metadata_actions": [
+        "inspect_task",
+        "filter_by_status",
+        "draft_operator_note"
+      ]
+    },
+    "runtime_settings": {
+      "title": "Runtime Settings",
+      "current_state_mode": "metadata_only",
+      "runtime_authority_blocked": true,
+      "required_status_modes": ["rendered", "degraded", "review_required", "blocked"],
+      "blocked_runtime_actions": [
+        "perform_live_inference",
+        "store_provider_tokens",
+        "persist_runtime_payload",
+        "change_model_route"
+      ],
+      "future_seams": [
+        "model.route",
+        "supervisor.health"
+      ],
+      "metadata_actions": [
+        "stage_seat_edits",
+        "record_readiness_metadata"
+      ]
+    },
+    "approvals": {
+      "title": "Approvals",
+      "current_state_mode": "display_state_only",
+      "runtime_authority_blocked": true,
+      "required_status_modes": ["review_required", "degraded", "blocked"],
+      "blocked_runtime_actions": [
+        "self_approve_high_risk",
+        "approve_without_evidence",
+        "broaden_scope",
+        "issue_live_approval_token",
+        "execute_approved_action"
+      ],
+      "future_seams": [
+        "approval.request",
+        "approval.result",
+        "approval.token"
+      ],
+      "metadata_actions": [
+        "review_pending_approval",
+        "record_intended_outcome_note"
+      ]
+    },
+    "guardian": {
+      "title": "Guardian",
+      "current_state_mode": "display_state_only",
+      "runtime_authority_blocked": true,
+      "required_status_modes": ["review_required", "blocked"],
+      "blocked_runtime_actions": [
+        "override_guardian_decision",
+        "reuse_expired_decision",
+        "treat_prompt_as_trusted",
+        "reveal_secret_material"
+      ],
+      "future_seams": [
+        "guardian.decision",
+        "guardian.replay",
+        "taint.ref"
+      ],
+      "metadata_actions": [
+        "inspect_decision",
+        "link_runbook_to_decision"
+      ]
+    },
+    "evidence": {
+      "title": "Evidence",
+      "current_state_mode": "display_state_only",
+      "runtime_authority_blocked": true,
+      "required_status_modes": ["rendered", "review_required", "blocked"],
+      "blocked_runtime_actions": [
+        "alter_evidence",
+        "show_raw_secrets",
+        "delete_evidence_without_review",
+        "continue_without_pre_action_evidence"
+      ],
+      "future_seams": [
+        "evidence.artifact",
+        "evidence.failure",
+        "evidence.ledger.entry"
+      ],
+      "metadata_actions": [
+        "inspect_evidence_metadata",
+        "link_evidence_to_task"
+      ]
+    },
+    "connectors": {
+      "title": "Connectors",
+      "current_state_mode": "display_state_only",
+      "runtime_authority_blocked": true,
+      "required_status_modes": ["review_required", "blocked"],
+      "blocked_runtime_actions": [
+        "connector_oauth_wiring",
+        "token_entry",
+        "live_read",
+        "live_write",
+        "webhook_handling"
+      ],
+      "future_seams": [
+        "connector.readiness",
+        "connector.consent",
+        "connector.scope_review"
+      ],
+      "metadata_actions": [
+        "inspect_connector_readiness",
+        "record_connector_blocker"
+      ]
+    },
+    "model_local_readiness": {
+      "title": "Model / Local AI Readiness",
+      "current_state_mode": "degraded",
+      "runtime_authority_blocked": true,
+      "required_status_modes": ["review_required", "blocked", "degraded", "selected", "denied"],
+      "blocked_runtime_actions": [
+        "external_model_provider_call",
+        "local_model_call",
+        "subscription_bridge",
+        "provider_key_entry",
+        "route_fallback_dispatch"
+      ],
+      "future_seams": [
+        "model.route",
+        "supervisor.health",
+        "worker.model_status"
+      ],
+      "metadata_actions": [
+        "inspect_model_posture",
+        "record_model_notes"
+      ]
+    },
+    "governance": {
+      "title": "Governance / Audit",
+      "current_state_mode": "display_state_only",
+      "runtime_authority_blocked": true,
+      "required_status_modes": ["review_required", "blocked"],
+      "blocked_runtime_actions": [
+        "runtime_breakglass",
+        "secret_reveal",
+        "automatic_export_delete",
+        "cross_tenant_sharing",
+        "privileged_self_review"
+      ],
+      "future_seams": [
+        "governance.identity",
+        "governance.access_review",
+        "governance.audit_export"
+      ],
+      "metadata_actions": [
+        "inspect_access_review",
+        "link_findings"
+      ]
+    },
+    "runbooks": {
+      "title": "Runbooks / Blocked Guidance",
+      "current_state_mode": "display_state_only",
+      "runtime_authority_blocked": true,
+      "required_status_modes": ["review_required", "blocked"],
+      "blocked_runtime_actions": [
+        "execute_runbook_automatically",
+        "run_diagnostics",
+        "remediate_systems",
+        "schedule_background_checks"
+      ],
+      "future_seams": [
+        "docs.runbooks",
+        "console.action"
+      ],
+      "metadata_actions": [
+        "open_runbook",
+        "attach_runbook_reference"
+      ]
+    }
+  }
+}

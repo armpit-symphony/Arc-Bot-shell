@@ -2,9 +2,11 @@
 
 from __future__ import annotations
 
+import io
 import json
 from pathlib import Path
 from typing import Any
+from unittest.mock import patch
 
 import pytest
 
@@ -131,3 +133,17 @@ def test_run_preview_handles_bad_payload_path() -> None:
 def test_run_preview_handles_invalid_phase_gate() -> None:
     status = run_preview([str(DEFAULT_PAYLOAD_PATH), "--phase-gate-name", "bad_gate"])
     assert status == 1
+
+
+def test_run_preview_can_export_snapshot(tmp_path: Path) -> None:
+    snapshot_path = tmp_path / "phase0_preview_snapshot.json"
+    output = io.StringIO()
+    with patch("sys.stdout", output):
+        status = run_preview(
+            [str(DEFAULT_PAYLOAD_PATH), "--compact", f"--snapshot-path={snapshot_path}"]
+        )
+
+    assert status == 0
+    cli_payload = json.loads(output.getvalue())
+    file_payload = json.loads(snapshot_path.read_text(encoding="utf-8"))
+    assert cli_payload == file_payload

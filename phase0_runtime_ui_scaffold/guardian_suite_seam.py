@@ -211,6 +211,10 @@ def _build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Emit compact JSON.",
     )
+    parser.add_argument(
+        "--snapshot-path",
+        help="Write rendered projection JSON to this file.",
+    )
     return parser
 
 
@@ -232,6 +236,16 @@ def run_guardian_suite_seam_preview(argv: list[str] | None = None) -> int:
     ) as err:
         print(f"guardian suite seam preview failed: {err}", file=sys.stderr)
         return 1
+    if args.snapshot_path:
+        Path(args.snapshot_path).write_text(
+            json.dumps(
+                projection,
+                sort_keys=True,
+                indent=2 if not args.compact else None,
+            )
+            + "\n",
+            encoding="utf-8",
+        )
 
     json.dump(projection, sys.stdout, indent=None if args.compact else 2, sort_keys=True)
     sys.stdout.write("\n")

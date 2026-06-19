@@ -75,3 +75,18 @@ def test_run_read_feed_preview_cli_omit_surface_contracts() -> None:
 def test_run_read_feed_preview_cli_handles_bad_contract_path() -> None:
     status = run_read_feed_preview(["does_not_exist.json", "--compact"])
     assert status == 1
+
+
+def test_run_read_feed_preview_cli_snapshot_export(tmp_path) -> None:
+    snapshot_path = tmp_path / "phase1_read_feed_snapshot.json"
+    output = io.StringIO()
+
+    with patch("sys.stdout", output):
+        status = run_read_feed_preview(
+            ["--compact", f"--snapshot-path={snapshot_path}"]
+        )
+
+    assert status == 0
+    cli_payload = json.loads(output.getvalue())
+    file_payload = json.loads(snapshot_path.read_text(encoding="utf-8"))
+    assert cli_payload == file_payload

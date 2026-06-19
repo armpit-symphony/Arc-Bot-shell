@@ -2,8 +2,11 @@
 
 from __future__ import annotations
 
+import io
 import json
+import sys
 from pathlib import Path
+from unittest.mock import patch
 
 import pytest
 
@@ -93,6 +96,21 @@ def test_guardian_suite_seam_preview_has_compact_output(
     output = json.loads(capsys.readouterr().out)
     assert output["artifact_type"] == "guardian_suite_spine_projection"
     assert output["phase_gate"]["name"] == seam.EXPECTED_PHASE_GATE_NAME
+
+
+def test_guardian_suite_seam_preview_can_export_snapshot(tmp_path: Path) -> None:
+    snapshot_path = tmp_path / "guardian_suite_spine_snapshot.json"
+    output = io.StringIO()
+
+    with patch("sys.stdout", output):
+        status = seam.run_guardian_suite_seam_preview(
+            [str(seam.DEFAULT_PAYLOAD_PATH), "--compact", f"--snapshot-path={snapshot_path}"]
+        )
+
+    assert status == 0
+    cli_payload = json.loads(output.getvalue())
+    file_payload = json.loads(snapshot_path.read_text(encoding="utf-8"))
+    assert cli_payload == file_payload
 
 
 def _write_temp_payload(tmp_path: Path, payload: dict[str, object]) -> str:
