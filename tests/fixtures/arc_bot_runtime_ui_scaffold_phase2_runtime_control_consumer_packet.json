@@ -30,13 +30,15 @@
     "docs/contracts/schemas/arc_bot_console_state_envelope.schema.json",
     "docs/contracts/schemas/arc_bot_work_queue_state.schema.json",
     "docs/contracts/schemas/arc_bot_runtime_settings_state.schema.json",
+    "docs/contracts/schemas/arc_bot_overview_state.schema.json",
     "tests/fixtures/arc_bot_runtime_ui_scaffold_phase1_read_feed_packet.json",
     "tests/fixtures/arc_bot_runtime_ui_scaffold_phase2_runtime_control_packet.json",
     "phase0_runtime_ui_scaffold/runtime_control_consumer.py"
   ],
   "surface_bindings": [
-    "work_queue",
-    "runtime_settings"
+    "overview",
+    "runtime_settings",
+    "work_queue"
   ],
   "source_reference": "app.services.guardian.suite",
   "source_access_mode": "read_only",

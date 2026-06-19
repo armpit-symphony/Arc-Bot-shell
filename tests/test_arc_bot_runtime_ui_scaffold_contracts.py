@@ -1,4 +1,4 @@
-"""Contract smoke checks for Phase-0 Work Queue and Runtime Settings scaffold snapshots."""
+"""Contract smoke checks for Phase-0 operator-console scaffold snapshots."""
 
 from __future__ import annotations
 
@@ -13,6 +13,7 @@ SCHEMA_DIR = REPO_ROOT / "docs" / "contracts" / "schemas"
 
 WORK_QUEUE_SCHEMA_PATH = SCHEMA_DIR / "arc_bot_work_queue_state.schema.json"
 RUNTIME_SETTINGS_SCHEMA_PATH = SCHEMA_DIR / "arc_bot_runtime_settings_state.schema.json"
+OVERVIEW_SCHEMA_PATH = SCHEMA_DIR / "arc_bot_overview_state.schema.json"
 ENVELOPE_SCHEMA_PATH = SCHEMA_DIR / "arc_bot_console_state_envelope.schema.json"
 
 WORK_QUEUE_FIXTURE_PATH = (
@@ -21,8 +22,10 @@ WORK_QUEUE_FIXTURE_PATH = (
 RUNTIME_SETTINGS_FIXTURE_PATH = (
     REPO_ROOT
     / "tests"
-    / "fixtures"
-    / "arc_bot_phase0_runtime_settings_state_snapshot.json"
+    / "fixtures" / "arc_bot_phase0_runtime_settings_state_snapshot.json"
+)
+OVERVIEW_FIXTURE_PATH = (
+    REPO_ROOT / "tests" / "fixtures" / "arc_bot_phase0_overview_state_snapshot.json"
 )
 CONTRACT_PACK_FIXTURE_PATH = (
     REPO_ROOT / "tests" / "fixtures" / "arc_bot_runtime_ui_scaffold_contract_pack.json"
@@ -70,23 +73,33 @@ def _assert_envelope(data: dict[str, Any], expected_view: str, allowed_statuses:
 
 
 def _assert_no_runtime_authority_contracts(payload: dict[str, Any]) -> None:
-    assert payload.get("runtime_route_change_without_approval_allowed") is False
-    assert payload.get("live_model_inference_allowed") is False
-    assert payload.get("tool_execution_allowed") is False
-    assert payload.get("credential_storage_allowed") is False
-    assert payload.get("provider_token_storage_allowed") is False
-    assert payload.get("raw_runtime_payload_persistence_allowed") is False
+    for field in (
+        "runtime_route_change_without_approval_allowed",
+        "live_model_inference_allowed",
+        "tool_execution_allowed",
+        "credential_storage_allowed",
+        "provider_token_storage_allowed",
+        "raw_runtime_payload_persistence_allowed",
+        "external_message_send_allowed",
+        "customer_system_mutation_allowed",
+        "live_program_execution_allowed",
+    ):
+        assert payload.get(field, False) is False
 
 
 def test_arc_bot_runtime_ui_scaffold_schema_documents_exist() -> None:
     assert WORK_QUEUE_SCHEMA_PATH.exists()
     assert RUNTIME_SETTINGS_SCHEMA_PATH.exists()
+    assert OVERVIEW_SCHEMA_PATH.exists()
     assert ENVELOPE_SCHEMA_PATH.exists()
 
     payload = _load_json(WORK_QUEUE_FIXTURE_PATH)
     runtime_payload = _load_json(RUNTIME_SETTINGS_FIXTURE_PATH)
+    overview_payload = _load_json(OVERVIEW_FIXTURE_PATH)
     assert "work_programs" in payload
     assert "local_runtime_install_routes" in runtime_payload
+    assert "worker_summary" in overview_payload
+    assert "queue_summary" in overview_payload
 
 
 def test_arc_bot_work_queue_snapshot_conforms_phase0_scope() -> None:
@@ -131,12 +144,33 @@ def test_arc_bot_runtime_settings_snapshot_conforms_phase0_scope() -> None:
     assert data["local_runtime_install_route_documented"] is True
     assert data["model_route_readiness_metadata_documented"] is True
     _assert_no_runtime_authority_contracts(data)
-    _assert_envelope(data, expected_view="runtime_settings", allowed_statuses={"rendered", "review_required", "degraded"})
+    _assert_envelope(
+        data,
+        expected_view="runtime_settings",
+        allowed_statuses={"rendered", "review_required", "degraded"},
+    )
 
     routes = data["local_runtime_install_routes"]
     assert isinstance(routes, list)
     assert len(routes) >= 1
     assert data["runtime_route_posture"]["status"] in {"selected", "degraded", "denied", "blocked", "unavailable"}
+
+
+def test_arc_bot_overview_snapshot_conforms_phase0_scope() -> None:
+    data = _load_json(OVERVIEW_FIXTURE_PATH)
+
+    assert data["surface"] == "overview"
+    assert data["display_state_only"] is True
+    _assert_no_runtime_authority_contracts(data)
+    _assert_envelope(data, expected_view="overview", allowed_statuses={"review_required", "degraded", "blocked", "rendered"})
+
+    assert isinstance(data["worker_summary"], dict)
+    assert isinstance(data["queue_summary"], dict)
+    assert isinstance(data["approval_summary"], dict)
+    assert isinstance(data["incident_summary"], dict)
+    assert isinstance(data["connector_health"], dict)
+    assert "acknowledge_overview_alert" in data["metadata_actions"]
+    assert "dispatch_to_worker" in data["blocked_actions"]
 
 
 def test_arc_bot_runtime_ui_scaffold_contract_pack_is_phase0_ready() -> None:
@@ -145,7 +179,7 @@ def test_arc_bot_runtime_ui_scaffold_contract_pack_is_phase0_ready() -> None:
     assert pack["packet_id"] == "arc_bot_runtime_ui_scaffold_contract_pack"
     assert pack["api_status"] == "CANDIDATE_ONLY"
     assert pack["docs_only_foundation_update"] is True
-    assert pack["target_build_surface"] == "work_queue_and_runtime_settings"
+    assert pack["target_build_surface"] == "work_queue_runtime_settings_overview"
     assert pack["contract_pack"]["contract_family"] == "phase-0"
     assert pack["contract_pack"]["display_mode_only"] is True
     assert pack["proof_branch"] == "arc-runtime-ui-scaffold-contract-pack"
@@ -156,6 +190,7 @@ def test_arc_bot_runtime_ui_scaffold_contract_pack_is_phase0_ready() -> None:
     assert set(pack["contract_pack"]["surface_bindings"].keys()) == {
         "work_queue",
         "runtime_settings",
+        "overview",
     }
 
     assert pack["contract_pack"]["metadata_policy"]["require_policy_refs"] is True

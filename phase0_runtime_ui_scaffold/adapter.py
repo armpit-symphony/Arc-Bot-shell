@@ -14,7 +14,7 @@ from typing import Any, Mapping
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-EXPECTED_SURFACES = {"work_queue", "runtime_settings"}
+EXPECTED_SURFACES = {"work_queue", "runtime_settings", "overview"}
 EXPECTED_PHASE_GATE_NAME = "RUNTIME_UI_Scaffold"
 EXPECTED_PHASE_GATE_FLAG = "runtime_ui_scaffold_only_preview"
 EXPECTED_ADAPTER_MODE = "fixture_backed_read_only_projection"
@@ -52,16 +52,10 @@ def _load_json(path: Path) -> dict[str, Any]:
 
 
 def _assert_no_runtime_authority(snapshot: dict[str, Any], surface: str) -> None:
-    for field in RUNTIME_AUTHORITY_FALSE_FIELDS:
+    for field in RUNTIME_AUTHORITY_FALSE_FIELDS + WORK_QUEUE_RUNTIME_AUTHORITY_FIELDS:
         if field in snapshot and snapshot[field] is not False:
             raise AdapterPayloadError(
                 f"Runtime authority must be blocked for {surface}: {field} is not False"
-            )
-
-    for field in WORK_QUEUE_RUNTIME_AUTHORITY_FIELDS:
-        if field in snapshot and snapshot[field] is not False:
-            raise AdapterPayloadError(
-                f"Work Queue runtime authority must be blocked: {field} is not False"
             )
 
 

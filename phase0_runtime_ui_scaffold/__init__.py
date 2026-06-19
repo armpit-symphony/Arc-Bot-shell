@@ -29,6 +29,11 @@ from .runtime_control_consumer import (
     build_phase2_runtime_control_consumer_projection,
     run_runtime_control_consumer_preview,
 )
+from .phase_chain import (
+    PhaseChainError,
+    build_phase0_runtime_ui_scaffold_chain,
+    run_phase_chain_preview,
+)
 
 __all__ = [
     "build_phase0_readonly_projection",
@@ -52,4 +57,7 @@ __all__ = [
     "Phase2RuntimeControlConsumerShapeError",
     "build_phase2_runtime_control_consumer_projection",
     "run_runtime_control_consumer_preview",
+    "PhaseChainError",
+    "build_phase0_runtime_ui_scaffold_chain",
+    "run_phase_chain_preview",
 ]

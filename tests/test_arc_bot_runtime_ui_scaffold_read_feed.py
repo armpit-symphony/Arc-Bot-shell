@@ -63,6 +63,8 @@ def test_arc_bot_runtime_ui_scaffold_phase1_read_feed_projection_is_read_only() 
             assert "dispatch_to_worker" in surface_projection["blocked_runtime_actions"]
         if surface == "runtime_settings":
             assert "perform_live_inference" in surface_projection["blocked_runtime_actions"]
+        if surface == "overview":
+            assert "adjust_model_route" in surface_projection["blocked_runtime_actions"]
 
 
 def test_arc_bot_runtime_ui_scaffold_phase1_read_feed_rejects_runtime_authority_contract() -> None:

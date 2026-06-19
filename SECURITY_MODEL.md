@@ -1,0 +1,40 @@
+﻿# Arc Bot Shell Security Model
+
+Date: 2026-06-18
+Status: Phase-0 draft
+
+## Core Security Principle
+
+All high-risk actions are blocked by design in this branch. Preview UI artifacts are governance surfaces only.
+
+## Controls (Phase-0)
+
+- **No execution authority**
+  - No tool execution.
+  - No connector writes.
+  - No provider/model routing.
+  - No file mutation.
+
+- **Evidence and policy requirements**
+  - `policy_refs` and `evidence_refs` are required in guarded outputs.
+  - Missing references result in blocked/review posture.
+
+- **Read-only seams**
+  - Projection inputs and outputs are immutable data transforms.
+  - `runtime_authority_blocked: true` and `runtime_execution_blocked: true` enforced across seams.
+
+- **Failure posture**
+  - Validation failures are explicit, non-silenced, and return fail-closed shapes.
+
+## Attack Surface Reduction
+
+- No credentials are stored in repo/project state.
+- No hidden background actions.
+- No external I/O in phase-0 scaffold modules.
+- Strict gate checks on all projection transitions.
+
+## Future Security Additions (not active now)
+
+- Token-bound approval lane (`approval.token` and Guardian binding).
+- Signed envelope handoff and audit chain.
+- Runtime route mutation requiring explicit policy/risk adjudication.

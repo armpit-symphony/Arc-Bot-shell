@@ -28,8 +28,11 @@ def test_build_phase2_runtime_control_projection_happy_path() -> None:
     assert projected["phase_gate"]["required"] is True
     assert projected["phase_gate"]["enabled"] is True
     assert projected["projection_source"] == "phase1_runtime_ui_consumer_projection"
-    assert "work_queue" in projected["surface_bindings"]
-    assert "runtime_settings" in projected["surface_bindings"]
+    assert set(projected["surface_bindings"]) == {
+        "work_queue",
+        "runtime_settings",
+        "overview",
+    }
     assert set(projected["surface_bindings"]) == set(projected["surfaces"].keys())
 
     for surface_projection in projected["surfaces"].values():

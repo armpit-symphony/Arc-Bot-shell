@@ -21,9 +21,10 @@ Lock down runtime scope for the shell user surface so no action path can infer r
    - [x] No live model calls, connector reads/writes, worker dispatch, or file mutations.
    - [x] No provider keys, tokens, or secrets are stored in shell product state.
    - [x] Frontend state is not a source of truth.
-2. Lock the two runtime UI targets
-   - [x] `Work Queue` listed and defined as preview/state-only.
-   - [x] `Runtime Settings` listed and defined as preview/state-only.
+2. Lock the runtime UI targets
+  - [x] `Work Queue` listed and defined as preview/state-only.
+  - [x] `Runtime Settings` listed and defined as preview/state-only.
+  - [x] `Overview` listed and defined as preview/state-only.
    - [x] Surface actions that are blocked by default with explicit reasons.
 3. Harden guardrails in docs/contracts
    - [x] Missing metadata forces blocked/review rendering (`fail-closed`).
@@ -63,11 +64,11 @@ Lock down runtime scope for the shell user surface so no action path can infer r
 
 - [x] Add initial Phase-0 schema documents for shared console envelope and surface-specific payloads.
 - [x] Add preview contract artifact pinning required shared envelope fields and blocked runtime actions.
-- [x] Add snapshot fixtures for Work Queue and Runtime Settings.
+- [x] Add snapshot fixtures for Overview, Work Queue, and Runtime Settings.
 - [x] Add contract checks that assert no runtime authority in the snapshots.
 - [x] Add operator-overview snapshot schema checks for shell-state envelope completeness.
 - [x] Add a single proof-pack fixture that bundles scope lock, schemas, and snapshot references for read-only scaffold handoff.
-  - [x] Add a proof-only adapter payload contract for surface read-only projection (`work_queue`, `runtime_settings`).
+  - [x] Add a proof-only adapter payload contract for surface read-only projection (`work_queue`, `runtime_settings`, `overview`).
   - [x] Add a no-execution preview interface for phase-gated projection rendering.
   - [x] Add a phase-1 read-feed runtime-seam projection wrapper for downstream runtime UI consumers.
 
@@ -82,6 +83,8 @@ Lock down runtime scope for the shell user surface so no action path can infer r
   - [x] Add a preview interface/entrypoint to render the read-only projection for downstream consumers.
   - [x] Add a runtime-control handoff proof seam and validation checks for UI state transfer.
   - [x] Implement phase-2 runtime-control seam consumer integration for downstream UI state handoff (still execution-disabled).
+  - [x] Add an end-to-end phase-chain continuity test across all preview/control seams.
+  - [x] Add a full-phase chain preview command for operator review.
 
 ## External Reference Alignment
 

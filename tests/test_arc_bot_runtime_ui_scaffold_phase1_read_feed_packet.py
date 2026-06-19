@@ -63,7 +63,7 @@ def test_phase1_read_feed_packet_aligns_to_preview_contract() -> None:
     projection = build_phase1_read_feed_projection(FEED_CONTRACT_PATH)
 
     assert packet["projection_source_file"] == FEED_CONTRACT_PATH.relative_to(REPO_ROOT).as_posix()
-    assert set(packet["surface_bindings"]) == {"work_queue", "runtime_settings"}
+    assert set(packet["surface_bindings"]) == set(preview_contract["surfaces"].keys())
     assert set(packet["surface_bindings"]) == set(preview_contract["surfaces"].keys())
     assert set(packet["spine_sources"]) == {
         "guardian_spine_tasks",
@@ -89,6 +89,8 @@ def test_phase1_read_feed_packet_aligns_to_preview_contract() -> None:
             assert "dispatch_to_worker" in surface_projection["blocked_runtime_actions"]
         elif surface == "runtime_settings":
             assert "perform_live_inference" in surface_projection["blocked_runtime_actions"]
+        elif surface == "overview":
+            assert "adjust_model_route" in surface_projection["blocked_runtime_actions"]
 
         assert set(surface_projection["spine_sources"]).issubset(set(packet["spine_sources"]))
 

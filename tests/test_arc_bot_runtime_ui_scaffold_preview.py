@@ -23,7 +23,7 @@ PREVIEW_CONTRACT_PATH = (
     REPO_ROOT
     / "tests"
     / "fixtures"
-    / "arc_bot_runtime_ui_scaffold_preview_contract.json"
+    / "arc_bot_runtime_ui_scaffold_phase0_preview_contract.json"
 )
 
 
@@ -80,6 +80,7 @@ def test_render_phase0_readonly_projection_defaults_to_expected_gate_and_surface
     assert rendered["phase_gate"]["required"] is True
     assert rendered["surfaces"]["work_queue"]["projection_mode"] == "read_only"
     assert rendered["surfaces"]["runtime_settings"]["projection_mode"] == "read_only"
+    assert rendered["surfaces"]["overview"]["projection_mode"] == "read_only"
 
 
 def test_render_phase0_readonly_projection_defaults_match_payload_metadata() -> None:

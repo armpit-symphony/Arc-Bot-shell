@@ -39,7 +39,8 @@ execution, provider calls, connector wiring, or mutation authority.
   `build_phase1_runtime_ui_consumer_projection`.
 - The helper preserves the same source contract (`app.services.guardian.suite`) and
   phase gate (`RUNTIME_UI_SCAFFOLD_PHASE1_FEED`) used in Phase-1 read-feed.
-- Surface bindings are preserved exactly (`work_queue`, `runtime_settings`) and remain
+- Surface bindings are preserved exactly (`work_queue`, `runtime_settings`,
+  `overview`) and remain
   read-only in consumer output.
 - Runtime authority remains blocked and not represented as executable control in any
   output shape.

@@ -70,6 +70,40 @@
         "runtime_route_mutation"
       ],
       "notes": "Phase-1 read-feed preview should only project status and metadata."
+    },
+    "overview": {
+      "contract_refs": [
+        "console.view",
+        "supervisor.health",
+        "worker.lifecycle",
+        "task.execution",
+        "approval.request",
+        "connector.readiness"
+      ],
+      "spine_sources": [
+        "guardian_spine_tasks",
+        "guardian_spine_events",
+        "guardian_spine_approvals",
+        "guardian_spine_projects"
+      ],
+      "required_envelope_fields": [
+        "tenant_id",
+        "customer_context_id",
+        "environment",
+        "operator_role"
+      ],
+      "blocked_runtime_actions": [
+        "dispatch_to_worker",
+        "approve_without_evidence",
+        "adjust_model_route",
+        "modify_worker_states",
+        "perform_live_inference",
+        "store_provider_tokens",
+        "tool_execution",
+        "runtime_route_mutation",
+        "provider_model_calls"
+      ],
+      "notes": "Phase-1 read-feed preview should only project overview status and metadata."
     }
   },
   "metadata_policy": {

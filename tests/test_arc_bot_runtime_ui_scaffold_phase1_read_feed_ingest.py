@@ -36,12 +36,17 @@ def test_build_phase1_read_feed_runtime_projection_ingests_payload() -> None:
     assert projection["phase_gate"]["name"] == "RUNTIME_UI_SCAFFOLD_PHASE1_FEED"
     assert projection["phase_gate"]["enabled"] is True
     assert projection["phase_gate"]["required"] is True
-    assert set(projection["surface_bindings"]) == {"runtime_settings", "work_queue"}
+    assert set(projection["surface_bindings"]) == {
+        "work_queue",
+        "runtime_settings",
+        "overview",
+    }
 
     work_queue_projection = projection["surfaces"]["work_queue"]
     runtime_settings_projection = projection["surfaces"]["runtime_settings"]
+    overview_projection = projection["surfaces"]["overview"]
 
-    for surface_projection in (work_queue_projection, runtime_settings_projection):
+    for surface_projection in (work_queue_projection, runtime_settings_projection, overview_projection):
         assert surface_projection["projection_mode"] == "read_only"
         assert "snapshot" in surface_projection
         assert "contract_refs" in surface_projection
@@ -49,7 +54,9 @@ def test_build_phase1_read_feed_runtime_projection_ingests_payload() -> None:
 
     assert "dispatch_to_worker" in work_queue_projection["blocked_runtime_actions"]
     assert "perform_live_inference" in runtime_settings_projection["blocked_runtime_actions"]
+    assert "adjust_model_route" in overview_projection["blocked_runtime_actions"]
     assert runtime_settings_projection["snapshot"]["surface"] == "runtime_settings"
+    assert overview_projection["snapshot"]["surface"] == "overview"
     assert work_queue_projection["snapshot"]["surface"] == "work_queue"
 
 

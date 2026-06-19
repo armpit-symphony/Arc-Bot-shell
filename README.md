@@ -226,6 +226,7 @@ This repo is currently a roadmap/staging repo for the Arc Bot business worker-bo
 - [Arc Bot Runtime UI Schemas](docs/contracts/schemas/arc_bot_console_state_envelope.schema.json)
   - [work queue snapshot schema](docs/contracts/schemas/arc_bot_work_queue_state.schema.json)
   - [runtime settings snapshot schema](docs/contracts/schemas/arc_bot_runtime_settings_state.schema.json)
+  - [overview snapshot schema](docs/contracts/schemas/arc_bot_overview_state.schema.json)
 - [Arc Bot Runtime UI Scaffold Contract Pack](tests/fixtures/arc_bot_runtime_ui_scaffold_contract_pack.json)
 - [Arc Bot Runtime UI Scaffold Adapter Proof Packet](docs/proof_packets/ARC_BOT_RUNTIME_UI_SCAFFOLD_PHASE0_ADAPTER_PROOF_PACKET.md)
 - [Arc Bot Reconstruction Docs And Source Map](docs/audits/ARC_BOT_RECONSTRUCTION_DOCS_AND_SOURCE_MAP.md)
@@ -254,6 +255,7 @@ The operator-console foundation defines the first office-worker control-room sur
 - Phase-1 runtime consumer preview (for downstream UI/runtime handoff): `python -m phase0_runtime_ui_scaffold.runtime_consumer`.
 - Phase-2 runtime-control seam preview (downstream UI state handoff): `python -m phase0_runtime_ui_scaffold.phase2_runtime_control`.
 - Phase-2 runtime-control consumer handoff preview (for downstream bounded UI control consumer): `python -m phase0_runtime_ui_scaffold.runtime_control_consumer`.
+- End-to-end phase-chain seam preview (preview -> runtime consumer -> control handoff -> control consumer): `python -m phase0_runtime_ui_scaffold.phase_chain`.
 
 ## Reference Context (For Next Phase)
 

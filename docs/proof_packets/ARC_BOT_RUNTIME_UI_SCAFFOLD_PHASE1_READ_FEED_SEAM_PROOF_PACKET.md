@@ -58,14 +58,14 @@ after a new phase gate is satisfied.
 
 ## What This Packet Proves
 
-- The read-feed contract for Phase-1 is bounded to:
+- The read-feed contract for Phase-1 is bounded to three surfaces:
   - `source_reference`: `app.services.guardian.suite`
   - `source_access_mode`: `read_only`
   - read-only spine sources:
     `guardian_spine_tasks`, `guardian_spine_events`, `guardian_spine_approvals`,
     `guardian_spine_projects`
-- `work_queue` and `runtime_settings` surface projections are declared and
-  normalized by `build_phase1_read_feed_projection`.
+- `work_queue`, `runtime_settings`, and `overview` surface projections are
+  declared and normalized by `build_phase1_read_feed_projection`.
 - `build_phase1_read_feed_runtime_projection` materializes those surfaces from a
   read-feed payload.
 - Projection ingest validates runtime-authority blocks and expected spine sources.

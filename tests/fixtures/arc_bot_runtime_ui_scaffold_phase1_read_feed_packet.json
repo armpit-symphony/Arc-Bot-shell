@@ -32,16 +32,19 @@
     "docs/contracts/schemas/arc_bot_console_state_envelope.schema.json",
     "docs/contracts/schemas/arc_bot_work_queue_state.schema.json",
     "docs/contracts/schemas/arc_bot_runtime_settings_state.schema.json",
+    "docs/contracts/schemas/arc_bot_overview_state.schema.json",
     "tests/fixtures/arc_bot_phase0_work_queue_state_snapshot.json",
     "tests/fixtures/arc_bot_phase0_runtime_settings_state_snapshot.json",
+    "tests/fixtures/arc_bot_phase0_overview_state_snapshot.json",
     "phase0_runtime_ui_scaffold/adapter.py",
     "phase0_runtime_ui_scaffold/__init__.py",
     "phase0_runtime_ui_scaffold/preview.py"
   ],
   "projection_source_file": "tests/fixtures/arc_bot_runtime_ui_scaffold_phase1_read_feed_contract.json",
   "surface_bindings": [
-    "work_queue",
-    "runtime_settings"
+    "overview",
+    "runtime_settings",
+    "work_queue"
   ],
   "source_reference": "app.services.guardian.suite",
   "source_access_mode": "read_only",
@@ -67,6 +70,7 @@
     "projection_gate_required": true,
     "runtime_authority_stays_blocked": true,
     "phase1_read_feed_ingest_added": true,
+    "phase1_runtime_consumer_interface_added": true,
     "phase1_preview_interface_added": true,
     "metadata_policy_complete": true
   },

@@ -39,7 +39,11 @@ def test_render_phase1_read_feed_projection_can_omit_surface_contracts() -> None
 
     assert rendered["projection"] == EXPECTED_PHASE_GATE_NAME
     assert "surface_read_paths" not in rendered
-    assert set(rendered["surface_bindings"]) == {"work_queue", "runtime_settings"}
+    assert set(rendered["surface_bindings"]) == {
+        "work_queue",
+        "runtime_settings",
+        "overview",
+    }
 
 
 def test_render_phase1_preview_rejects_gate_mismatch() -> None:

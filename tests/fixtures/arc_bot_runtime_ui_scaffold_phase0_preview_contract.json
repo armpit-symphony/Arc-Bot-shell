@@ -86,12 +86,12 @@
         "review_required"
       ],
       "blocked_runtime_actions": [
+        "connector_writes",
+        "dispatch_to_worker",
         "approve_without_evidence",
         "adjust_model_route",
-        "connector_writes",
-        "customer_system_mutation",
-        "dispatch_to_worker",
         "modify_worker_states",
+        "customer_system_mutation",
         "provider_model_calls",
         "tool_execution"
       ],

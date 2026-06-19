@@ -30,7 +30,11 @@ def test_build_phase2_runtime_control_consumer_projection_happy_path() -> None:
     assert projection["phase_gate"]["name"] == "RUNTIME_UI_SCAFFOLD_PHASE1_FEED"
     assert projection["phase_gate"]["required"] is True
     assert projection["phase_gate"]["enabled"] is True
-    assert set(projection["surface_bindings"]) == {"work_queue", "runtime_settings"}
+    assert set(projection["surface_bindings"]) == {
+        "work_queue",
+        "runtime_settings",
+        "overview",
+    }
     assert projection["surface_bindings"] == sorted(projection["surface_bindings"])
 
     for surface_projection in projection["surfaces"].values():

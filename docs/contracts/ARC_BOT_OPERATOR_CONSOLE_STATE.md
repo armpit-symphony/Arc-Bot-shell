@@ -50,7 +50,9 @@ Schema-aligned validation artifacts for Phase-0 snapshots:
 - `docs/contracts/schemas/arc_bot_console_state_envelope.schema.json`
 - `docs/contracts/schemas/arc_bot_work_queue_state.schema.json`
 - `docs/contracts/schemas/arc_bot_runtime_settings_state.schema.json`
+- `docs/contracts/schemas/arc_bot_overview_state.schema.json`
 - `tests/fixtures/arc_bot_runtime_ui_scaffold_contract_pack.json`
+- `tests/fixtures/arc_bot_phase0_overview_state_snapshot.json`
 
 ## Surface State Groups
 

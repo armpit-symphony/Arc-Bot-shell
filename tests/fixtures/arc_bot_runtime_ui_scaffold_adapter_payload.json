@@ -4,12 +4,13 @@
   "adapter_name": "arc-bot-runtime-ui-scaffold",
   "adapter_phase": "phase-0",
   "adapter_mode": "fixture_backed_read_only_projection",
-  "target_build_surface": "work_queue_and_runtime_settings",
+  "target_build_surface": "work_queue_runtime_settings_overview",
   "phase_gate_required": true,
   "phase_gate_flag": "runtime_ui_scaffold_only_preview",
   "snapshot_schema_contracts": [
     "docs/contracts/schemas/arc_bot_work_queue_state.schema.json",
     "docs/contracts/schemas/arc_bot_runtime_settings_state.schema.json",
+    "docs/contracts/schemas/arc_bot_overview_state.schema.json",
     "docs/contracts/schemas/arc_bot_console_state_envelope.schema.json"
   ],
   "surface_payloads": [
@@ -65,6 +66,37 @@
         "rendered",
         "review_required",
         "degraded"
+      ],
+      "read_only_projection_only": true
+    },
+    {
+      "surface": "overview",
+      "view_type": "overview",
+      "schema": "docs/contracts/schemas/arc_bot_overview_state.schema.json",
+      "snapshot_file": "tests/fixtures/arc_bot_phase0_overview_state_snapshot.json",
+      "snapshot_contract_binding": "docs/contracts/schemas/arc_bot_overview_state.schema.json",
+      "runtime_authority_enforced_false": true,
+      "requires_phase_gate": true,
+      "allowed_metadata_actions": [
+        "acknowledge_overview_alert",
+        "attach_overview_note",
+        "refresh_health_snapshot"
+      ],
+      "blocked_runtime_actions": [
+        "dispatch_to_worker",
+        "approve_without_evidence",
+        "adjust_model_route",
+        "modify_worker_states",
+        "customer_system_mutation",
+        "provider_model_calls",
+        "tool_execution",
+        "connector_writes"
+      ],
+      "required_envelope_status_modes": [
+        "review_required",
+        "rendered",
+        "degraded",
+        "blocked"
       ],
       "read_only_projection_only": true
     }

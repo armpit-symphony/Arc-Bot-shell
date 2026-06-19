@@ -233,6 +233,130 @@
         "runtime_route_mutation"
       ],
       "notes": "Read feed payload for runtime settings preview surfaces."
+    },
+    "overview": {
+      "snapshot": {
+        "envelope": {
+          "tenant_id": "acme-ops-tenant",
+          "customer_context_id": "acme-headquarters",
+          "environment": "phase0_lab",
+          "operator_role": "operator",
+          "view_id": "vw-overview-001",
+          "view_type": "overview",
+          "view_mode": "review_only",
+          "status": "review_required",
+          "policy_refs": [
+            "lima-office://policy/arc-bot/overview/phase0"
+          ],
+          "evidence_refs": [
+            "docs://proof/arc-bot-overview"
+          ],
+          "related_contract_refs": [
+            "console.view",
+            "supervisor.health",
+            "worker.lifecycle",
+            "task.execution",
+            "approval.request"
+          ],
+          "runbook_refs": [
+            "lima-office://runbooks/overview-review-only"
+          ],
+          "future_lima_office_supervisor_seam": "lima-office://supervisor/overview-state",
+          "future_lima_ai_os_seam": "arc-lima://runtime/overview-state"
+        },
+        "surface": "overview",
+        "display_state_only": true,
+        "worker_summary": {
+          "active_workers": 6,
+          "idle_workers": 2,
+          "quarantined_workers": 0,
+          "degraded_workers": 1
+        },
+        "queue_summary": {
+          "total_programs": 2,
+          "ready_for_dispatch": 0,
+          "review_required": 2,
+          "blocked": 2,
+          "draft": 1
+        },
+        "approval_summary": {
+          "pending": 1,
+          "approved": 0,
+          "denied": 0
+        },
+        "incident_summary": {
+          "open_incidents": 0,
+          "severity_high": 0,
+          "severity_medium": 1,
+          "sla_risk_count": 1
+        },
+        "connector_health": {
+          "mail": "disconnected",
+          "crm": "disconnected",
+          "voice": "disconnected"
+        },
+        "connector_readiness_posture": "blocked_mvp",
+        "model_route_posture": {
+          "mode": "blocked_mvp",
+          "status": "blocked",
+          "selected_route": "arc-bot-local-planned",
+          "reason_codes": [
+            "phase0_blocked_mvp",
+            "approval_pending"
+          ]
+        },
+        "metadata_actions": [
+          "acknowledge_overview_alert",
+          "attach_overview_note",
+          "refresh_health_snapshot"
+        ],
+        "blocked_actions": [
+          "dispatch_to_worker",
+          "approve_without_evidence",
+          "adjust_model_route",
+          "modify_worker_states",
+          "tool_execution",
+          "perform_live_inference",
+          "provider_model_calls"
+        ],
+        "live_model_inference_allowed": false,
+        "tool_execution_allowed": false,
+        "credential_storage_allowed": false,
+        "provider_token_storage_allowed": false,
+        "raw_runtime_payload_persistence_allowed": false,
+        "runtime_route_change_without_approval_allowed": false,
+        "external_message_send_allowed": false,
+        "customer_system_mutation_allowed": false,
+        "live_program_execution_allowed": false,
+        "runbook_ready": false
+      },
+      "contract_refs": [
+        "console.view",
+        "supervisor.health",
+        "worker.lifecycle",
+        "task.execution",
+        "approval.request",
+        "connector.readiness"
+      ],
+      "spine_sources": [
+        "guardian_spine_tasks",
+        "guardian_spine_events",
+        "guardian_spine_approvals",
+        "guardian_spine_projects"
+      ],
+      "blocked_runtime_actions": [
+        "dispatch_to_worker",
+        "approve_without_evidence",
+        "adjust_model_route",
+        "modify_worker_states",
+        "perform_live_inference",
+        "tool_execution",
+        "runtime_route_mutation",
+        "provider_model_calls",
+        "store_provider_tokens",
+        "customer_system_mutation"
+      ],
+      "notes": "Read feed payload for overview preview surfaces."
     }
   }
 }

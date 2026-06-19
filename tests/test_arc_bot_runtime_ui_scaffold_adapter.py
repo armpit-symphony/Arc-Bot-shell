@@ -69,7 +69,7 @@ def test_arc_bot_runtime_ui_scaffold_adapter_payload_shape_is_phase0_readonly() 
     assert payload["adapter_mode"] == "fixture_backed_read_only_projection"
     assert payload["phase_gate_required"] is True
     assert payload["phase_gate_flag"] == "runtime_ui_scaffold_only_preview"
-    assert payload["target_build_surface"] == "work_queue_and_runtime_settings"
+    assert payload["target_build_surface"] == "work_queue_runtime_settings_overview"
     assert payload["adapter_phase"] == "phase-0"
     assert packet["requires_phase_gate"] is True
     assert payload["snapshot_schema_contracts"]
@@ -81,7 +81,7 @@ def test_arc_bot_runtime_ui_scaffold_adapter_payload_shape_is_phase0_readonly() 
 
     assert set(packet["adapter_surfaces"]) == {payload_entry["surface"] for payload_entry in payload["surface_payloads"]}  # noqa: E501
 
-    required_surface_names = {"work_queue", "runtime_settings"}
+    required_surface_names = {"work_queue", "runtime_settings", "overview"}
     assert set(packet["adapter_surfaces"]) == required_surface_names
     assert set(payload["blocked_runtime_actions"]) >= {
         "provider_model_calls",
@@ -101,7 +101,7 @@ def test_arc_bot_runtime_ui_scaffold_adapter_matches_contract_pack() -> None:
 
     surface_bindings = contract_pack["contract_pack"]["surface_bindings"]
     binding_names = set(surface_bindings.keys())
-    assert binding_names == {"work_queue", "runtime_settings"}
+    assert binding_names == {"work_queue", "runtime_settings", "overview"}
 
     payload_surfaces = {entry["surface"] for entry in payload["surface_payloads"]}
     assert payload_surfaces == binding_names
@@ -146,6 +146,17 @@ def test_arc_bot_runtime_ui_scaffold_adapter_snapshots_have_valid_shape() -> Non
             assert snapshot["provider_token_storage_allowed"] is False
             assert snapshot["raw_runtime_payload_persistence_allowed"] is False
             assert snapshot["runtime_route_change_without_approval_allowed"] is False
+        elif entry["surface"] == "overview":
+            assert snapshot["envelope"]["status"] in {
+                "review_required",
+                "rendered",
+                "degraded",
+                "blocked",
+            }
+            assert snapshot["live_model_inference_allowed"] is False
+            assert snapshot["tool_execution_allowed"] is False
+            assert snapshot["customer_system_mutation_allowed"] is False
+            assert snapshot["external_message_send_allowed"] is False
 
 
 def test_arc_bot_runtime_ui_scaffold_adapter_boundaries_remain_phase0() -> None:

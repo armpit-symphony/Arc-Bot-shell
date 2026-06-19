@@ -11,7 +11,7 @@
   "proof_packet_ref": "proof-packet:phase-0-runtime-ui-scaffold-adapter:arc-bot-shell:001",
   "proof_packet_files": [
     "docs/proof_packets/ARC_BOT_RUNTIME_UI_SCAFFOLD_PHASE0_ADAPTER_PROOF_PACKET.md",
-    "tests/fixtures/arc_bot_runtime_ui_scaffold_preview_contract.json",
+    "tests/fixtures/arc_bot_runtime_ui_scaffold_phase0_preview_contract.json",
     "tests/fixtures/arc_bot_runtime_ui_scaffold_adapter_payload.json",
     "tests/fixtures/arc_bot_runtime_ui_scaffold_phase0_adapter_packet.json",
     "tests/test_arc_bot_runtime_ui_scaffold_adapter.py",
@@ -26,17 +26,20 @@
     "docs/OPERATOR_CONSOLE_FOUNDATION.md",
     "docs/contracts/ARC_BOT_OPERATOR_CONSOLE_STATE.md",
     "tests/fixtures/arc_bot_runtime_ui_scaffold_contract_pack.json",
-    "tests/fixtures/arc_bot_runtime_ui_scaffold_preview_contract.json",
+    "tests/fixtures/arc_bot_runtime_ui_scaffold_phase0_preview_contract.json",
     "tests/fixtures/arc_bot_phase0_work_queue_state_snapshot.json",
     "tests/fixtures/arc_bot_phase0_runtime_settings_state_snapshot.json",
+    "tests/fixtures/arc_bot_phase0_overview_state_snapshot.json",
     "docs/contracts/schemas/arc_bot_console_state_envelope.schema.json",
     "docs/contracts/schemas/arc_bot_work_queue_state.schema.json",
-    "docs/contracts/schemas/arc_bot_runtime_settings_state.schema.json"
+    "docs/contracts/schemas/arc_bot_runtime_settings_state.schema.json",
+    "docs/contracts/schemas/arc_bot_overview_state.schema.json"
   ],
   "adapter_payload_file": "tests/fixtures/arc_bot_runtime_ui_scaffold_adapter_payload.json",
   "adapter_surfaces": [
     "work_queue",
-    "runtime_settings"
+    "runtime_settings",
+    "overview"
   ],
   "adapter_runtime_authority_added": false,
   "adapter_runtime_source_backed": false,
@@ -66,5 +69,5 @@
     "python -B -m pytest -q tests/test_arc_bot_runtime_ui_scaffold_contracts.py tests/test_arc_bot_phase0_scope_lock_runtime_ui.py tests/test_arc_bot_operator_console_work_queue_runtime_settings.py -p no:cacheprovider",
     "git diff --check"
   ],
-  "recommended_next_step": "Keep the projection harness fixture-backed; any future UI implementation must consume only these two approved surfaces behind a later explicit phase gate."
+  "recommended_next_step": "Keep the projection harness fixture-backed; any future UI implementation must consume only these approved surfaces behind a later explicit phase gate."
 }

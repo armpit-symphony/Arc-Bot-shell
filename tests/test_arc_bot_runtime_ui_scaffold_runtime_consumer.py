@@ -33,12 +33,24 @@ def test_build_phase1_runtime_ui_consumer_projection_happy_path() -> None:
         "guardian_spine_approvals",
         "guardian_spine_projects",
     }
-    assert set(projection["surface_bindings"]) == {"work_queue", "runtime_settings"}
+    assert set(projection["surface_bindings"]) == {
+        "work_queue",
+        "runtime_settings",
+        "overview",
+    }
 
     for surface_projection in projection["surfaces"].values():
         assert surface_projection["projection_mode"] == "read_only"
-        assert surface_projection["snapshot_surface"] in {"work_queue", "runtime_settings"}
-        assert surface_projection["view_type"] in {"work_queue", "runtime_settings"}
+        assert surface_projection["snapshot_surface"] in {
+            "work_queue",
+            "runtime_settings",
+            "overview",
+        }
+        assert surface_projection["view_type"] in {
+            "work_queue",
+            "runtime_settings",
+            "overview",
+        }
         assert surface_projection["status"] in {"review_required", "rendered"}
         assert set(surface_projection["blocked_runtime_actions"])
         assert set(surface_projection["contract_refs"])

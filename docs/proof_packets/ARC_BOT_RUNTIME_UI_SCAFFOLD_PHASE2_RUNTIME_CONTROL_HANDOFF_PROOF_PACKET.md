@@ -54,7 +54,8 @@ Arc-Bot-shell defines a phase-2 runtime-control projection handoff that:
 - The phase-2 control projection remains read-only and cannot be used for execution.
 - `source_reference` stays `app.services.guardian.suite`.
 - `source_access_mode` remains `read_only`.
-- Surface bindings remain exactly `work_queue` and `runtime_settings`.
+- Surface bindings remain exactly `work_queue`, `runtime_settings`, and
+  `overview`.
 - `spine_sources` and per-surface `spine_sources` remain constrained to
   `guardian_spine_tasks`, `guardian_spine_events`, `guardian_spine_approvals`,
   `guardian_spine_projects`.

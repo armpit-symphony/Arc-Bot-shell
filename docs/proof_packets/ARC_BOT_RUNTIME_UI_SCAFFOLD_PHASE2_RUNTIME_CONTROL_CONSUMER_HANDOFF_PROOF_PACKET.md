@@ -48,7 +48,8 @@ projection suitable only for preview/routed display.
 - The consumer keeps runtime in `read_only` posture with `consumer_mode == read_only`.
 - The handoff source remains `phase2_runtime_control_handoff_projection`.
 - Runtime authority remains blocked at surface and packet level.
-- Surface bindings remain exactly `work_queue` and `runtime_settings`.
+- Surface bindings remain exactly `work_queue`, `runtime_settings`, and
+  `overview`.
 - Spine source bindings remain constrained to the approved read-only spine sources.
 - `blocked_runtime_actions` and metadata-action posture are preserved.
 - A phase gate is still required and enabled.
