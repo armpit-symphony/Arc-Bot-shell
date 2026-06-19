@@ -102,6 +102,24 @@ def test_arc_bot_docs_update_adds_no_runtime_behavior() -> None:
         assert boundaries[key] is False
 
 
+def test_arc_bot_phase0_contract_schema_snapshots_exist() -> None:
+    artifact_paths = [
+        "docs/contracts/schemas/arc_bot_console_state_envelope.schema.json",
+        "docs/contracts/schemas/arc_bot_work_queue_state.schema.json",
+        "docs/contracts/schemas/arc_bot_runtime_settings_state.schema.json",
+        "tests/fixtures/arc_bot_phase0_work_queue_state_snapshot.json",
+        "tests/fixtures/arc_bot_phase0_runtime_settings_state_snapshot.json",
+    ]
+
+    for relative_path in artifact_paths:
+        assert (REPO_ROOT / relative_path).exists(), relative_path
+
+
+def test_arc_bot_runtime_ui_contract_pack_is_referenced_for_phase0() -> None:
+    pack_path = REPO_ROOT / "tests" / "fixtures" / "arc_bot_runtime_ui_scaffold_contract_pack.json"
+    assert pack_path.exists()
+
+
 def test_arc_bot_operator_console_docs_contain_expected_boundaries() -> None:
     fixture = _load_fixture()
     foundation = (

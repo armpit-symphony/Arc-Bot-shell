@@ -223,9 +223,27 @@ This repo is currently a roadmap/staging repo for the Arc Bot business worker-bo
 
 - [Arc Bot Operator Console Foundation](docs/OPERATOR_CONSOLE_FOUNDATION.md)
 - [Arc Bot Operator Console State Contract](docs/contracts/ARC_BOT_OPERATOR_CONSOLE_STATE.md)
+- [Arc Bot Runtime UI Schemas](docs/contracts/schemas/arc_bot_console_state_envelope.schema.json)
+  - [work queue snapshot schema](docs/contracts/schemas/arc_bot_work_queue_state.schema.json)
+  - [runtime settings snapshot schema](docs/contracts/schemas/arc_bot_runtime_settings_state.schema.json)
+- [Arc Bot Runtime UI Scaffold Contract Pack](tests/fixtures/arc_bot_runtime_ui_scaffold_contract_pack.json)
 - [Arc Bot Reconstruction Docs And Source Map](docs/audits/ARC_BOT_RECONSTRUCTION_DOCS_AND_SOURCE_MAP.md)
+- [Arc Bot Phase-0 Roadmap](docs/ROADMAP.md)
 
 The operator-console foundation defines the first office-worker control-room surfaces and server-side state boundary. It is not a frontend, backend, persistence layer, worker runtime, connector, model router, scheduler, Guardian implementation, or LIMA runtime integration.
+
+## Scope Lock Notes (Current)
+
+- Phase-0 runtime UI scaffold is locked: preview/render-only pages, no live execution.
+- Runtime authority is deferred to approved LIMA-Guardian-Suite / LIMA-Guardian Spine integration phases.
+- The current shell scope remains documentation-first and fail-closed.
+
+## Reference Context (For Next Phase)
+
+- Sparkbot: `https://github.com/armpit-symphony/Sparkbot`
+- Sparkbot_shell: `https://github.com/armpit-symphony/Sparkbot_shell`
+- LIMA-Guardian-Suite: `https://github.com/armpit-symphony/LIMA-Guardian-Suite`
+- LIMA AI Office operator/docs and contracts remain the source for downstream state schemas.
 
 ## Development Principles
 

@@ -55,6 +55,45 @@ The Arc Bot operator console foundation contains these top-level surfaces:
 | Governance / Audit | Show access review, identity/MFA placeholders, breakglass posture, retention/export/delete posture | Documented foundation only | `governance.identity`, `governance.access_review`, `governance.breakglass`, `governance.audit_export` | Future auth/policy/storage seam; no secret or breakglass runtime |
 | Runbooks / Blocked Guidance | Show next safe manual review lane for blocked actions | Documented foundation only | `docs/runbooks/*`, `console.action`, `console.alert` | Human control surface guidance before future governed runtime |
 
+## Phase 0 Scope Lock (Runtime UI Scaffold)
+
+This branch defines a runtime UI scaffold only.
+
+- No provider/local model calls.
+- No connector reads/writes.
+- No worker dispatch or task execution.
+- No task creation as source-of-truth; all state is server-backed preview metadata.
+- No runtime secrets, no credentials, and no direct tool execution in the shell.
+
+### Runtime UI Scaffold Baseline
+
+- `Work Queue` and `Runtime Settings` pages are documented as metadata-first surfaces.
+- Queue operations are limited to draft/readiness tagging and blocked/approval annotations.
+- Runtime settings capture route/documentation posture, not live model invocation.
+- All surfaces must render blocked/fail-closed when required proofs are missing.
+
+### Guardian/Suite Alignment (Display Only)
+
+In Phase 0:
+
+- `guardian.decision`, `approval.request`, `approval.token`, and `token.verification` are display-only inputs.
+- `guardian_spine_events` and `guardian_spine_approvals` are displayed as read-only evidence lineage views when present in fixture/source snapshots.
+- `model.route` and `supervisor.health` are shown as readiness metadata only.
+- `evidence.artifact` links are presented for review context.
+- Live authority comes only from approved downstream integrations in later phases.
+
+Prototype read-feed reference for future phases (not implemented in this branch):
+
+- `app.services.guardian.suite` for consolidated Guardian services.
+- `guardian_spine_tasks`, `guardian_spine_events`, `guardian_spine_approvals`, and `guardian_spine_projects` as read-only spine data tables.
+- Surface-only mapping to shell views with no direct `executive`/tool execution calls.
+- Contract bundle anchor (proof-only): `tests/fixtures/arc_bot_runtime_ui_scaffold_contract_pack.json`
+
+### Cross-repo Runtime Authority Gate
+
+- `LIMA-AI-OS`, `LIMA-Guardian-Suite`, and `Arc Bot runtime` runtime authority are out of scope in this phase.
+- Runtime spine/suite hooks are noted as future seam points, not implemented in this branch.
+
 ## Required Page Frame
 
 Every future surface must show:

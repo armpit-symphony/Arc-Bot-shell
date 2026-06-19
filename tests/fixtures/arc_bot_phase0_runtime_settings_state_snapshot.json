@@ -1,0 +1,66 @@
+{
+  "envelope": {
+    "tenant_id": "acme-ops-tenant",
+    "customer_context_id": "acme-headquarters",
+    "environment": "phase0_lab",
+    "operator_role": "operator",
+    "view_id": "vw-runtime-settings-001",
+    "view_type": "runtime_settings",
+    "view_mode": "review_only",
+    "status": "rendered",
+    "policy_refs": [
+      "lima-office://policy/arc-bot/runtime-settings/phase0"
+    ],
+    "evidence_refs": [
+      "docs://proof/arc-bot-runtime-settings"
+    ],
+    "related_contract_refs": [
+      "model.route",
+      "supervisor.health",
+      "worker.lifecycle"
+    ],
+    "runbook_refs": [
+      "lima-office://runbooks/runtime-readiness"
+    ],
+    "future_lima_office_supervisor_seam": "lima-office://supervisor/runtime-route-state",
+    "future_lima_ai_os_seam": "arc-lima://runtime/settings-state"
+  },
+  "surface": "runtime_settings",
+  "display_state_only": true,
+  "local_runtime_install_routes": [
+    {
+      "seat_id": "seat-lima-01",
+      "runtime_family": "local_ollama_like",
+      "base_endpoint_label": "127.0.0.1:11434",
+      "installer_readiness": "ready_for_review",
+      "readiness_notes": "Fixture-only reachability check not run in phase-0."
+    }
+  ],
+  "runtime_route_posture": {
+    "mode": "blocked_mvp",
+    "status": "blocked",
+    "selected_route": "arc-bot-local-planned",
+    "reason_codes": [
+      "phase0_blocked_mvp",
+      "approval_pending"
+    ]
+  },
+  "local_runtime_install_route_documented": true,
+  "model_route_readiness_metadata_documented": true,
+  "live_model_inference_allowed": false,
+  "tool_execution_allowed": false,
+  "credential_storage_allowed": false,
+  "provider_token_storage_allowed": false,
+  "raw_runtime_payload_persistence_allowed": false,
+  "runtime_route_change_without_approval_allowed": false,
+  "metadata_actions": [
+    "annotate_readiness_notes",
+    "stage_setup_blocker",
+    "attach_readiness_reference"
+  ],
+  "blocked_actions": [
+    "perform_live_inference",
+    "store_provider_tokens",
+    "persist_runtime_payload"
+  ]
+}

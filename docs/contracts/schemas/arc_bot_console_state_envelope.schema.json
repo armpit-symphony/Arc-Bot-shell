@@ -1,0 +1,70 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/arc-bot/schemas/arc-bot-console-state-envelope.schema.json",
+  "title": "Arc Bot Console State Envelope",
+  "type": "object",
+  "required": [
+    "tenant_id",
+    "customer_context_id",
+    "environment",
+    "operator_role",
+    "view_id",
+    "view_type",
+    "view_mode",
+    "status",
+    "policy_refs",
+    "evidence_refs",
+    "related_contract_refs",
+    "runbook_refs",
+    "future_lima_office_supervisor_seam",
+    "future_lima_ai_os_seam"
+  ],
+  "properties": {
+    "tenant_id": { "type": "string", "minLength": 1 },
+    "customer_context_id": { "type": "string", "minLength": 1 },
+    "environment": {
+      "type": "string",
+      "enum": ["phase0_lab", "mock", "dry_run", "blocked_mvp"]
+    },
+    "operator_role": { "type": "string", "minLength": 1 },
+    "view_id": { "type": "string", "minLength": 1 },
+    "view_type": {
+      "type": "string",
+      "enum": ["work_queue", "runtime_settings", "overview", "workers", "tasks", "approvals", "guardian", "evidence", "connectors", "model_local_ai_readiness", "governance_audit", "runbooks_blocked_guidance"]
+    },
+    "view_mode": { "type": "string", "enum": ["readonly", "review_only", "approval_capable"] },
+    "status": {
+      "type": "string",
+      "enum": ["rendered", "review_required", "degraded", "blocked"]
+    },
+    "policy_refs": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "evidence_refs": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "related_contract_refs": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "blocked_reason": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "runbook_refs": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "future_lima_office_supervisor_seam": {
+      "type": "string",
+      "minLength": 1
+    },
+    "future_lima_ai_os_seam": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "additionalProperties": true
+}

@@ -1,0 +1,86 @@
+{
+  "envelope": {
+    "tenant_id": "acme-ops-tenant",
+    "customer_context_id": "acme-headquarters",
+    "environment": "phase0_lab",
+    "operator_role": "operator",
+    "view_id": "vw-work-queue-001",
+    "view_type": "work_queue",
+    "view_mode": "review_only",
+    "status": "review_required",
+    "policy_refs": [
+      "lima-office://policy/arc-bot/work-queue/phase0"
+    ],
+    "evidence_refs": [
+      "docs://proof/arc-bot-work-queue-runtime-settings"
+    ],
+    "related_contract_refs": [
+      "task.execution",
+      "guardian.decision",
+      "approval.request",
+      "console.view"
+    ],
+    "blocked_reason": [
+      "runtime_dispatch_not_authorized_in_phase0"
+    ],
+    "runbook_refs": [
+      "lima-office://runbooks/work-queue-review-only"
+    ],
+    "future_lima_office_supervisor_seam": "lima-office://supervisor/work-queue-state",
+    "future_lima_ai_os_seam": "arc-lima://runtime/future/consequential-actions"
+  },
+  "surface": "work_queue",
+  "display_state_only": true,
+  "metadata_only_queue_entries": true,
+  "future_intent_envelope_mapping": true,
+  "live_program_execution_allowed": false,
+  "customer_system_mutation_allowed": false,
+  "external_message_send_allowed": false,
+  "work_programs": [
+    {
+      "program_id": "wq-001",
+      "title": "Quarterly backup review and anomaly prep",
+      "status": "draft",
+      "risk_tier": "medium",
+      "assigned_worker_role": "it-helpdesk",
+      "execution_mode": "plan_only",
+      "required_model_route_posture": "mock_only",
+      "blocked_reasons": [
+        "no_runtime_authority",
+        "missing_approval_binding"
+      ],
+      "ready_for_dispatch": false,
+      "attached_sop_references": [
+        "lima-office://sop/backup-review-v2"
+      ],
+      "training_memo": "Verify scope and dependency list before operator approval."
+    },
+    {
+      "program_id": "wq-002",
+      "title": "Vendor ticket triage summary",
+      "status": "ready",
+      "risk_tier": "low",
+      "assigned_worker_role": "admin-assist",
+      "execution_mode": "draft_only",
+      "required_model_route_posture": "blocked_mvp",
+      "blocked_reasons": [
+        "model_route_not_authorized_in_phase0"
+      ],
+      "ready_for_dispatch": false,
+      "attached_sop_references": [
+        "lima-office://sop/vendor-triage"
+      ],
+      "training_memo": "Operator review only; no dispatch in this branch."
+    }
+  ],
+  "metadata_actions": [
+    "reorder_programs",
+    "update_readiness_tags",
+    "attach_sop_reference"
+  ],
+  "blocked_actions": [
+    "dispatch_to_worker",
+    "persist_queue_to_customer_system",
+    "send_external_messages"
+  ]
+}

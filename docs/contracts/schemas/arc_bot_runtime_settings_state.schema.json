@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/arc-bot/schemas/arc-bot-runtime-settings-state.schema.json",
+  "title": "Arc Bot Runtime Settings State",
+  "type": "object",
+  "required": [
+    "envelope",
+    "surface",
+    "display_state_only",
+    "runtime_route_posture",
+    "live_model_inference_allowed",
+    "tool_execution_allowed",
+    "credential_storage_allowed",
+    "provider_token_storage_allowed",
+    "raw_runtime_payload_persistence_allowed",
+    "runtime_route_change_without_approval_allowed"
+  ],
+  "properties": {
+    "envelope": {
+      "$ref": "./arc_bot_console_state_envelope.schema.json"
+    },
+    "surface": { "const": "runtime_settings" },
+    "display_state_only": { "type": "boolean" },
+    "local_runtime_install_routes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["seat_id", "runtime_family", "base_endpoint_label", "installer_readiness"],
+        "properties": {
+          "seat_id": { "type": "string", "minLength": 1 },
+          "runtime_family": { "type": "string", "minLength": 1 },
+          "base_endpoint_label": { "type": "string", "minLength": 1 },
+          "installer_readiness": {
+            "type": "string",
+            "enum": ["not_started", "ready_for_review", "blocked", "mock_planned"]
+          },
+          "readiness_notes": { "type": "string" }
+        },
+        "additionalProperties": true
+      }
+    },
+    "runtime_route_posture": {
+      "type": "object",
+      "required": ["mode", "status", "selected_route", "reason_codes"],
+      "properties": {
+        "mode": {
+          "type": "string",
+          "enum": ["mock_only", "local_planned", "subscription_planned", "blocked_mvp"]
+        },
+        "status": { "type": "string", "enum": ["selected", "degraded", "denied", "blocked", "unavailable"] },
+        "selected_route": { "type": "string", "minLength": 1 },
+        "reason_codes": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "local_runtime_install_route_documented": { "type": "boolean" },
+    "model_route_readiness_metadata_documented": { "type": "boolean" },
+    "live_model_inference_allowed": { "type": "boolean" },
+    "tool_execution_allowed": { "type": "boolean" },
+    "credential_storage_allowed": { "type": "boolean" },
+    "provider_token_storage_allowed": { "type": "boolean" },
+    "raw_runtime_payload_persistence_allowed": { "type": "boolean" },
+    "runtime_route_change_without_approval_allowed": { "type": "boolean" },
+    "metadata_actions": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "blocked_actions": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    }
+  },
+  "additionalProperties": true
+}

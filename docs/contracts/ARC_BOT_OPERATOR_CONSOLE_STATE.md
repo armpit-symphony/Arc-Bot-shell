@@ -45,6 +45,13 @@ Every future console state response should carry this envelope:
 | `future_lima_office_supervisor_seam` | yes | Supervisor-owned state source expected later. |
 | `future_lima_ai_os_seam` | yes | LIMA Runtime contract seam expected later. |
 
+Schema-aligned validation artifacts for Phase-0 snapshots:
+
+- `docs/contracts/schemas/arc_bot_console_state_envelope.schema.json`
+- `docs/contracts/schemas/arc_bot_work_queue_state.schema.json`
+- `docs/contracts/schemas/arc_bot_runtime_settings_state.schema.json`
+- `tests/fixtures/arc_bot_runtime_ui_scaffold_contract_pack.json`
+
 ## Surface State Groups
 
 ### Overview State

@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/arc-bot/schemas/arc-bot-work-queue-state.schema.json",
+  "title": "Arc Bot Work Queue State",
+  "type": "object",
+  "required": [
+    "envelope",
+    "surface",
+    "work_programs",
+    "display_state_only",
+    "metadata_only_queue_entries",
+    "live_program_execution_allowed",
+    "customer_system_mutation_allowed",
+    "external_message_send_allowed"
+  ],
+  "properties": {
+    "envelope": {
+      "$ref": "./arc_bot_console_state_envelope.schema.json"
+    },
+    "surface": { "const": "work_queue" },
+    "display_state_only": { "type": "boolean" },
+    "metadata_only_queue_entries": { "type": "boolean" },
+    "future_intent_envelope_mapping": { "type": "boolean" },
+    "live_program_execution_allowed": { "type": "boolean" },
+    "customer_system_mutation_allowed": { "type": "boolean" },
+    "external_message_send_allowed": { "type": "boolean" },
+    "work_programs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "program_id",
+          "title",
+          "status",
+          "risk_tier",
+          "assigned_worker_role",
+          "execution_mode",
+          "required_model_route_posture",
+          "blocked_reasons",
+          "ready_for_dispatch"
+        ],
+        "properties": {
+          "program_id": { "type": "string", "minLength": 1 },
+          "title": { "type": "string", "minLength": 1 },
+          "status": { "type": "string", "enum": ["draft", "ready", "active", "completed"] },
+          "risk_tier": { "type": "string", "enum": ["low", "medium", "high"] },
+          "assigned_worker_role": { "type": "string", "minLength": 1 },
+          "execution_mode": {
+            "type": "string",
+            "enum": ["plan_only", "read_only", "draft_only", "mock_only", "blocked_mvp"]
+          },
+          "required_model_route_posture": {
+            "type": "string",
+            "enum": ["mock_only", "local_planned", "subscription_planned", "blocked_mvp"]
+          },
+          "blocked_reasons": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "ready_for_dispatch": { "type": "boolean" },
+          "attached_sop_references": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "training_memo": { "type": "string" }
+        },
+        "additionalProperties": true
+      }
+    },
+    "metadata_actions": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "blocked_actions": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    }
+  },
+  "additionalProperties": true
+}

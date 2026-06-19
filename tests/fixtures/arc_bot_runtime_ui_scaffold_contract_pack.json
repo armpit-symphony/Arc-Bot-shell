@@ -1,0 +1,64 @@
+{
+  "packet_id": "arc_bot_runtime_ui_scaffold_contract_pack",
+  "api_status": "CANDIDATE_ONLY",
+  "consumer_repo": "Arc-Bot-shell",
+  "consumer_repository": "armpit-symphony/Arc-Bot-shell",
+  "proof_branch": "arc-runtime-ui-scaffold-contract-pack",
+  "source_commit_before_branch": "a05faea14ab24341b4b4567967911e33e51ce88a",
+  "docs_only_foundation_update": true,
+  "scope": "Phase-0 runtime UI scaffold contract artifacts",
+  "target_build_surface": "work_queue_and_runtime_settings",
+  "contract_pack": {
+    "contract_version": "arc-bot-console-state-v1",
+    "contract_family": "phase-0",
+    "artifacts": [
+      "docs/contracts/ARC_BOT_OPERATOR_CONSOLE_STATE.md",
+      "docs/contracts/schemas/arc_bot_console_state_envelope.schema.json",
+      "docs/contracts/schemas/arc_bot_work_queue_state.schema.json",
+      "docs/contracts/schemas/arc_bot_runtime_settings_state.schema.json",
+      "tests/fixtures/arc_bot_phase0_work_queue_state_snapshot.json",
+      "tests/fixtures/arc_bot_phase0_runtime_settings_state_snapshot.json"
+    ],
+    "future_read_feed_references": [
+      "app.services.guardian.suite",
+      "guardian_spine_tasks",
+      "guardian_spine_events",
+      "guardian_spine_approvals",
+      "guardian_spine_projects"
+    ],
+    "surface_bindings": {
+      "work_queue": {
+        "schema": "docs/contracts/schemas/arc_bot_work_queue_state.schema.json",
+        "view_type": "work_queue",
+        "snapshot_file": "tests/fixtures/arc_bot_phase0_work_queue_state_snapshot.json"
+      },
+      "runtime_settings": {
+        "schema": "docs/contracts/schemas/arc_bot_runtime_settings_state.schema.json",
+        "view_type": "runtime_settings",
+        "snapshot_file": "tests/fixtures/arc_bot_phase0_runtime_settings_state_snapshot.json"
+      }
+    },
+    "display_mode_only": true,
+    "runtime_authority_required_for_execution": true,
+    "allowed_local_runtime_actions": [
+      "annotate_readiness",
+      "update_review_notes",
+      "attach_runbook_ref"
+    ],
+    "blocked_runtime_actions": [
+      "provider_model_calls",
+      "connector_reads",
+      "connector_writes",
+      "tool_execution",
+      "runtime_route_mutation",
+      "credential_storage",
+      "customer_system_mutation"
+    ],
+    "metadata_policy": {
+      "require_policy_refs": true,
+      "require_evidence_refs": true,
+      "require_runbook_refs": true
+    }
+  },
+  "recommended_next_step": "implement read-only scaffold adapter behind explicit phase gate with fixture-backed rendering"
+}
