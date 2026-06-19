@@ -76,9 +76,9 @@ Lock down runtime scope for the shell user surface so no action path can infer r
 - [x] Add adapter contract package and proof packet for surface snapshots.
   - [x] Implement a phase-gated read-only render harness from adapter payload (mock-safe).
   - [x] Add read-feed runtime-seam projection helper behind phase gate for preview-only UI handoff.
+  - [x] Add runtime-consumer handoff proof and validation for phase-2 transfer continuity.
   - [x] Add migration gate tests so runtime authority cannot appear without guardrail updates.
   - [x] Add a preview interface/entrypoint to render the read-only projection for downstream consumers.
-  - [x] Add an end-to-end phase-chain continuity test across all preview/control seams.
 
 ## External Reference Alignment
 

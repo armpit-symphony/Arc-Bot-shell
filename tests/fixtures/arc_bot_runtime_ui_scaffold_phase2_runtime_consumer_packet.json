@@ -1,0 +1,74 @@
+{
+  "packet_id": "arc_bot_runtime_ui_scaffold_phase2_runtime_consumer_packet",
+  "proof_gap_id": "PHASE-2-RUNTIME-CONSUMER-HANDOFF",
+  "api_status": "CANDIDATE_ONLY",
+  "consumer_repo": "Arc-Bot-shell",
+  "consumer_repository": "armpit-symphony/Arc-Bot-shell",
+  "proof_branch": "arc-bot-runtime-ui-scaffold-phase2-runtime-consumer-handoff",
+  "source_commit_before_branch": "6f387b8763644836a732737475d64f28ccd71cb8",
+  "proof_commit": "recorded_by_git_after_commit",
+  "scope": "Phase-2 runtime consumer handoff for read-feed projection.",
+  "proof_packet_ref": "proof-packet:phase-2-runtime-consumer-handoff:arc-bot-shell:001",
+  "projection_source_file": "tests/fixtures/arc_bot_runtime_ui_scaffold_phase1_read_feed_contract.json",
+  "payload_source_file": "tests/fixtures/arc_bot_runtime_ui_scaffold_phase1_read_feed_payload.json",
+  "proof_packet_files": [
+    "docs/proof_packets/ARC_BOT_RUNTIME_UI_SCAFFOLD_PHASE1_READ_FEED_SEAM_PROOF_PACKET.md",
+    "docs/proof_packets/ARC_BOT_RUNTIME_UI_SCAFFOLD_PHASE2_RUNTIME_CONSUMER_HANDOFF_PROOF_PACKET.md",
+    "tests/fixtures/arc_bot_runtime_ui_scaffold_phase1_read_feed_contract.json",
+    "tests/fixtures/arc_bot_runtime_ui_scaffold_phase1_read_feed_payload.json",
+    "tests/fixtures/arc_bot_runtime_ui_scaffold_phase2_runtime_consumer_packet.json",
+    "tests/test_arc_bot_runtime_ui_scaffold_runtime_consumer.py",
+    "tests/test_arc_bot_runtime_ui_scaffold_phase2_runtime_consumer_packet.py",
+    "phase0_runtime_ui_scaffold/read_feed.py",
+    "phase0_runtime_ui_scaffold/runtime_consumer.py"
+  ],
+  "supporting_evidence_files": [
+    "README.md",
+    "docs/ROADMAP.md",
+    "docs/OPERATOR_CONSOLE_FOUNDATION.md",
+    "docs/contracts/ARC_BOT_OPERATOR_CONSOLE_STATE.md",
+    "docs/contracts/schemas/arc_bot_console_state_envelope.schema.json",
+    "docs/contracts/schemas/arc_bot_work_queue_state.schema.json",
+    "docs/contracts/schemas/arc_bot_runtime_settings_state.schema.json",
+    "tests/fixtures/arc_bot_runtime_ui_scaffold_preview_contract.json",
+    "tests/fixtures/arc_bot_runtime_ui_scaffold_phase1_read_feed_packet.json",
+    "phase0_runtime_ui_scaffold/runtime_consumer.py"
+  ],
+  "surface_bindings": [
+    "work_queue",
+    "runtime_settings"
+  ],
+  "source_reference": "app.services.guardian.suite",
+  "source_access_mode": "read_only",
+  "spine_sources": [
+    "guardian_spine_tasks",
+    "guardian_spine_events",
+    "guardian_spine_approvals",
+    "guardian_spine_projects"
+  ],
+  "projection_gate_name": "RUNTIME_UI_SCAFFOLD_PHASE1_FEED",
+  "projection_gate_required": true,
+  "runtime_authority_blocked": true,
+  "requires_phase_gate": true,
+  "phase": "phase-1",
+  "payload_type": "phase1_runtime_ui_consumer_projection",
+  "scope_lock": "read-only read-seam consumer handoff",
+  "target_readiness": "phase-2 preview contract-ready",
+  "required_confirmations": {
+    "proof_packet_files_exist": true,
+    "runtime_consumer_projection_added": true,
+    "runtime_consumer_preview_cli_added": true,
+    "projection_surfaces_preserve_binding": true,
+    "projection_surface_bindings_exact": true,
+    "runtime_authority_blocks_still_present": true,
+    "runtime_preview_summary_included": true,
+    "no_runtime_wiring_added": true,
+    "no_runtime_source_change": true
+  },
+  "validation_commands": [
+    "python -B -m pytest -q tests/test_arc_bot_runtime_ui_scaffold_runtime_consumer.py tests/test_arc_bot_runtime_ui_scaffold_phase2_runtime_consumer_packet.py -p no:cacheprovider",
+    "python -B -m pytest -q tests/test_arc_bot_runtime_ui_scaffold_read_feed.py tests/test_arc_bot_runtime_ui_scaffold_phase1_read_feed_packet.py tests/test_arc_bot_runtime_ui_scaffold_phase1_read_feed_preview.py tests/test_arc_bot_runtime_ui_scaffold_phase1_read_feed_ingest.py -p no:cacheprovider",
+    "git diff --check"
+  ],
+  "recommended_next_step": "Phase-2 runtime-control handoff may proceed with a bounded consumer integration seam that reads `phase1_runtime_ui_consumer_projection`."
+}

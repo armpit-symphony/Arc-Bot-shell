@@ -13,6 +13,10 @@ from .read_feed import (
     render_phase1_read_feed_projection,
     run_read_feed_preview,
 )
+from .runtime_consumer import (
+    build_phase1_runtime_ui_consumer_projection,
+    run_runtime_consumer_preview,
+)
 
 __all__ = [
     "build_phase0_readonly_projection",
@@ -26,4 +30,6 @@ __all__ = [
     "build_phase1_read_feed_runtime_projection",
     "render_phase1_read_feed_projection",
     "run_read_feed_preview",
+    "build_phase1_runtime_ui_consumer_projection",
+    "run_runtime_consumer_preview",
 ]

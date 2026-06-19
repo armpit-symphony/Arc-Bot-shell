@@ -230,6 +230,17 @@ This repo is currently a roadmap/staging repo for the Arc Bot business worker-bo
 - [Arc Bot Runtime UI Scaffold Adapter Proof Packet](docs/proof_packets/ARC_BOT_RUNTIME_UI_SCAFFOLD_PHASE0_ADAPTER_PROOF_PACKET.md)
 - [Arc Bot Reconstruction Docs And Source Map](docs/audits/ARC_BOT_RECONSTRUCTION_DOCS_AND_SOURCE_MAP.md)
 - [Arc Bot Phase-0 Roadmap](docs/ROADMAP.md)
+- Core architecture planning:
+  - [ARCHITECTURE.md](ARCHITECTURE.md)
+  - [MVP_SCOPE.md](MVP_SCOPE.md)
+  - [CONTRACTS.md](CONTRACTS.md)
+  - [SECURITY_MODEL.md](SECURITY_MODEL.md)
+  - [THREAT_MODEL.md](THREAT_MODEL.md)
+  - [WORKER_NODE_SPEC.md](WORKER_NODE_SPEC.md)
+  - [SUPERVISOR_SPEC.md](SUPERVISOR_SPEC.md)
+  - [AUTONOMY_BOUNDARIES.md](AUTONOMY_BOUNDARIES.md)
+  - [DECISIONS.md](DECISIONS.md)
+  - [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md)
 
 The operator-console foundation defines the first office-worker control-room surfaces and server-side state boundary. It is not a frontend, backend, persistence layer, worker runtime, connector, model router, scheduler, Guardian implementation, or LIMA runtime integration.
 
@@ -240,6 +251,7 @@ The operator-console foundation defines the first office-worker control-room sur
 - The current shell scope remains documentation-first and fail-closed.
 - Preview entrypoint (no execution): `python -m phase0_runtime_ui_scaffold.preview`.
 - Phase-1 read-feed seam preview: `python -m phase0_runtime_ui_scaffold.read_feed`.
+- Phase-1 runtime consumer preview (for downstream UI/runtime handoff): `python -m phase0_runtime_ui_scaffold.runtime_consumer`.
 
 ## Reference Context (For Next Phase)
 
