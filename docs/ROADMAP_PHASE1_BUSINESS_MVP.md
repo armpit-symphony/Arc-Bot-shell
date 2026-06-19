@@ -46,7 +46,7 @@ Guardian and LIMA Office gate packets.
 
 ### Milestone 2: Runtime Authority Gating Pack
 
-- Define one-to-one mapping from each planned user intent to required future gates:
+- [x] Define one-to-one mapping from each planned user intent to required future gates:
   - `guardian_runtime_authority_approval`
   - `connector_authority_approval`
   - `approval_token_lineage`
@@ -94,3 +94,4 @@ Topology boundary: this roadmap assumes one supervisor and **1-8 workers**.
 - [Phase-1 client configuration no-execution packet](proof_packets/ARC_BOT_PHASE1_CLIENT_CONFIGURATION_NO_EXECUTION_PACKET.md)
 - [Phase-1 client configuration migration gate packet](proof_packets/ARC_BOT_PHASE1_CLIENT_CONFIGURATION_MIGRATION_GATE_PACKET.md)
 - [Phase-1 readiness bundle packet](proof_packets/ARC_BOT_PHASE1_READINESS_BUNDLE_PACKET.md)
+- [Phase-1 runtime authority gating packet](proof_packets/ARC_BOT_PHASE1_RUNTIME_AUTHORITY_GATING_PACKET.md)

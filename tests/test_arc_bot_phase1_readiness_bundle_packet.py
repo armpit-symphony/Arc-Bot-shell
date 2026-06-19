@@ -32,3 +32,4 @@ def test_phase1_readiness_bundle_packet_and_projection_references() -> None:
     roadmap = REPO_ROOT / "docs" / "ROADMAP_PHASE1_BUSINESS_MVP.md"
     roadmap_text = roadmap.read_text(encoding="utf-8")
     assert "ARC_BOT_PHASE1_READINESS_BUNDLE_PACKET" in roadmap_text
+    assert "ARC_BOT_PHASE1_RUNTIME_AUTHORITY_GATING_PACKET" in roadmap_text

@@ -242,6 +242,7 @@ This repo is currently a roadmap/staging repo for the Arc Bot business worker-bo
 - [Arc Bot Phase-1 Client Configuration Migration Gate Packet](docs/proof_packets/ARC_BOT_PHASE1_CLIENT_CONFIGURATION_MIGRATION_GATE_PACKET.md)
 - [Arc Bot Phase-1 Business MVP Roadmap Packet](docs/proof_packets/ARC_BOT_PHASE1_MVP_ROADMAP_PACKET.md)
 - [Arc Bot Phase-1 Readiness Bundle Packet](docs/proof_packets/ARC_BOT_PHASE1_READINESS_BUNDLE_PACKET.md)
+- [Arc Bot Phase-1 Runtime Authority Gating Packet](docs/proof_packets/ARC_BOT_PHASE1_RUNTIME_AUTHORITY_GATING_PACKET.md)
 - [Arc Bot Phase-1 Business Inventory Proof Packet](docs/proof_packets/ARC_BOT_PHASE1_BUSINESS_INVENTORY_PROOF_PACKET.md)
 - [Arc Bot Phase-1 Business Inventory Migration Gate Packet](docs/proof_packets/ARC_BOT_PHASE1_BUSINESS_INVENTORY_MIGRATION_GATE_PACKET.md)
 - [Arc Bot Phase-1 Business MVP Roadmap](docs/ROADMAP_PHASE1_BUSINESS_MVP.md)
@@ -277,6 +278,7 @@ The operator-console foundation defines the first office-worker control-room sur
 - Include guardian-suite seam summary in phase-chain preview: `python -m phase0_runtime_ui_scaffold.phase_chain --with-guardian-suite-seam`.
 - Emit read-only Phase-1 business inventory preview: `python -m phase1_business_shell_inventory.inventory`.
 - Emit read-only Phase-1 client configuration preview: `python -m phase1_client_configuration.configuration`.
+- Emit Phase-1 runtime authority gating projection: `python -m phase1_runtime_authority_gating.gating`.
 - Emit read-only Phase-1 readiness bundle: `python -m phase1_readiness.bundle`.
 - Emit canonical scope-lock status snapshot artifact: `python -m phase0_runtime_ui_scaffold.phase_chain --emit-status-snapshot --with-guardian-suite-seam`.
 - Emit and write canonical snapshot artifact: `python -m phase0_runtime_ui_scaffold.phase_chain --emit-status-snapshot --with-guardian-suite-seam --status-snapshot-path tests/fixtures/arc_bot_runtime_ui_scaffold_phase0_scope_lock_status_snapshot.json --compact`.

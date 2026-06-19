@@ -1,0 +1,204 @@
+{
+  "artifact_id": "arc_bot_phase1_runtime_authority_gating_pack_v1",
+  "artifact_type": "phase1_runtime_authority_gating_pack",
+  "artifact_version": "phase-1",
+  "source_access_mode": "read_only",
+  "runtime_authority_state": {
+    "runtime_authority_blocked": true,
+    "runtime_execution_blocked": true
+  },
+  "phase_gate": {
+    "name": "ARC_BOT_PHASE1_RUNTIME_AUTHORITY_GATING",
+    "required": true,
+    "flag": "arc_bot_runtime_authority_gating_pack"
+  },
+  "required_future_gates": [
+    {
+      "gate_id": "approval_token_lineage",
+      "required": true,
+      "resolved": false,
+      "requires_guardian_review": true,
+      "requires_evidence_ref": true,
+      "requires_rollback_metadata": true
+    },
+    {
+      "gate_id": "connector_authority_approval",
+      "required": true,
+      "resolved": false,
+      "requires_guardian_review": true,
+      "requires_evidence_ref": true,
+      "requires_rollback_metadata": true
+    },
+    {
+      "gate_id": "evidence_and_rollback_gate",
+      "required": true,
+      "resolved": false,
+      "requires_guardian_review": true,
+      "requires_evidence_ref": true,
+      "requires_rollback_metadata": true
+    },
+    {
+      "gate_id": "guardian_runtime_authority_approval",
+      "required": true,
+      "resolved": false,
+      "requires_guardian_review": true,
+      "requires_evidence_ref": true,
+      "requires_rollback_metadata": true
+    },
+    {
+      "gate_id": "production_readiness_approval",
+      "required": true,
+      "resolved": false,
+      "requires_guardian_review": true,
+      "requires_evidence_ref": true,
+      "requires_rollback_metadata": true
+    }
+  ],
+  "planned_user_intents": [
+    {
+      "intent_id": "add_readiness_blocker_note",
+      "surface": "work_queue",
+      "intent_category": "metadata_control",
+      "required_future_gates": [
+        "evidence_and_rollback_gate"
+      ],
+      "notes": "Surface blockers before any queue mutation; remains plan-only today."
+    },
+    {
+      "intent_id": "attach_work_docs",
+      "surface": "work_queue",
+      "intent_category": "metadata_control",
+      "required_future_gates": [
+        "evidence_and_rollback_gate"
+      ],
+      "notes": "Doc attachments require evidence lineage and rollback posture before dispatch."
+    },
+    {
+      "intent_id": "create_local_queue_entry",
+      "surface": "work_queue",
+      "intent_category": "runtime_assignment",
+      "required_future_gates": [
+        "evidence_and_rollback_gate",
+        "guardian_runtime_authority_approval"
+      ],
+      "notes": "Potential assignment intent transitions require future approval and rollback readiness."
+    },
+    {
+      "intent_id": "record_connector_blocker",
+      "surface": "connectors",
+      "intent_category": "connector_review",
+      "required_future_gates": [
+        "connector_authority_approval"
+      ],
+      "notes": "Connector readiness blockers become actionable once connector authority gates are live."
+    },
+    {
+      "intent_id": "inspect_connector_readiness",
+      "surface": "connectors",
+      "intent_category": "connector_review",
+      "required_future_gates": [
+        "connector_authority_approval",
+        "evidence_and_rollback_gate"
+      ],
+      "notes": "Connector status surfacing becomes bounded action after connector and evidence gates."
+    },
+    {
+      "intent_id": "record_model_readiness_notes",
+      "surface": "model_local_readiness",
+      "intent_category": "model_readiness",
+      "required_future_gates": [
+        "evidence_and_rollback_gate"
+      ],
+      "notes": "Model-route and local-readiness changes are evidence-guarded in planning."
+    },
+    {
+      "intent_id": "enable_model_route_runtime",
+      "surface": "model_local_readiness",
+      "intent_category": "runtime_change",
+      "required_future_gates": [
+        "production_readiness_approval",
+        "guardian_runtime_authority_approval"
+      ],
+      "notes": "Changing model readiness posture is a production-capability action."
+    },
+    {
+      "intent_id": "request_connector_enrollment_review",
+      "surface": "workers",
+      "intent_category": "worker_control",
+      "required_future_gates": [
+        "guardian_runtime_authority_approval",
+        "evidence_and_rollback_gate"
+      ],
+      "notes": "Worker review intent requires explicit Guardian-authority gate."
+    },
+    {
+      "intent_id": "request_reenrollment_review",
+      "surface": "workers",
+      "intent_category": "worker_control",
+      "required_future_gates": [
+        "guardian_runtime_authority_approval",
+        "evidence_and_rollback_gate"
+      ],
+      "notes": "Re-enrollment review cannot move past planning while gates are unresolved."
+    },
+    {
+      "intent_id": "approve_connector_oauth_mock",
+      "surface": "approvals",
+      "intent_category": "approval_intent",
+      "required_future_gates": [
+        "approval_token_lineage",
+        "connector_authority_approval"
+      ],
+      "notes": "Future connector runtime enabling remains token-lineage and connector-authority gated."
+    },
+    {
+      "intent_id": "issue_live_approval_token",
+      "surface": "approvals",
+      "intent_category": "approval_intent",
+      "required_future_gates": [
+        "approval_token_lineage",
+        "evidence_and_rollback_gate"
+      ],
+      "notes": "No live token issue is allowed in this phase."
+    },
+    {
+      "intent_id": "record_runtime_settings_notes",
+      "surface": "runtime_settings",
+      "intent_category": "metadata_control",
+      "required_future_gates": [
+        "evidence_and_rollback_gate"
+      ],
+      "notes": "Runtime seat notes are metadata-only with rollback/evidence constraints."
+    },
+    {
+      "intent_id": "open_runbook_from_task",
+      "surface": "runbooks",
+      "intent_category": "ops_guidance",
+      "required_future_gates": [
+        "evidence_and_rollback_gate"
+      ],
+      "notes": "Even runbook actions must stay in documented/fail-closed mode until gates pass."
+    }
+  ],
+  "runtime_boundaries": {
+    "frontend_routes_added": false,
+    "interactive_action_controls_added": false,
+    "runtime_execution_added": false,
+    "model_provider_calls_added": false,
+    "connector_reads_or_writes_added": false,
+    "connector_oauth_added": false,
+    "webhook_handling_added": false,
+    "worker_dispatch_added": false,
+    "customer_system_mutation_added": false,
+    "tenant_switching_added": false,
+    "credential_or_secret_access_added": false,
+    "persistence_mutation_added": false,
+    "production_deployment_added": false,
+    "browser_network_file_device_robotics_behavior_added": false
+  },
+  "validation_commands": [
+    "python -B -m pytest -q tests/test_arc_bot_phase1_runtime_authority_gating.py -p no:cacheprovider --basetemp=.pytest-arc-runtime-authority-gating",
+    "python -B -m phase1_runtime_authority_gating.gating --compact",
+    "python -B -m json.tool tests/fixtures/arc_bot_phase1_runtime_authority_gating_packet.json"
+  ]
+}

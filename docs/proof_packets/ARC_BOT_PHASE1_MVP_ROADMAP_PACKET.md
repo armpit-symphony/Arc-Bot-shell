@@ -15,6 +15,7 @@ locked to preview-only authority and contracts-first assumptions.
 - Proof packet references:
   - `docs/proof_packets/ARC_BOT_PHASE1_BUSINESS_INVENTORY_PROOF_PACKET.md`
   - `docs/proof_packets/ARC_BOT_PHASE1_CLIENT_CONFIGURATION_NO_EXECUTION_PACKET.md`
+  - `docs/proof_packets/ARC_BOT_PHASE1_RUNTIME_AUTHORITY_GATING_PACKET.md`
 - Scope lock and handoff evidence:
   - `docs/ROADMAP.md`
   - `docs/ROADMAP_SCOPE_LOCK_PUNCH_LIST.md`

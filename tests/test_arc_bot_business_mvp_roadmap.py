@@ -30,3 +30,4 @@ def test_business_mvp_roadmap_artifact_exists_and_constrained() -> None:
     assert "planning evidence only" in packet_text
     assert "docs/ROADMAP_PHASE1_BUSINESS_MVP.md" in packet_text
     assert "ARC_BOT_PHASE1_READINESS_BUNDLE_PACKET" in packet_text
+    assert "ARC_BOT_PHASE1_RUNTIME_AUTHORITY_GATING_PACKET" in packet_text

@@ -25,10 +25,12 @@ and scope-lock snapshot outputs for downstream handoff and operator review.
 - `tests/fixtures/arc_bot_runtime_ui_scaffold_phase0_scope_lock_status_snapshot.json`
 - `tests/fixtures/arc_bot_phase1_readiness_bundle_projection.json`
 - `tests/fixtures/arc_bot_phase1_client_configuration_migration_gate_packet.json`
+- `tests/fixtures/arc_bot_phase1_runtime_authority_gating_packet.json`
 - Proof packets:
   - `docs/proof_packets/ARC_BOT_PHASE1_MVP_ROADMAP_PACKET.md`
   - `docs/proof_packets/ARC_BOT_PHASE1_CLIENT_CONFIGURATION_MIGRATION_GATE_PACKET.md`
   - `docs/proof_packets/ARC_BOT_RUNTIME_UI_SCAFFOLD_PHASE0_SCOPE_LOCK_STATUS_SNAPSHOT_PROOF_PACKET.md`
+  - `docs/proof_packets/ARC_BOT_PHASE1_RUNTIME_AUTHORITY_GATING_PACKET.md`
 
 ## Required Gate Posture
 
