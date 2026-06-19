@@ -65,6 +65,7 @@ Lock down runtime scope for the shell user surface so no action path can infer r
 - [x] Add preview contract artifact pinning required shared envelope fields and blocked runtime actions.
 - [x] Add snapshot fixtures for Work Queue and Runtime Settings.
 - [x] Add contract checks that assert no runtime authority in the snapshots.
+- [x] Add operator-overview snapshot schema checks for shell-state envelope completeness.
 - [x] Add a single proof-pack fixture that bundles scope lock, schemas, and snapshot references for read-only scaffold handoff.
   - [x] Add a proof-only adapter payload contract for surface read-only projection (`work_queue`, `runtime_settings`).
   - [x] Add a no-execution preview interface for phase-gated projection rendering.
@@ -79,6 +80,7 @@ Lock down runtime scope for the shell user surface so no action path can infer r
   - [x] Add runtime-consumer handoff proof and validation for phase-2 transfer continuity.
   - [x] Add migration gate tests so runtime authority cannot appear without guardrail updates.
   - [x] Add a preview interface/entrypoint to render the read-only projection for downstream consumers.
+  - [x] Add a runtime-control handoff proof seam and validation checks for UI state transfer.
 
 ## External Reference Alignment
 
