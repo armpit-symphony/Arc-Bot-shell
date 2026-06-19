@@ -34,6 +34,15 @@ from .phase_chain import (
     build_phase0_runtime_ui_scaffold_chain,
     run_phase_chain_preview,
 )
+from .guardian_suite_seam import (
+    EXPECTED_PHASE_GATE_FLAG,
+    EXPECTED_PHASE_GATE_NAME,
+    DEFAULT_PAYLOAD_PATH as GUARDIAN_SUITE_SEAM_PAYLOAD_PATH,
+    GuardianSuiteGateError,
+    GuardianSuitePayloadError,
+    build_guardian_suite_seam_projection,
+    run_guardian_suite_seam_preview,
+)
 
 __all__ = [
     "build_phase0_readonly_projection",
@@ -60,4 +69,11 @@ __all__ = [
     "PhaseChainError",
     "build_phase0_runtime_ui_scaffold_chain",
     "run_phase_chain_preview",
+    "EXPECTED_PHASE_GATE_NAME",
+    "EXPECTED_PHASE_GATE_FLAG",
+    "GUARDIAN_SUITE_SEAM_PAYLOAD_PATH",
+    "GuardianSuiteGateError",
+    "GuardianSuitePayloadError",
+    "build_guardian_suite_seam_projection",
+    "run_guardian_suite_seam_preview",
 ]

@@ -22,6 +22,8 @@ def test_build_phase_chain_projection() -> None:
     assert chain["runtime_authority_blocked"] is True
     assert chain["runtime_execution_blocked"] is True
     assert "phase_markers" in chain
+    assert chain["include_guardian_suite_seam"] is False
+    assert "phase0_guardian_suite_seam" not in chain["phases"]
 
     phases = chain["phases"]
     assert set(phases.keys()) == {
@@ -35,6 +37,19 @@ def test_build_phase_chain_projection() -> None:
     assert phases["phase2_control_consumer"]["runtime_execution_blocked"] is True
 
 
+def test_build_phase_chain_projection_with_guardian_suite_seam() -> None:
+    chain = build_phase0_runtime_ui_scaffold_chain(include_guardian_suite_seam=True)
+    guardian_projection = chain["phases"]["phase0_guardian_suite_seam"]
+
+    assert guardian_projection["artifact_type"] == "guardian_suite_spine_projection"
+    assert guardian_projection["phase"] == chain["phase"]
+    assert guardian_projection["source_reference"] == chain["source_reference"]
+    assert guardian_projection["phase_gate"]["enabled"] is True
+    assert chain["include_guardian_suite_seam"] is True
+
+    assert set(guardian_projection["surfaces"]) == set(chain["surface_bindings"])
+
+
 def test_run_phase_chain_preview_cli_compact() -> None:
     output = io.StringIO()
     with patch("sys.stdout", output):
@@ -44,6 +59,17 @@ def test_run_phase_chain_preview_cli_compact() -> None:
     parsed = json.loads(output.getvalue())
     assert parsed["artifact_type"] == "phase0_runtime_ui_scaffold_phase_chain_projection"
     assert parsed["phase_markers"]["execution_mode"] == "disabled"
+    assert parsed["include_guardian_suite_seam"] is False
+    assert "phase0_guardian_suite_seam" not in parsed["phases"]
+
+    output = io.StringIO()
+    with patch("sys.stdout", output):
+        status = run_phase_chain_preview(["--with-guardian-suite-seam", "--compact"])
+
+    assert status == 0
+    parsed = json.loads(output.getvalue())
+    assert parsed["include_guardian_suite_seam"] is True
+    assert parsed["phases"]["phase0_guardian_suite_seam"]["artifact_type"] == "guardian_suite_spine_projection"
 
 
 def test_phase_chain_surfaces_remain_locked_across_all_phases() -> None:

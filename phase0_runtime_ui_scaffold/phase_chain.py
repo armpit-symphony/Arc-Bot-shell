@@ -13,6 +13,12 @@ from .phase2_runtime_control import (
     Phase2RuntimeControlShapeError,
     build_phase2_runtime_control_projection,
 )
+from .guardian_suite_seam import (
+    GuardianSuiteGateError,
+    GuardianSuitePayloadError,
+    DEFAULT_PAYLOAD_PATH as GUARDIAN_SUITE_SEAM_PAYLOAD_PATH,
+    build_guardian_suite_seam_projection,
+)
 from .read_feed import DEFAULT_CONTRACT_PATH, DEFAULT_PAYLOAD_PATH, build_phase1_read_feed_projection
 from .read_feed import build_phase1_read_feed_runtime_projection
 from .runtime_control_consumer import (
@@ -39,6 +45,8 @@ def build_phase0_runtime_ui_scaffold_chain(
     contract_path: str | Path = DEFAULT_CONTRACT_PATH,
     payload_path: str | Path = DEFAULT_PAYLOAD_PATH,
     include_phase_markers: bool = True,
+    include_guardian_suite_seam: bool = False,
+    guardian_suite_payload_path: str | Path = GUARDIAN_SUITE_SEAM_PAYLOAD_PATH,
 ) -> dict[str, Any]:
     """Build full chain projections for preview-only runtime UI seams."""
 
@@ -58,6 +66,11 @@ def build_phase0_runtime_ui_scaffold_chain(
     control_consumer_projection = build_phase2_runtime_control_consumer_projection(
         control_contract_path=contract_path,
         control_payload_path=payload_path,
+    )
+    guardian_suite_projection = (
+        build_guardian_suite_seam_projection(payload_path=Path(guardian_suite_payload_path))
+        if include_guardian_suite_seam
+        else None
     )
 
     _assert_chain_link(
@@ -84,6 +97,31 @@ def build_phase0_runtime_ui_scaffold_chain(
         control_consumer_projection["runtime_execution_blocked"] is True,
         "Chain requires execution to stay blocked.",
     )
+    if guardian_suite_projection is not None:
+        _assert_chain_link(
+            guardian_suite_projection["phase"] == projection_contract["phase"],
+            "Guardian suite seam and read-feed seam must share the same phase.",
+        )
+        _assert_chain_link(
+            guardian_suite_projection["source_reference"]
+            == projection_contract["source_reference"],
+            "Guardian suite seam must source from app.services.guardian.suite.",
+        )
+        _assert_chain_link(
+            guardian_suite_projection["source_access_mode"]
+            == projection_contract["source_access_mode"],
+            "Guardian suite seam must remain read-only source access.",
+        )
+        _assert_chain_link(
+            set(guardian_suite_projection["surfaces"]).issubset(
+                set(projection_contract["surface_read_paths"].keys())
+            ),
+            "Guardian suite seam surfaces must align with read-feed surfaces.",
+        )
+        _assert_chain_link(
+            bool(guardian_suite_projection["phase_gate"]["enabled"]),
+            "Guardian suite seam must keep its phase gate enabled.",
+        )
     _assert_chain_link(
         set(runtime_projection["surface_bindings"]) == set(consumer_projection["surface_bindings"]),
         "Runtime and consumer surfaces must align.",
@@ -104,6 +142,7 @@ def build_phase0_runtime_ui_scaffold_chain(
         "runtime_execution_blocked": True,
         "source_contract_file": str(contract_path),
         "source_payload_file": str(payload_path),
+        "include_guardian_suite_seam": include_guardian_suite_seam,
         "projection_gate": {
             "name": projection_contract["projection_gate_name"],
             "required": projection_contract["projection_gate_required"],
@@ -118,6 +157,8 @@ def build_phase0_runtime_ui_scaffold_chain(
             "phase2_control_consumer": control_consumer_projection,
         },
     }
+    if guardian_suite_projection is not None:
+        chain["phases"]["phase0_guardian_suite_seam"] = guardian_suite_projection
 
     if include_phase_markers:
         chain["phase_markers"] = {
@@ -150,6 +191,19 @@ def _build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Do not include phase marker metadata.",
     )
+    parser.add_argument(
+        "--with-guardian-suite-seam",
+        action="store_true",
+        help="Include guardian suite seam projection in the preview output.",
+    )
+    parser.add_argument(
+        "--guardian-suite-payload-path",
+        default=str(GUARDIAN_SUITE_SEAM_PAYLOAD_PATH),
+        help=(
+            "Guardian suite payload fixture path "
+            "(defaults to tests/fixtures/arc_bot_guardian_suite_spine_payload.json)"
+        ),
+    )
     parser.add_argument("--compact", action="store_true", help="Emit compact JSON.")
     return parser
 
@@ -163,6 +217,8 @@ def run_phase_chain_preview(argv: list[str] | None = None) -> int:
             contract_path=Path(args.contract_path),
             payload_path=Path(args.payload_path),
             include_phase_markers=not args.no_phase_markers,
+            include_guardian_suite_seam=args.with_guardian_suite_seam,
+            guardian_suite_payload_path=Path(args.guardian_suite_payload_path),
         )
     except (
         OSError,
@@ -172,6 +228,8 @@ def run_phase_chain_preview(argv: list[str] | None = None) -> int:
         Phase2RuntimeControlShapeError,
         Phase2RuntimeControlConsumerError,
         Phase2RuntimeControlConsumerShapeError,
+        GuardianSuitePayloadError,
+        GuardianSuiteGateError,
     ) as err:
         print(f"phase chain preview failed: {err}", file=sys.stderr)
         return 1

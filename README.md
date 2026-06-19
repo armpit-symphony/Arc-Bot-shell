@@ -229,6 +229,7 @@ This repo is currently a roadmap/staging repo for the Arc Bot business worker-bo
   - [overview snapshot schema](docs/contracts/schemas/arc_bot_overview_state.schema.json)
 - [Arc Bot Runtime UI Scaffold Contract Pack](tests/fixtures/arc_bot_runtime_ui_scaffold_contract_pack.json)
 - [Arc Bot Runtime UI Scaffold Adapter Proof Packet](docs/proof_packets/ARC_BOT_RUNTIME_UI_SCAFFOLD_PHASE0_ADAPTER_PROOF_PACKET.md)
+- [Arc Bot Runtime UI Scaffold Guardian Suite Seam Proof Packet](docs/proof_packets/ARC_BOT_RUNTIME_UI_SCAFFOLD_PHASE0_GUARDIAN_SUITE_SEAM_PROOF_PACKET.md)
 - [Arc Bot Reconstruction Docs And Source Map](docs/audits/ARC_BOT_RECONSTRUCTION_DOCS_AND_SOURCE_MAP.md)
 - [Arc Bot Phase-0 Roadmap](docs/ROADMAP.md)
 - Core architecture planning:
@@ -252,10 +253,12 @@ The operator-console foundation defines the first office-worker control-room sur
 - The current shell scope remains documentation-first and fail-closed.
 - Preview entrypoint (no execution): `python -m phase0_runtime_ui_scaffold.preview`.
 - Phase-1 read-feed seam preview: `python -m phase0_runtime_ui_scaffold.read_feed`.
+- Guardian Suite spine seam dry-run (fixture-backed): `python -m phase0_runtime_ui_scaffold.guardian_suite_seam`.
 - Phase-1 runtime consumer preview (for downstream UI/runtime handoff): `python -m phase0_runtime_ui_scaffold.runtime_consumer`.
 - Phase-2 runtime-control seam preview (downstream UI state handoff): `python -m phase0_runtime_ui_scaffold.phase2_runtime_control`.
 - Phase-2 runtime-control consumer handoff preview (for downstream bounded UI control consumer): `python -m phase0_runtime_ui_scaffold.runtime_control_consumer`.
 - End-to-end phase-chain seam preview (preview -> runtime consumer -> control handoff -> control consumer): `python -m phase0_runtime_ui_scaffold.phase_chain`.
+- Include guardian-suite seam summary in phase-chain preview: `python -m phase0_runtime_ui_scaffold.phase_chain --with-guardian-suite-seam`.
 
 ## Reference Context (For Next Phase)
 

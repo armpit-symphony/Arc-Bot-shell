@@ -1,0 +1,91 @@
+{
+  "payload_id": "arc_bot_guardian_suite_spine_payload_v1",
+  "payload_type": "guardian_suite_spine_payload",
+  "artifact_type": "guardian_suite_spine_payload",
+  "api_status": "CANDIDATE_ONLY",
+  "phase": "phase-1",
+  "projection_scope": "read_only",
+  "source_reference": "app.services.guardian.suite",
+  "source_access_mode": "read_only",
+  "runtime_authority_enabled": false,
+  "runtime_authority_required_for_execution": true,
+  "phase_gate_name": "RUNTIME_UI_SCAFFOLD_PHASE1_FEED",
+  "phase_gate_required": true,
+  "phase_gate_flag": "runtime_ui_scaffold_guardian_suite_readonly",
+  "ingested_at": "2026-06-19T09:30:00Z",
+  "spine_sources": [
+    "guardian_spine_tasks",
+    "guardian_spine_events",
+    "guardian_spine_approvals",
+    "guardian_spine_projects"
+  ],
+  "spine_source_records": {
+    "guardian_spine_tasks": [
+      {
+        "task_id": "wq-001",
+        "surface": "work_queue",
+        "risk_tier": "medium",
+        "execution_mode": "plan_only",
+        "updated_at": "2026-06-19T09:15:00Z"
+      },
+      {
+        "task_id": "wq-002",
+        "surface": "work_queue",
+        "risk_tier": "low",
+        "execution_mode": "draft_only",
+        "updated_at": "2026-06-19T09:16:00Z"
+      },
+      {
+        "task_id": "ov-003",
+        "surface": "overview",
+        "risk_tier": "medium",
+        "execution_mode": "plan_only",
+        "updated_at": "2026-06-19T09:17:00Z"
+      }
+    ],
+    "guardian_spine_events": [
+      {
+        "event_id": "ev-1001",
+        "surface": "work_queue",
+        "event_type": "dispatch_blocked",
+        "updated_at": "2026-06-19T09:10:00Z"
+      },
+      {
+        "event_id": "ev-1002",
+        "surface": "overview",
+        "event_type": "runtime_status_snapshot",
+        "updated_at": "2026-06-19T09:11:00Z"
+      }
+    ],
+    "guardian_spine_approvals": [
+      {
+        "approval_id": "ap-9001",
+        "surface": "work_queue",
+        "state": "pending",
+        "updated_at": "2026-06-19T09:09:00Z"
+      },
+      {
+        "approval_id": "ap-9002",
+        "surface": "overview",
+        "state": "blocked_without_evidence",
+        "updated_at": "2026-06-19T09:12:00Z"
+      }
+    ],
+    "guardian_spine_projects": [
+      {
+        "project_id": "rs-300",
+        "surface": "runtime_settings",
+        "selected_route": "arc-bot-local-planned",
+        "status": "blocked",
+        "updated_at": "2026-06-19T09:08:00Z"
+      },
+      {
+        "project_id": "ov-400",
+        "surface": "overview",
+        "selected_route": "summary-only",
+        "status": "review_required",
+        "updated_at": "2026-06-19T09:13:00Z"
+      }
+    ]
+  }
+}
