@@ -100,7 +100,8 @@ Lock down runtime scope for the shell user surface so no action path can infer r
 - [x] Align Phase-1 inventory contract with formal schema and downstream consumer tests.
 - [x] Add evidence packet tying business inventory snapshot to migration gates.
 - [x] Define client configuration schema and no-execution skeleton plan.
-- [ ] Prepare first business MVP roadmap from approved planning artifacts.
+- [x] Prepare first business MVP roadmap from approved planning artifacts:
+  - [Arc Bot Business MVP Roadmap (Phase-1 Candidate)](ROADMAP_PHASE1_BUSINESS_MVP.md).
 
 ## External Reference Alignment
 

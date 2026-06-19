@@ -1,0 +1,111 @@
+{
+  "packet_id": "arc_bot_phase1_client_configuration_migration_gate_packet_v1",
+  "api_status": "CANDIDATE_ONLY",
+  "artifact_version": "phase-1",
+  "source_client_configuration_fixture": "tests/fixtures/arc_bot_phase1_client_configuration.json",
+  "schema_ref": "docs/contracts/schemas/arc_bot_client_configuration.schema.json",
+  "proof_packet_ref": "docs/proof_packets/ARC_BOT_PHASE1_CLIENT_CONFIGURATION_MIGRATION_GATE_PACKET.md",
+  "projection_ref": "phase1_client_configuration.configuration",
+  "migration_gates": [
+    {
+      "gate_id": "client_configuration_shape_gate",
+      "required": true,
+      "requires_guardian_review": true,
+      "requires_evidence_ref": true,
+      "requires_rollback_metadata": true,
+      "future_implementation_approval_required": true,
+      "allowed_now": [
+        "schema_review",
+        "fixture_review",
+        "topology_review",
+        "policy_reference_review",
+        "evidence_reference_review"
+      ],
+      "blocked_runtime_actions": [
+        "frontend_route_activation",
+        "interactive_action_controls_activation",
+        "runtime_execution",
+        "provider_model_calls",
+        "connector_oauth",
+        "connector_live_read",
+        "connector_live_write",
+        "webhook_handling",
+        "worker_dispatch",
+        "customer_system_mutation",
+        "persistence_mutation",
+        "production_deployment"
+      ],
+      "required_forwards": [
+        "docs/contracts/schemas/arc_bot_client_configuration.schema.json",
+        "tests/fixtures/arc_bot_phase1_client_configuration.json"
+      ]
+    },
+    {
+      "gate_id": "tenant_and_boundary_gate",
+      "required": true,
+      "requires_guardian_review": true,
+      "requires_evidence_ref": true,
+      "requires_rollback_metadata": true,
+      "future_implementation_approval_required": true,
+      "allowed_now": [
+        "single_tenant_boundary_review",
+        "customer_context_review",
+        "cross_tenant_memory_block_review"
+      ],
+      "blocked_runtime_actions": [
+        "tenant_switching",
+        "customer_data_write",
+        "customer_system_mutation"
+      ],
+      "required_forwards": [
+        "tests/fixtures/arc_bot_phase1_client_configuration.json"
+      ]
+    },
+    {
+      "gate_id": "runtime_authority_stop_gate",
+      "required": true,
+      "requires_guardian_review": true,
+      "requires_evidence_ref": true,
+      "requires_rollback_metadata": true,
+      "future_implementation_approval_required": true,
+      "allowed_now": [
+        "static_review_only",
+        "projection_review"
+      ],
+      "blocked_runtime_actions": [
+        "runtime_execution",
+        "connector_live_read",
+        "provider_model_calls",
+        "worker_dispatch"
+      ],
+      "required_forwards": [
+        "docs/contracts/schemas/arc_bot_client_configuration.schema.json"
+      ]
+    }
+  ],
+  "runtime_boundaries": {
+    "frontend_routes_added": false,
+    "interactive_action_controls_added": false,
+    "runtime_execution_added": false,
+    "model_provider_calls_added": false,
+    "connector_reads_or_writes_added": false,
+    "connector_oauth_added": false,
+    "webhook_handling_added": false,
+    "worker_dispatch_added": false,
+    "customer_system_mutation_added": false,
+    "tenant_switching_added": false,
+    "credential_or_secret_access_added": false,
+    "persistence_added": false,
+    "browser_network_file_device_robotics_behavior_added": false,
+    "production_ready": false,
+    "product_ready": false
+  },
+  "validation_commands": [
+    "python -B -m pytest -q tests/test_arc_bot_phase1_client_configuration_no_execution.py -p no:cacheprovider --basetemp=.pytest-arc-client-config",
+    "python -B -m pytest -q tests/test_arc_bot_phase1_client_configuration_projection.py -p no:cacheprovider --basetemp=.pytest-arc-client-config-projection",
+    "python -B -m pytest -q tests/test_arc_bot_phase1_client_configuration_contracts.py -p no:cacheprovider --basetemp=.pytest-arc-client-config-contracts",
+    "python -B -m json.tool tests/fixtures/arc_bot_phase1_client_configuration.json",
+    "python -B -m json.tool tests/fixtures/arc_bot_phase1_client_configuration_migration_gate_packet.json",
+    "python -B -m json.tool docs/contracts/schemas/arc_bot_client_configuration.schema.json"
+  ]
+}

@@ -76,10 +76,20 @@ without wiring it in this phase.
   - `tests/fixtures/arc_bot_runtime_ui_scaffold_phase0_scope_lock_status_snapshot.json`
   before downstream handoff.
 
+## Phase-0 Scope Lock (This Turn)
+
+- [x] Confirm all source references resolve to `app.services.guardian.suite` with
+  `read_only` access mode.
+- [x] Confirm all runtime/action surfaces are preview-only (`overview`,
+  `work_queue`, `runtime_settings`).
+- [x] Confirm no connector writes, model calls, worker dispatch, or persistence
+  behavior exists in this phase.
+- [x] Confirm deterministic proof artifacts and one-shot tests are present.
+
 ## Exit Criteria for Scope Lock
 
 - [x] Scope lock language and gates exist in docs, contracts, and projections.
 - [x] No runtime authority is enabled in projection outputs.
 - [x] Seams are present only as read-only, fail-closed fixtures with explicit
   off-by-default stage-inclusion behavior in phase-chain.
-- [x] Deterministic full-chain handoff artifact exists (next action).
+- [x] Deterministic full-chain handoff artifact exists.

@@ -1,0 +1,466 @@
+{
+  "artifact_id": "arc_bot_phase1_readiness_bundle_v1",
+  "artifact_type": "phase1_readiness_bundle_projection",
+  "phase": "phase-1",
+  "phase_gate": {
+    "enabled": true,
+    "flag": "arc_bot_phase1_readiness_bundle",
+    "name": "ARC_BOT_PHASE1_READINESS_BUNDLE",
+    "required": true
+  },
+  "projection_scope": "planning_read_only",
+  "projections": {
+    "business_inventory": {
+      "artifact_id": "arc_bot_phase1_business_shell_inventory_v1",
+      "artifact_type": "phase1_business_shell_inventory_projection",
+      "phase": "phase-1",
+      "phase_gate": {
+        "enabled": true,
+        "flag": "arc_bot_business_inventory_read_only_planning",
+        "name": "ARC_BOT_PHASE1_BUSINESS_INVENTORY",
+        "required": true
+      },
+      "projection_scope": "planning_read_only",
+      "runtime_authority_blocked": true,
+      "runtime_execution_blocked": true,
+      "source_access_mode": "docs_only"
+    },
+    "client_configuration": {
+      "artifact_id": "arc_bot_phase1_client_configuration_v1",
+      "artifact_type": "phase1_client_configuration_projection",
+      "phase": "phase-1",
+      "phase_gate": {
+        "enabled": true,
+        "flag": "arc_bot_client_configuration_docs_only",
+        "name": "ARC_BOT_PHASE1_CLIENT_CONFIGURATION",
+        "required": true
+      },
+      "projection_scope": "planning_read_only",
+      "runtime_authority_blocked": true,
+      "runtime_execution_blocked": true,
+      "source_access_mode": "read_only"
+    },
+    "phase0_scope_lock_status_snapshot": {
+      "artifact_version": "phase-1",
+      "phase1": {
+        "read_feed_contract": {
+          "artifact_id": "arc_bot_runtime_ui_scaffold_phase1_read_feed_contract_v1",
+          "artifact_type": "read_feed_contract",
+          "phase": "phase-1",
+          "projection_scope": "read_only",
+          "source_access_mode": "read_only",
+          "source_reference": "app.services.guardian.suite",
+          "spine_sources": [
+            "guardian_spine_approvals",
+            "guardian_spine_events",
+            "guardian_spine_projects",
+            "guardian_spine_tasks"
+          ],
+          "surface_read_paths": [
+            "overview",
+            "runtime_settings",
+            "work_queue"
+          ]
+        },
+        "read_feed_runtime": {
+          "artifact_id": "arc_bot_runtime_ui_scaffold_phase1_read_feed_contract_v1",
+          "artifact_type": "phase1_read_feed_runtime_projection",
+          "phase": "phase-1",
+          "phase_gate": {
+            "enabled": true,
+            "name": "RUNTIME_UI_SCAFFOLD_PHASE1_FEED",
+            "required": true
+          },
+          "projection_scope": "read_only",
+          "source_access_mode": "read_only",
+          "source_reference": "app.services.guardian.suite",
+          "spine_sources": [
+            "guardian_spine_approvals",
+            "guardian_spine_events",
+            "guardian_spine_projects",
+            "guardian_spine_tasks"
+          ],
+          "surface_bindings": [
+            "overview",
+            "runtime_settings",
+            "work_queue"
+          ],
+          "surfaces": {
+            "overview": {
+              "projection_mode": "read_only"
+            },
+            "runtime_settings": {
+              "projection_mode": "read_only"
+            },
+            "work_queue": {
+              "projection_mode": "read_only"
+            }
+          }
+        },
+        "runtime_consumer": {
+          "artifact_id": "arc_bot_runtime_ui_scaffold_phase1_read_feed_contract_v1",
+          "artifact_type": "phase1_runtime_ui_consumer_projection",
+          "phase": "phase-1",
+          "phase_gate": {
+            "enabled": true,
+            "name": "RUNTIME_UI_SCAFFOLD_PHASE1_FEED",
+            "required": true
+          },
+          "projection_scope": "read_only",
+          "projection_source_file": "tests/fixtures/arc_bot_runtime_ui_scaffold_phase1_read_feed_contract.json",
+          "runtime_authority_blocked": true,
+          "source_access_mode": "read_only",
+          "source_reference": "app.services.guardian.suite",
+          "spine_source_records": {
+            "guardian_spine_approvals": 1,
+            "guardian_spine_events": 1,
+            "guardian_spine_projects": 1,
+            "guardian_spine_tasks": 2
+          },
+          "spine_sources": [
+            "guardian_spine_approvals",
+            "guardian_spine_events",
+            "guardian_spine_projects",
+            "guardian_spine_tasks"
+          ],
+          "surface_bindings": [
+            "overview",
+            "runtime_settings",
+            "work_queue"
+          ],
+          "surfaces": {
+            "overview": {
+              "projection_mode": "read_only",
+              "status": "review_required"
+            },
+            "runtime_settings": {
+              "projection_mode": "read_only",
+              "status": "rendered"
+            },
+            "work_queue": {
+              "projection_mode": "read_only",
+              "status": "review_required"
+            }
+          }
+        }
+      },
+      "phase2": {
+        "runtime_control": {
+          "artifact_id": "arc_bot_runtime_ui_scaffold_phase1_read_feed_contract_v1",
+          "artifact_type": "phase2_runtime_control_handoff_projection",
+          "handoff_metadata": {
+            "authority_mode": "blocked",
+            "handoff_mode": "downstream_ui_state",
+            "ingested_from": "phase1_runtime_ui_consumer_projection",
+            "projection_gate": "RUNTIME_UI_SCAFFOLD_PHASE1_FEED"
+          },
+          "phase": "phase-1",
+          "phase_gate": {
+            "enabled": true,
+            "name": "RUNTIME_UI_SCAFFOLD_PHASE1_FEED",
+            "required": true
+          },
+          "projection_bindings": [
+            "guardian_spine_approvals",
+            "guardian_spine_events",
+            "guardian_spine_projects",
+            "guardian_spine_tasks"
+          ],
+          "projection_scope": "read_only",
+          "projection_source": "phase1_runtime_ui_consumer_projection",
+          "runtime_authority_blocked": true,
+          "source_access_mode": "read_only",
+          "source_reference": "app.services.guardian.suite",
+          "spine_source_record_counts": {
+            "guardian_spine_approvals": 1,
+            "guardian_spine_events": 1,
+            "guardian_spine_projects": 1,
+            "guardian_spine_tasks": 2
+          },
+          "surface_bindings": [
+            "overview",
+            "runtime_settings",
+            "work_queue"
+          ],
+          "surfaces": {
+            "overview": {
+              "projection_mode": "read_only",
+              "runtime_authority_blocked": true,
+              "runtime_execution_blocked": true,
+              "status": "review_required"
+            },
+            "runtime_settings": {
+              "projection_mode": "read_only",
+              "runtime_authority_blocked": true,
+              "runtime_execution_blocked": true,
+              "status": "rendered"
+            },
+            "work_queue": {
+              "projection_mode": "read_only",
+              "runtime_authority_blocked": true,
+              "runtime_execution_blocked": true,
+              "status": "review_required"
+            }
+          }
+        },
+        "runtime_control_consumer": {
+          "artifact_id": "arc_bot_runtime_ui_scaffold_phase1_read_feed_contract_v1",
+          "artifact_type": "phase2_runtime_control_ui_consumer_projection",
+          "consumer_metadata": {
+            "authority_mode": "blocked",
+            "consumer_mode": "read_only",
+            "execution_allowed": false,
+            "handoff_mode": "ui_state",
+            "ingested_from": "phase1_runtime_ui_consumer_projection",
+            "projection_gate": "RUNTIME_UI_SCAFFOLD_PHASE1_FEED"
+          },
+          "phase": "phase-1",
+          "phase_gate": {
+            "enabled": true,
+            "name": "RUNTIME_UI_SCAFFOLD_PHASE1_FEED",
+            "required": true
+          },
+          "projection_bindings": [
+            "guardian_spine_approvals",
+            "guardian_spine_events",
+            "guardian_spine_projects",
+            "guardian_spine_tasks"
+          ],
+          "projection_scope": "read_only",
+          "projection_source": "phase2_runtime_control_handoff_projection",
+          "runtime_authority_blocked": true,
+          "runtime_execution_blocked": true,
+          "source_access_mode": "read_only",
+          "source_reference": "app.services.guardian.suite",
+          "surface_bindings": [
+            "overview",
+            "runtime_settings",
+            "work_queue"
+          ],
+          "surface_summary": {
+            "blocked_runtime_actions": [
+              "adjust_model_route",
+              "approve_without_evidence",
+              "customer_system_mutation",
+              "dispatch_to_worker",
+              "modify_worker_states",
+              "perform_live_inference",
+              "persist_queue_to_customer_system",
+              "persist_runtime_payload",
+              "provider_model_calls",
+              "runtime_route_mutation",
+              "send_external_messages",
+              "store_provider_tokens",
+              "tool_execution"
+            ],
+            "spine_sources": [
+              "guardian_spine_approvals",
+              "guardian_spine_events",
+              "guardian_spine_projects",
+              "guardian_spine_tasks"
+            ]
+          },
+          "surfaces": {
+            "overview": {
+              "projection_mode": "read_only",
+              "runtime_authority_blocked": true,
+              "runtime_execution_blocked": true,
+              "status": "review_required"
+            },
+            "runtime_settings": {
+              "projection_mode": "read_only",
+              "runtime_authority_blocked": true,
+              "runtime_execution_blocked": true,
+              "status": "rendered"
+            },
+            "work_queue": {
+              "projection_mode": "read_only",
+              "runtime_authority_blocked": true,
+              "runtime_execution_blocked": true,
+              "status": "review_required"
+            }
+          }
+        }
+      },
+      "phase_chain": {
+        "artifact_id": "arc_bot_runtime_ui_scaffold_phase1_read_feed_contract_v1",
+        "artifact_type": "phase0_runtime_ui_scaffold_phase_chain_projection",
+        "include_guardian_suite_seam": true,
+        "phase": "phase-1",
+        "phase_markers": {
+          "authority_mode": "blocked",
+          "execution_mode": "disabled",
+          "phase1": {
+            "name": "read_feed_and_runtime_projection"
+          },
+          "phase2": {
+            "name": "runtime_control_seam"
+          }
+        },
+        "phases": {
+          "phase0_guardian_suite_seam": {
+            "artifact_id": "arc_bot_guardian_suite_spine_projection_v1",
+            "artifact_type": "guardian_suite_spine_projection",
+            "payload_id": "arc_bot_guardian_suite_spine_payload_v1",
+            "payload_type": "guardian_suite_spine_payload",
+            "phase": "phase-1",
+            "phase_gate": {
+              "enabled": true,
+              "flag": "runtime_ui_scaffold_guardian_suite_readonly",
+              "name": "RUNTIME_UI_SCAFFOLD_PHASE1_FEED",
+              "required": true
+            },
+            "projection_scope": "read_only",
+            "source_access_mode": "read_only",
+            "source_reference": "app.services.guardian.suite",
+            "spine_record_counts": {
+              "guardian_spine_approvals": 2,
+              "guardian_spine_events": 2,
+              "guardian_spine_projects": 2,
+              "guardian_spine_tasks": 3
+            },
+            "spine_sources": [
+              "guardian_spine_tasks",
+              "guardian_spine_events",
+              "guardian_spine_approvals",
+              "guardian_spine_projects"
+            ]
+          },
+          "phase1_read_feed_contract": {
+            "artifact_id": "arc_bot_runtime_ui_scaffold_phase1_read_feed_contract_v1",
+            "artifact_type": "read_feed_contract",
+            "phase": "phase-1",
+            "projection_scope": "read_only",
+            "source_access_mode": "read_only",
+            "source_reference": "app.services.guardian.suite",
+            "spine_sources": [
+              "guardian_spine_approvals",
+              "guardian_spine_events",
+              "guardian_spine_projects",
+              "guardian_spine_tasks"
+            ]
+          },
+          "phase1_read_feed_runtime": {
+            "artifact_id": "arc_bot_runtime_ui_scaffold_phase1_read_feed_contract_v1",
+            "artifact_type": "phase1_read_feed_runtime_projection",
+            "payload_id": "arc_bot_runtime_ui_scaffold_phase1_read_feed_payload_v1",
+            "payload_type": "read_feed_payload",
+            "phase": "phase-1",
+            "phase_gate": {
+              "enabled": true,
+              "name": "RUNTIME_UI_SCAFFOLD_PHASE1_FEED",
+              "required": true
+            },
+            "projection_scope": "read_only",
+            "source_access_mode": "read_only",
+            "source_reference": "app.services.guardian.suite",
+            "spine_sources": [
+              "guardian_spine_approvals",
+              "guardian_spine_events",
+              "guardian_spine_projects",
+              "guardian_spine_tasks"
+            ],
+            "surface_bindings": [
+              "overview",
+              "runtime_settings",
+              "work_queue"
+            ]
+          },
+          "phase1_runtime_consumer": {
+            "artifact_id": "arc_bot_runtime_ui_scaffold_phase1_read_feed_contract_v1",
+            "artifact_type": "phase1_runtime_ui_consumer_projection",
+            "payload_id": "arc_bot_runtime_ui_scaffold_phase1_read_feed_payload_v1",
+            "phase": "phase-1",
+            "phase_gate": {
+              "enabled": true,
+              "name": "RUNTIME_UI_SCAFFOLD_PHASE1_FEED",
+              "required": true
+            },
+            "projection_scope": "read_only",
+            "runtime_authority_blocked": true,
+            "source_access_mode": "read_only",
+            "source_reference": "app.services.guardian.suite",
+            "spine_sources": [
+              "guardian_spine_approvals",
+              "guardian_spine_events",
+              "guardian_spine_projects",
+              "guardian_spine_tasks"
+            ],
+            "surface_bindings": [
+              "overview",
+              "runtime_settings",
+              "work_queue"
+            ]
+          },
+          "phase2_control": {
+            "artifact_id": "arc_bot_runtime_ui_scaffold_phase1_read_feed_contract_v1",
+            "artifact_type": "phase2_runtime_control_handoff_projection",
+            "phase": "phase-1",
+            "phase_gate": {
+              "enabled": true,
+              "name": "RUNTIME_UI_SCAFFOLD_PHASE1_FEED",
+              "required": true
+            },
+            "projection_bindings": [
+              "guardian_spine_approvals",
+              "guardian_spine_events",
+              "guardian_spine_projects",
+              "guardian_spine_tasks"
+            ],
+            "projection_scope": "read_only",
+            "runtime_authority_blocked": true,
+            "source_access_mode": "read_only",
+            "source_reference": "app.services.guardian.suite",
+            "surface_bindings": [
+              "overview",
+              "runtime_settings",
+              "work_queue"
+            ]
+          },
+          "phase2_control_consumer": {
+            "artifact_id": "arc_bot_runtime_ui_scaffold_phase1_read_feed_contract_v1",
+            "artifact_type": "phase2_runtime_control_ui_consumer_projection",
+            "phase": "phase-1",
+            "phase_gate": {
+              "enabled": true,
+              "name": "RUNTIME_UI_SCAFFOLD_PHASE1_FEED",
+              "required": true
+            },
+            "projection_bindings": [
+              "guardian_spine_approvals",
+              "guardian_spine_events",
+              "guardian_spine_projects",
+              "guardian_spine_tasks"
+            ],
+            "projection_scope": "read_only",
+            "runtime_authority_blocked": true,
+            "runtime_execution_blocked": true,
+            "source_access_mode": "read_only",
+            "source_reference": "app.services.guardian.suite",
+            "surface_bindings": [
+              "overview",
+              "runtime_settings",
+              "work_queue"
+            ]
+          }
+        },
+        "projection_scope": "read_only",
+        "runtime_authority_blocked": true,
+        "runtime_execution_blocked": true,
+        "source_access_mode": "read_only",
+        "source_reference": "app.services.guardian.suite",
+        "surface_bindings": [
+          "overview",
+          "runtime_settings",
+          "work_queue"
+        ]
+      },
+      "projection_source_reference": "app.services.guardian.suite",
+      "snapshot_id": "arc_bot_runtime_ui_scaffold_phase0_scope_lock_status_snapshot_v1",
+      "source_access_mode": "read_only"
+    }
+  },
+  "runtime_authority_blocked": true,
+  "runtime_execution_blocked": true,
+  "source_access_mode": "read_only"
+}

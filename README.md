@@ -239,8 +239,12 @@ This repo is currently a roadmap/staging repo for the Arc Bot business worker-bo
 - [Arc Bot Runtime UI Scaffold Guardian Suite Seam Proof Packet](docs/proof_packets/ARC_BOT_RUNTIME_UI_SCAFFOLD_PHASE0_GUARDIAN_SUITE_SEAM_PROOF_PACKET.md)
 - [Arc Bot Runtime UI Scaffold Scope-Lock Status Snapshot Proof Packet](docs/proof_packets/ARC_BOT_RUNTIME_UI_SCAFFOLD_PHASE0_SCOPE_LOCK_STATUS_SNAPSHOT_PROOF_PACKET.md)
 - [Arc Bot Phase-1 Client Configuration No-Execution Packet](docs/proof_packets/ARC_BOT_PHASE1_CLIENT_CONFIGURATION_NO_EXECUTION_PACKET.md)
+- [Arc Bot Phase-1 Client Configuration Migration Gate Packet](docs/proof_packets/ARC_BOT_PHASE1_CLIENT_CONFIGURATION_MIGRATION_GATE_PACKET.md)
+- [Arc Bot Phase-1 Business MVP Roadmap Packet](docs/proof_packets/ARC_BOT_PHASE1_MVP_ROADMAP_PACKET.md)
+- [Arc Bot Phase-1 Readiness Bundle Packet](docs/proof_packets/ARC_BOT_PHASE1_READINESS_BUNDLE_PACKET.md)
 - [Arc Bot Phase-1 Business Inventory Proof Packet](docs/proof_packets/ARC_BOT_PHASE1_BUSINESS_INVENTORY_PROOF_PACKET.md)
 - [Arc Bot Phase-1 Business Inventory Migration Gate Packet](docs/proof_packets/ARC_BOT_PHASE1_BUSINESS_INVENTORY_MIGRATION_GATE_PACKET.md)
+- [Arc Bot Phase-1 Business MVP Roadmap](docs/ROADMAP_PHASE1_BUSINESS_MVP.md)
 - [Arc Bot Runtime UI Scope Lock Punch List](docs/ROADMAP_SCOPE_LOCK_PUNCH_LIST.md)
 - [Arc Bot Reconstruction Docs And Source Map](docs/audits/ARC_BOT_RECONSTRUCTION_DOCS_AND_SOURCE_MAP.md)
 - [Arc Bot Phase-0 Roadmap](docs/ROADMAP.md)
@@ -272,9 +276,12 @@ The operator-console foundation defines the first office-worker control-room sur
 - End-to-end phase-chain seam preview (preview -> runtime consumer -> control handoff -> control consumer): `python -m phase0_runtime_ui_scaffold.phase_chain`.
 - Include guardian-suite seam summary in phase-chain preview: `python -m phase0_runtime_ui_scaffold.phase_chain --with-guardian-suite-seam`.
 - Emit read-only Phase-1 business inventory preview: `python -m phase1_business_shell_inventory.inventory`.
+- Emit read-only Phase-1 client configuration preview: `python -m phase1_client_configuration.configuration`.
+- Emit read-only Phase-1 readiness bundle: `python -m phase1_readiness.bundle`.
 - Emit canonical scope-lock status snapshot artifact: `python -m phase0_runtime_ui_scaffold.phase_chain --emit-status-snapshot --with-guardian-suite-seam`.
 - Emit and write canonical snapshot artifact: `python -m phase0_runtime_ui_scaffold.phase_chain --emit-status-snapshot --with-guardian-suite-seam --status-snapshot-path tests/fixtures/arc_bot_runtime_ui_scaffold_phase0_scope_lock_status_snapshot.json --compact`.
 - Scope-lock status snapshot fixture assertion: `python -m pytest -q tests/test_arc_bot_runtime_ui_scaffold_phase_chain.py::test_phase_chain_scope_lock_status_snapshot_matches_fixture`.
+- Reproducible local check (bypasses machine temp/cache write issues): `python -m pytest -p no:cacheprovider --basetemp tmp_pytest -q tests/test_arc_bot_runtime_ui_scaffold_phase_chain.py tests/test_arc_bot_runtime_ui_scaffold_guardian_suite_seam.py tests/test_arc_bot_phase0_scope_lock_runtime_ui.py tests/test_arc_bot_runtime_ui_scaffold_contracts.py`.
 
 ## Reference Context (For Next Phase)
 
@@ -318,5 +325,5 @@ The operator-console foundation defines the first office-worker control-room sur
 - [x] Define bot role/persona template schema
 - [x] Create shell wireframes
 - [x] Create no-execution skeleton plan
+- [x] Prepare first business MVP roadmap
 - [ ] Review LIMA Office/LIMA AI OS contract assumptions
-- [ ] Prepare first business MVP roadmap
