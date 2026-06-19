@@ -224,6 +224,8 @@ This repo is currently a roadmap/staging repo for the Arc Bot business worker-bo
 - [Arc Bot Operator Console Foundation](docs/OPERATOR_CONSOLE_FOUNDATION.md)
 - [Arc Bot Operator Console State Contract](docs/contracts/ARC_BOT_OPERATOR_CONSOLE_STATE.md)
 - [Arc Bot Phase-1 Business Inventory Contract](tests/fixtures/arc_bot_phase1_business_inventory.json)
+- [Arc Bot Phase-1 Business Inventory Schema](docs/contracts/schemas/arc_bot_phase1_business_inventory.schema.json)
+- [Arc Bot Phase-1 Business Inventory Wireframes](docs/wireframes/ARC_BOT_PHASE1_BUSINESS_INVENTORY_WIREFRAMES.md)
 - [Arc Bot Runtime UI Schemas](docs/contracts/schemas/arc_bot_console_state_envelope.schema.json)
   - [work queue snapshot schema](docs/contracts/schemas/arc_bot_work_queue_state.schema.json)
   - [runtime settings snapshot schema](docs/contracts/schemas/arc_bot_runtime_settings_state.schema.json)
@@ -233,6 +235,7 @@ This repo is currently a roadmap/staging repo for the Arc Bot business worker-bo
 - [Arc Bot Runtime UI Scaffold Guardian Suite Seam Proof Packet](docs/proof_packets/ARC_BOT_RUNTIME_UI_SCAFFOLD_PHASE0_GUARDIAN_SUITE_SEAM_PROOF_PACKET.md)
 - [Arc Bot Runtime UI Scaffold Scope-Lock Status Snapshot Proof Packet](docs/proof_packets/ARC_BOT_RUNTIME_UI_SCAFFOLD_PHASE0_SCOPE_LOCK_STATUS_SNAPSHOT_PROOF_PACKET.md)
 - [Arc Bot Phase-1 Business Inventory Proof Packet](docs/proof_packets/ARC_BOT_PHASE1_BUSINESS_INVENTORY_PROOF_PACKET.md)
+- [Arc Bot Phase-1 Business Inventory Migration Gate Packet](docs/proof_packets/ARC_BOT_PHASE1_BUSINESS_INVENTORY_MIGRATION_GATE_PACKET.md)
 - [Arc Bot Runtime UI Scope Lock Punch List](docs/ROADMAP_SCOPE_LOCK_PUNCH_LIST.md)
 - [Arc Bot Reconstruction Docs And Source Map](docs/audits/ARC_BOT_RECONSTRUCTION_DOCS_AND_SOURCE_MAP.md)
 - [Arc Bot Phase-0 Roadmap](docs/ROADMAP.md)
@@ -308,7 +311,7 @@ The operator-console foundation defines the first office-worker control-room sur
 - [x] Define connector readiness states
 - [ ] Define client configuration schema
 - [x] Define bot role/persona template schema
-- [ ] Create shell wireframes
+- [x] Create shell wireframes
 - [ ] Create no-execution skeleton plan
 - [ ] Review LIMA Office/LIMA AI OS contract assumptions
 - [ ] Prepare first business MVP roadmap

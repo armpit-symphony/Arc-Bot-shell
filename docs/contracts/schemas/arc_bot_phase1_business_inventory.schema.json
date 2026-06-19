@@ -1,0 +1,176 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/arc-bot/schemas/arc-bot-phase1-business-inventory.schema.json",
+  "title": "Arc Bot Phase-1 Business Inventory",
+  "type": "object",
+  "required": [
+    "artifact_id",
+    "artifact_type",
+    "artifact_version",
+    "artifact_name",
+    "source_reference",
+    "source_access_mode",
+    "phase_gate",
+    "first_customer_role_focus",
+    "business_role_templates",
+    "task_model",
+    "surfaces"
+  ],
+  "properties": {
+    "artifact_id": { "const": "arc_bot_phase1_business_shell_inventory_v1" },
+    "artifact_type": { "const": "phase1_business_shell_inventory_contract" },
+    "artifact_version": { "const": "phase-1" },
+    "artifact_name": { "type": "string", "minLength": 1 },
+    "source_reference": { "const": "docs/OPERATOR_CONSOLE_FOUNDATION.md" },
+    "source_access_mode": { "const": "docs_only" },
+    "phase_gate": {
+      "type": "object",
+      "required": ["name", "required", "flag"],
+      "properties": {
+        "name": { "const": "ARC_BOT_PHASE1_BUSINESS_INVENTORY" },
+        "required": { "const": true },
+        "flag": { "const": "arc_bot_business_inventory_read_only_planning" }
+      },
+      "additionalProperties": false
+    },
+    "first_customer_role_focus": { "type": "string", "minLength": 1 },
+    "business_role_templates": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "role_id",
+          "name",
+          "purpose",
+          "allowed_task_categories",
+          "forbidden_task_categories",
+          "risk_tier",
+          "escalation_path",
+          "persona_notes"
+        ],
+        "properties": {
+          "role_id": { "type": "string", "minLength": 1 },
+          "name": { "type": "string", "minLength": 1 },
+          "purpose": { "type": "string", "minLength": 1 },
+          "allowed_task_categories": {
+            "type": "array",
+            "minItems": 1,
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "forbidden_task_categories": {
+            "type": "array",
+            "minItems": 1,
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "risk_tier": {
+            "type": "string",
+            "enum": ["low", "medium", "high", "critical"]
+          },
+          "escalation_path": { "type": "string", "minLength": 1 },
+          "persona_notes": {
+            "type": "array",
+            "minItems": 1,
+            "items": { "type": "string", "minLength": 1 }
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "task_model": {
+      "type": "object",
+      "required": ["statuses", "execution_modes", "risk_tiers", "approval_labels"],
+      "properties": {
+        "statuses": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "execution_modes": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "risk_tiers": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "approval_labels": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 1 }
+        }
+      },
+      "additionalProperties": false
+    },
+    "surfaces": {
+      "type": "object",
+      "required": [
+        "approvals",
+        "connectors",
+        "evidence",
+        "governance",
+        "guardian",
+        "model_local_readiness",
+        "overview",
+        "runbooks",
+        "runtime_settings",
+        "tasks",
+        "work_queue",
+        "workers"
+      ],
+      "patternProperties": {
+        "^[a-z_]+$": {
+          "type": "object",
+          "required": [
+            "title",
+            "current_state_mode",
+            "runtime_authority_blocked",
+            "required_status_modes",
+            "blocked_runtime_actions",
+            "future_seams",
+            "metadata_actions"
+          ],
+          "properties": {
+            "title": { "type": "string", "minLength": 1 },
+            "current_state_mode": {
+              "type": "string",
+              "enum": [
+                "blocked",
+                "degraded",
+                "display_state_only",
+                "metadata_only",
+                "ready",
+                "review_required"
+              ]
+            },
+            "runtime_authority_blocked": { "const": true },
+            "required_status_modes": {
+              "type": "array",
+              "minItems": 1,
+              "items": { "type": "string", "minLength": 1 }
+            },
+            "blocked_runtime_actions": {
+              "type": "array",
+              "minItems": 1,
+              "items": { "type": "string", "minLength": 1 }
+            },
+            "future_seams": {
+              "type": "array",
+              "minItems": 1,
+              "items": { "type": "string", "minLength": 1 }
+            },
+            "metadata_actions": {
+              "type": "array",
+              "items": { "type": "string", "minLength": 1 }
+            }
+          },
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

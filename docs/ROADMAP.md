@@ -96,9 +96,11 @@ Lock down runtime scope for the shell user surface so no action path can infer r
 - [x] Define evidence and governance readiness requirements.
 - [x] Define connector readiness and tool surface constraints.
 - [x] Define bot role/persona template schema and review posture.
-- [ ] Add phase-1 wireframe artifacts for new inventory surfaces.
-- [ ] Align Phase-1 inventory contract with formal schema and downstream consumer tests.
-- [ ] Add evidence packet tying business inventory snapshot to migration gates.
+- [x] Add phase-1 wireframe artifacts for new inventory surfaces.
+- [x] Align Phase-1 inventory contract with formal schema and downstream consumer tests.
+- [x] Add evidence packet tying business inventory snapshot to migration gates.
+- [ ] Define client configuration schema and no-execution skeleton plan.
+- [ ] Prepare first business MVP roadmap from approved planning artifacts.
 
 ## External Reference Alignment
 
