@@ -6,6 +6,8 @@ Status: Foundation contracts and invariants
 ## Contract Families
 
 - `arc_bot_console_state_envelope.schema.json`
+- `arc_bot_client_configuration.schema.json`
+- `arc_bot_phase1_client_configuration.json`
 - `arc_bot_work_queue_state.schema.json`
 - `arc_bot_runtime_settings_state.schema.json`
 - `arc_bot_overview_state.schema.json`
@@ -14,6 +16,9 @@ Status: Foundation contracts and invariants
 
 ## Required Contract Invariants
 
+- Client configuration contracts must remain `docs_only` and phase-gated.
+- Client configuration contracts must not contain secret values, provider tokens, API keys, OAuth client secrets, or credential material.
+- Client configuration contracts must keep single-tenant assumptions explicit and cross-tenant memory disabled.
 - `projection_scope` must remain `read_only` for Phase-0 runtime UI scaffold modules.
 - `runtime_authority_blocked` must be `true` for all seam outputs.
 - `source_access_mode` must be `read_only`.
@@ -33,6 +38,10 @@ Status: Foundation contracts and invariants
 ### Runtime Settings
 - Metadata and readiness posture only.
 - No model/provider/connector mutation or execution paths.
+
+### Client Configuration
+- Static planning contract for tenant boundary, deployment topology, operator roles, connector posture, policy posture, and evidence requirements.
+- No persistence, connector live I/O, OAuth, webhook handling, credential access, customer-system mutation, tenant switching, or production deployment authority.
 
 ### Overview
 - Operator-level summary and health snapshot preview.

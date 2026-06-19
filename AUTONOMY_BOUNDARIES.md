@@ -8,6 +8,7 @@ Status: Phase-0 guardrails
 - Render contract-validated preview/control seam artifacts.
 - Display blocked, review, and evidence-ready states.
 - Aggregate read-only readiness posture.
+- Review static client configuration metadata and no-execution skeleton constraints.
 
 ## What Arc Bot Shell Must Not Do (Now)
 
@@ -15,6 +16,7 @@ Status: Phase-0 guardrails
 - No automatic remediation.
 - No connector/tool/file/network/robotics actions.
 - No runtime secrets handling.
+- No client configuration persistence, tenant switching, or customer-system mutation.
 
 ## What It May Do (With Explicit Approval in Later Phases)
 

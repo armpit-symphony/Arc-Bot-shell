@@ -1,0 +1,127 @@
+{
+  "artifact_id": "arc_bot_phase1_client_configuration_v1",
+  "artifact_type": "phase1_client_configuration_contract",
+  "artifact_version": "phase-1",
+  "source_access_mode": "docs_only",
+  "phase_gate": {
+    "name": "ARC_BOT_PHASE1_CLIENT_CONFIGURATION",
+    "required": true,
+    "flag": "arc_bot_client_configuration_docs_only"
+  },
+  "tenant_boundary": {
+    "tenant_id": "tenant_demo_arc",
+    "customer_context_id": "customer_context_demo_office",
+    "single_tenant_only": true,
+    "cross_tenant_memory_allowed": false,
+    "customer_data_write_allowed": false,
+    "tenant_switching_allowed": false,
+    "raw_customer_data_storage_allowed": false
+  },
+  "deployment_profile": {
+    "target_topology": "one_supervisor_with_1_to_8_arc_workers",
+    "supervisor_count": 1,
+    "worker_count_min": 1,
+    "worker_count_max": 8,
+    "deployment_status": "planning_only",
+    "production_deployment_allowed": false,
+    "remote_endpoint_touch_allowed": false,
+    "background_service_install_allowed": false
+  },
+  "operator_roles": [
+    {
+      "role_id": "owner_operator",
+      "label": "Owner Operator",
+      "allowed_metadata_actions": [
+        "review_configuration_summary",
+        "record_blocker_note",
+        "link_policy_reference"
+      ],
+      "blocked_actions": [
+        "approve_runtime_action",
+        "enter_secret_material",
+        "enable_connector",
+        "dispatch_worker"
+      ]
+    },
+    {
+      "role_id": "support_operator",
+      "label": "Support Operator",
+      "allowed_metadata_actions": [
+        "review_readiness_state",
+        "open_runbook_reference"
+      ],
+      "blocked_actions": [
+        "change_policy",
+        "execute_remediation",
+        "touch_customer_system",
+        "change_model_route"
+      ]
+    }
+  ],
+  "connector_profiles": [
+    {
+      "connector_id": "email_connector_placeholder",
+      "label": "Email Connector Placeholder",
+      "readiness": "blocked_mvp",
+      "credential_value_allowed": false,
+      "live_read_allowed": false,
+      "live_write_allowed": false,
+      "oauth_flow_allowed": false,
+      "webhook_allowed": false,
+      "metadata_actions": [
+        "record_connector_blocker",
+        "link_future_scope_review"
+      ]
+    },
+    {
+      "connector_id": "ticketing_connector_placeholder",
+      "label": "Ticketing Connector Placeholder",
+      "readiness": "missing_contract",
+      "credential_value_allowed": false,
+      "live_read_allowed": false,
+      "live_write_allowed": false,
+      "oauth_flow_allowed": false,
+      "webhook_allowed": false,
+      "metadata_actions": [
+        "record_connector_blocker",
+        "link_future_consent_review"
+      ]
+    }
+  ],
+  "policy_posture": {
+    "approval_required_for_external_actions": true,
+    "guardian_review_required": true,
+    "breakglass_allowed": false,
+    "secret_material_allowed": false,
+    "policy_refs": [
+      "docs/SECURITY_MODEL.md",
+      "AUTONOMY_BOUNDARIES.md"
+    ]
+  },
+  "runtime_boundaries": {
+    "frontend_routes_added": false,
+    "interactive_action_controls_added": false,
+    "runtime_execution_added": false,
+    "model_provider_calls_added": false,
+    "connector_reads_or_writes_added": false,
+    "worker_dispatch_added": false,
+    "customer_system_mutation_added": false,
+    "credential_or_secret_access_added": false,
+    "persistence_added": false,
+    "browser_network_file_device_robotics_behavior_added": false,
+    "production_deployment_added": false,
+    "product_readiness_claim_added": false
+  },
+  "evidence_requirements": {
+    "policy_refs_required": true,
+    "evidence_refs_required": true,
+    "rollback_refs_required": true,
+    "required_future_gate_refs": [
+      "client_configuration_schema_review",
+      "no_execution_skeleton_review",
+      "guardian_runtime_authority_approval",
+      "connector_authority_approval",
+      "production_readiness_approval"
+    ]
+  }
+}

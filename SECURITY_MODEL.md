@@ -29,6 +29,7 @@ All high-risk actions are blocked by design in this branch. Preview UI artifacts
 ## Attack Surface Reduction
 
 - No credentials are stored in repo/project state.
+- Client configuration fixtures may contain only placeholder metadata and must not contain provider tokens, API keys, OAuth client secrets, refresh tokens, or credential values.
 - No hidden background actions.
 - No external I/O in phase-0 scaffold modules.
 - Strict gate checks on all projection transitions.

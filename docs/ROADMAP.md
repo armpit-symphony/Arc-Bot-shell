@@ -99,7 +99,7 @@ Lock down runtime scope for the shell user surface so no action path can infer r
 - [x] Add phase-1 wireframe artifacts for new inventory surfaces.
 - [x] Align Phase-1 inventory contract with formal schema and downstream consumer tests.
 - [x] Add evidence packet tying business inventory snapshot to migration gates.
-- [ ] Define client configuration schema and no-execution skeleton plan.
+- [x] Define client configuration schema and no-execution skeleton plan.
 - [ ] Prepare first business MVP roadmap from approved planning artifacts.
 
 ## External Reference Alignment

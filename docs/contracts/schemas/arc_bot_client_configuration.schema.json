@@ -1,0 +1,159 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/arc-bot/schemas/arc-bot-client-configuration.schema.json",
+  "title": "Arc Bot Phase-1 Client Configuration",
+  "type": "object",
+  "required": [
+    "artifact_id",
+    "artifact_type",
+    "artifact_version",
+    "source_access_mode",
+    "phase_gate",
+    "tenant_boundary",
+    "deployment_profile",
+    "operator_roles",
+    "connector_profiles",
+    "policy_posture",
+    "runtime_boundaries",
+    "evidence_requirements"
+  ],
+  "properties": {
+    "artifact_id": { "const": "arc_bot_phase1_client_configuration_v1" },
+    "artifact_type": { "const": "phase1_client_configuration_contract" },
+    "artifact_version": { "const": "phase-1" },
+    "source_access_mode": { "const": "docs_only" },
+    "phase_gate": {
+      "type": "object",
+      "required": ["name", "required", "flag"],
+      "properties": {
+        "name": { "const": "ARC_BOT_PHASE1_CLIENT_CONFIGURATION" },
+        "required": { "const": true },
+        "flag": { "const": "arc_bot_client_configuration_docs_only" }
+      },
+      "additionalProperties": false
+    },
+    "tenant_boundary": {
+      "type": "object",
+      "required": [
+        "tenant_id",
+        "customer_context_id",
+        "single_tenant_only",
+        "cross_tenant_memory_allowed",
+        "customer_data_write_allowed"
+      ],
+      "properties": {
+        "tenant_id": { "type": "string", "minLength": 1 },
+        "customer_context_id": { "type": "string", "minLength": 1 },
+        "single_tenant_only": { "const": true },
+        "cross_tenant_memory_allowed": { "const": false },
+        "customer_data_write_allowed": { "const": false }
+      },
+      "additionalProperties": true
+    },
+    "deployment_profile": {
+      "type": "object",
+      "required": [
+        "target_topology",
+        "supervisor_count",
+        "worker_count_min",
+        "worker_count_max",
+        "deployment_status",
+        "production_deployment_allowed"
+      ],
+      "properties": {
+        "target_topology": { "const": "one_supervisor_with_1_to_8_arc_workers" },
+        "supervisor_count": { "const": 1 },
+        "worker_count_min": { "const": 1 },
+        "worker_count_max": { "const": 8 },
+        "deployment_status": { "const": "planning_only" },
+        "production_deployment_allowed": { "const": false }
+      },
+      "additionalProperties": true
+    },
+    "operator_roles": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["role_id", "label", "allowed_metadata_actions", "blocked_actions"],
+        "properties": {
+          "role_id": { "type": "string", "minLength": 1 },
+          "label": { "type": "string", "minLength": 1 },
+          "allowed_metadata_actions": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "blocked_actions": {
+            "type": "array",
+            "minItems": 1,
+            "items": { "type": "string", "minLength": 1 }
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "connector_profiles": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "connector_id",
+          "label",
+          "readiness",
+          "credential_value_allowed",
+          "live_read_allowed",
+          "live_write_allowed",
+          "metadata_actions"
+        ],
+        "properties": {
+          "connector_id": { "type": "string", "minLength": 1 },
+          "label": { "type": "string", "minLength": 1 },
+          "readiness": { "enum": ["blocked_mvp", "missing_contract", "review_required"] },
+          "credential_value_allowed": { "const": false },
+          "live_read_allowed": { "const": false },
+          "live_write_allowed": { "const": false },
+          "metadata_actions": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "policy_posture": {
+      "type": "object",
+      "required": [
+        "approval_required_for_external_actions",
+        "guardian_review_required",
+        "breakglass_allowed",
+        "secret_material_allowed"
+      ],
+      "properties": {
+        "approval_required_for_external_actions": { "const": true },
+        "guardian_review_required": { "const": true },
+        "breakglass_allowed": { "const": false },
+        "secret_material_allowed": { "const": false }
+      },
+      "additionalProperties": true
+    },
+    "runtime_boundaries": {
+      "type": "object",
+      "patternProperties": {
+        "^[a-z_]+$": { "const": false }
+      },
+      "additionalProperties": false
+    },
+    "evidence_requirements": {
+      "type": "object",
+      "required": ["policy_refs_required", "evidence_refs_required", "rollback_refs_required"],
+      "properties": {
+        "policy_refs_required": { "const": true },
+        "evidence_refs_required": { "const": true },
+        "rollback_refs_required": { "const": true }
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": false
+}
