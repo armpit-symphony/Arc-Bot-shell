@@ -44,3 +44,25 @@ def test_run_phase_chain_preview_cli_compact() -> None:
     parsed = json.loads(output.getvalue())
     assert parsed["artifact_type"] == "phase0_runtime_ui_scaffold_phase_chain_projection"
     assert parsed["phase_markers"]["execution_mode"] == "disabled"
+
+
+def test_phase_chain_surfaces_remain_locked_across_all_phases() -> None:
+    chain = build_phase0_runtime_ui_scaffold_chain()
+    expected_surfaces = {"work_queue", "runtime_settings", "overview"}
+
+    assert set(chain["surface_bindings"]) == expected_surfaces
+
+    feed_contract = chain["phases"]["phase1_read_feed_contract"]
+    assert set(feed_contract["surface_read_paths"].keys()) == expected_surfaces
+    assert feed_contract["source_reference"] == "app.services.guardian.suite"
+    assert feed_contract["source_access_mode"] == "read_only"
+    assert feed_contract["projection_scope"] == "read_only"
+
+    assert set(chain["phases"]["phase1_read_feed_runtime"]["surface_bindings"]) == expected_surfaces
+    assert set(chain["phases"]["phase1_runtime_consumer"]["surface_bindings"]) == expected_surfaces
+    assert set(chain["phases"]["phase2_control"]["surface_bindings"]) == expected_surfaces
+    assert set(chain["phases"]["phase2_control_consumer"]["surface_bindings"]) == expected_surfaces
+
+    assert chain["phases"]["phase1_runtime_consumer"]["runtime_authority_blocked"] is True
+    assert chain["phases"]["phase2_control"]["runtime_authority_blocked"] is True
+    assert chain["phases"]["phase2_control_consumer"]["runtime_execution_blocked"] is True
