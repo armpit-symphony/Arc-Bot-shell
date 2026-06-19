@@ -230,6 +230,7 @@ This repo is currently a roadmap/staging repo for the Arc Bot business worker-bo
 - [Arc Bot Runtime UI Scaffold Contract Pack](tests/fixtures/arc_bot_runtime_ui_scaffold_contract_pack.json)
 - [Arc Bot Runtime UI Scaffold Adapter Proof Packet](docs/proof_packets/ARC_BOT_RUNTIME_UI_SCAFFOLD_PHASE0_ADAPTER_PROOF_PACKET.md)
 - [Arc Bot Runtime UI Scaffold Guardian Suite Seam Proof Packet](docs/proof_packets/ARC_BOT_RUNTIME_UI_SCAFFOLD_PHASE0_GUARDIAN_SUITE_SEAM_PROOF_PACKET.md)
+- [Arc Bot Runtime UI Scope Lock Punch List](docs/ROADMAP_SCOPE_LOCK_PUNCH_LIST.md)
 - [Arc Bot Reconstruction Docs And Source Map](docs/audits/ARC_BOT_RECONSTRUCTION_DOCS_AND_SOURCE_MAP.md)
 - [Arc Bot Phase-0 Roadmap](docs/ROADMAP.md)
 - Core architecture planning:
