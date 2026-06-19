@@ -54,10 +54,26 @@ without wiring it in this phase.
 
 - [x] Add a one-shot artifact fixture for the full phase-chain + seam output
   to make handoff to downstream seams deterministic.
-- [ ] Add a phase-0 scope-lock status snapshot test that compares
+- [x] Add a phase-0 scope-lock status snapshot test that compares
   `phase_chain`/`phase1`/`phase2` outputs in a single assertion file.
-- [ ] Add a small execution checklist in project docs for the next operator who
+- [x] Add a small execution checklist in project docs for the next operator who
   inherits this phase boundary.
+
+## Phase-0 Operator Checklist
+
+- [x] Confirm the phase-chain plus phase-1/phase-2 status snapshot fixture passes
+  (`arc_bot_runtime_ui_scaffold_phase0_scope_lock_status_snapshot.json`).
+- [x] Before starting any runtime-control integration work, re-run:
+  - `python -m pytest -q tests/test_arc_bot_runtime_ui_scaffold_phase_chain.py`
+  - `python -m pytest -q tests/test_arc_bot_runtime_ui_scaffold_guardian_suite_seam.py`
+  - `python -m pytest -q tests/test_arc_bot_phase0_scope_lock_runtime_ui.py`
+- [x] Keep `source_reference` fixed to `app.services.guardian.suite`
+  and all `runtime_*_blocked` flags true in all preview/control outputs
+  (`tests/test_arc_bot_runtime_ui_scaffold_phase_chain.py`).
+- [ ] If a phase contract changes, update both:
+  - `tests/fixtures/arc_bot_runtime_ui_scaffold_phase0_scope_lock_chain_packet.json`
+  - `tests/fixtures/arc_bot_runtime_ui_scaffold_phase0_scope_lock_status_snapshot.json`
+  before downstream handoff.
 
 ## Exit Criteria for Scope Lock
 

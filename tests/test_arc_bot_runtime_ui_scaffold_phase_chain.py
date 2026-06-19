@@ -111,12 +111,16 @@ def _compact_projection_for_status_snapshot(projection: dict[str, Any]) -> dict[
         "spine_source_record_counts",
         "surface_summary",
         "phase_gate",
-        "projection_bindings",
         "handoff_metadata",
         "consumer_metadata",
     ]:
         if key in projection:
             value = projection[key]
+            if key == "projection_source_file" and isinstance(value, str):
+                try:
+                    value = str((REPO_ROOT / value).relative_to(REPO_ROOT)).replace("\\", "/")
+                except ValueError:
+                    value = value.replace("\\", "/")
             if key in {"projection_bindings", "surface_bindings", "spine_sources"} and isinstance(
                 value, list
             ):
@@ -135,8 +139,11 @@ def _compact_projection_for_status_snapshot(projection: dict[str, Any]) -> dict[
             surface_projection = surfaces[surface_name]
             compact_surface = {
                 "projection_mode": surface_projection["projection_mode"],
-                "runtime_authority_blocked": surface_projection["runtime_authority_blocked"],
             }
+            if "runtime_authority_blocked" in surface_projection:
+                compact_surface["runtime_authority_blocked"] = surface_projection[
+                    "runtime_authority_blocked"
+                ]
             if "runtime_execution_blocked" in surface_projection:
                 compact_surface["runtime_execution_blocked"] = surface_projection[
                     "runtime_execution_blocked"
@@ -287,3 +294,29 @@ def test_phase_chain_surfaces_remain_locked_across_all_phases() -> None:
     assert chain["phases"]["phase1_runtime_consumer"]["runtime_authority_blocked"] is True
     assert chain["phases"]["phase2_control"]["runtime_authority_blocked"] is True
     assert chain["phases"]["phase2_control_consumer"]["runtime_execution_blocked"] is True
+
+
+def test_phase_chain_outputs_keep_reference_and_blocks() -> None:
+    chain = build_phase0_runtime_ui_scaffold_chain(include_guardian_suite_seam=True)
+
+    assert chain["source_reference"] == "app.services.guardian.suite"
+    assert chain["source_access_mode"] == "read_only"
+    assert chain["runtime_authority_blocked"] is True
+    assert chain["runtime_execution_blocked"] is True
+
+    for phase_projection in chain["phases"].values():
+        assert phase_projection["source_reference"] == "app.services.guardian.suite"
+        assert phase_projection["source_access_mode"] == "read_only"
+        if "runtime_authority_blocked" in phase_projection:
+            assert phase_projection["runtime_authority_blocked"] is True
+        if "runtime_execution_blocked" in phase_projection:
+            assert phase_projection["runtime_execution_blocked"] is True
+        surfaces = phase_projection.get("surfaces")
+        if not isinstance(surfaces, dict):
+            continue
+        for surface_projection in surfaces.values():
+            if isinstance(surface_projection, dict):
+                if "runtime_authority_blocked" in surface_projection:
+                    assert surface_projection["runtime_authority_blocked"] is True
+                if "runtime_execution_blocked" in surface_projection:
+                    assert surface_projection["runtime_execution_blocked"] is True

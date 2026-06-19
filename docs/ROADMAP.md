@@ -37,6 +37,7 @@ Lock down runtime scope for the shell user surface so no action path can infer r
    - [x] No runtime authority is derived directly in this repo.
 5. Add proof scaffolding
    - [x] Fixture packet records scope constraints for both surfaces.
+   - [x] Add a deterministic phase-chain + phase-locked status snapshot fixture.
    - [x] Preview contract scaffold is pinned in a stable artifact fixture for downstream consumers.
    - [x] Tests assert scope-lock text, boundary flags, and docs-first posture.
    - [x] `README` includes active phase lock and deferred runtime authority note.
@@ -85,6 +86,7 @@ Lock down runtime scope for the shell user surface so no action path can infer r
   - [x] Implement phase-2 runtime-control seam consumer integration for downstream UI state handoff (still execution-disabled).
   - [x] Add an end-to-end phase-chain continuity test across all preview/control seams.
   - [x] Add a full-phase chain preview command for operator review.
+  - [x] Lock all phase-chain and phase outputs to source `app.services.guardian.suite` and `read_only` with execution blocked.
 
 ## External Reference Alignment
 
