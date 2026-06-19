@@ -28,6 +28,12 @@ def _load_fixture() -> dict[str, Any]:
     return fixture
 
 
+def _clear_lima_modules() -> None:
+    for module_name in list(sys.modules):
+        if module_name == "lima" or module_name.startswith("lima."):
+            del sys.modules[module_name]
+
+
 def test_v1_g38_fixture_records_static_candidate_scope() -> None:
     fixture = _load_fixture()
 
@@ -77,6 +83,7 @@ def test_v1_g38_links_lima_patch_preview_and_design_evidence() -> None:
 
 def test_v1_g38_static_candidate_does_not_import_or_call_runtime() -> None:
     fixture = _load_fixture()
+    _clear_lima_modules()
 
     assert fixture["consumer_runtime_source_files_changed"] is False
     assert fixture["consumer_runtime_modules_imported"] is False

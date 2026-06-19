@@ -29,6 +29,12 @@ def _load_fixture() -> dict[str, Any]:
     return fixture
 
 
+def _clear_lima_modules() -> None:
+    for module_name in list(sys.modules):
+        if module_name == "lima" or module_name.startswith("lima."):
+            del sys.modules[module_name]
+
+
 def _load_g41_fixture() -> dict[str, Any]:
     source_path = (
         REPO_ROOT
@@ -105,6 +111,7 @@ def test_v1_g42_links_lima_shell_boundary_and_g41_evidence() -> None:
 
 def test_v1_g42_static_wiring_does_not_import_or_call_runtime() -> None:
     fixture = _load_fixture()
+    _clear_lima_modules()
 
     assert fixture["consumer_runtime_source_files_changed"] is False
     assert fixture["consumer_runtime_modules_imported"] is False

@@ -44,7 +44,9 @@ The Arc Bot operator console foundation contains these top-level surfaces:
 | --- | --- | --- | --- | --- |
 | Overview | Show supervisor health, blocked states, queue posture, worker status, approvals, evidence, connector readiness, and model-route posture | Documented foundation only | `console.view`, `console.alert`, `supervisor.health`, `sla.slo`, `incident.ops` | Shell summary emits read-only state snapshot; no runtime authority |
 | Workers | Show Arc worker lifecycle, heartbeat, deployment, capability scope, quarantine/revoke posture | Documented foundation only | `worker.lifecycle`, `worker.heartbeat`, `worker.deployment`, `worker.attestation` | Worker identity/capability metadata maps to future Shell/Driver boundaries |
+| Work Queue | Stage work programs, draft local task assignments, and attach SOP/work documents before review | Documented foundation only | `task.execution`, `worker.lifecycle`, `console.view` | Future `IntentEnvelope` and task-assignment request mapping |
 | Tasks | Show task intake, assignment, status, approval need, evidence refs, model-route posture, and blocked reasons | Documented foundation only | `task.execution`, `guardian.decision`, `approval.request`, `evidence.artifact` | Task requests become future `HumanInput`/`IntentEnvelope`/candidate preview |
+| Runtime Settings | Configure local runtime install route, seat endpoints, and model-route readiness checks | Documented foundation only | `model.route`, `supervisor.health`, `worker.lifecycle` | Future model-route validation and harness control surface |
 | Approvals | Show approval requests, result posture, token binding, expiry, separation checks, and denied states | Documented foundation only | `approval.request`, `approval.result`, `approval.token`, `approval.binding`, `token.verification` | Approval metadata maps to future LIMA `ApprovalMetadata` and Guardian decision refs |
 | Guardian | Show Guardian decisions, risk tier, policy refs, taint refs, replay/expiry posture, and denied/blocked states | Documented foundation only | `guardian.decision`, `guardian.replay`, `taint.ref` | Consequential actions require future `ConsequentialActionRequest` and `GuardianDecision` |
 | Evidence | Show evidence refs, hashes, redaction, retention, export posture, evidence failures | Documented foundation only | `evidence.artifact`, `evidence.failure`, `evidence.ledger.entry` | Evidence/lineage maps to future LIMA Spine events and storage refs |
@@ -138,6 +140,63 @@ Future seams:
 
 - LIMA Office Supervisor owns worker registry and lifecycle state.
 - LIMA AI OS shell/driver contracts may consume worker capabilities only after Guardian approval.
+
+### Work Queue
+
+Available as display/state:
+
+- Work program definitions with status (`draft`, `ready`, `active`, `completed`) and risk tags.
+- Draft worker-role assignment and expected output summary.
+- Attached SOP/work file references for preview.
+- Local model-seat readiness snapshot and routing dependencies.
+- Blocked reason and runbook when ready-to-dispatch prerequisites are missing.
+
+Metadata-only:
+
+- Create and reorder local program queue entries.
+- Attach or detach SOP/work references before approval review.
+- Record training memo and intake notes for future worker handoff.
+- Link readiness blockers to model-route and task states.
+
+Blocked/fail-closed:
+
+- Trigger live program execution.
+- Change active assignment outside source-of-truth task records.
+- Persist queue mutations directly to customer systems.
+- Send external messages from queue context.
+
+Future seams:
+
+- LIMA Office `task.execution` receives operator-generated work intent for assignment.
+- LIMA AI OS `HumanInput` and `IntentEnvelope` provide typed task intake and approval-linked dispatch.
+
+### Runtime Settings
+
+Available as display/state:
+
+- Local seat catalog with provider kind and base endpoint labels.
+- Installation/quickstart posture per runtime family.
+- Per-seat confirmability status for local runtime checks.
+- Local model-route posture summary and readiness state.
+- Evidence markers for readiness checks.
+
+Metadata-only:
+
+- Stage seat edits (labels, endpoint, local runtime family) for review.
+- Record readiness check metadata and setup blockers.
+- Attach setup notes without initiating runtime calls.
+
+Blocked/fail-closed:
+
+- Perform live model inference or tool execution.
+- Store credentials or provider tokens in this shell surface.
+- Persist secrets or raw runtime payloads locally as product state.
+- Change runtime routes without approval posture.
+
+Future seams:
+
+- LIMA Office `model.route` and `supervisor.health` govern approved local/runtime readiness posture.
+- LIMA AI OS harness validation moves local readiness checks from shell notes into audited control.
 
 ### Tasks
 

@@ -1,0 +1,62 @@
+{
+  "packet_id": "arc_bot_operator_console_work_queue_runtime_settings",
+  "api_status": "CANDIDATE_ONLY",
+  "consumer_repo": "Arc-Bot-shell",
+  "consumer_repository": "armpit-symphony/Arc-Bot-shell",
+  "proof_branch": "arc-work-queue-runtime-settings-docs",
+  "source_commit_before_branch": "8358b8c",
+  "docs_only_foundation_update": true,
+  "operator_console_surfaces_added": [
+    "Work Queue",
+    "Runtime Settings"
+  ],
+  "docs": {
+    "operator_console_foundation": "docs/OPERATOR_CONSOLE_FOUNDATION.md",
+    "operator_console_state_contract": "docs/contracts/ARC_BOT_OPERATOR_CONSOLE_STATE.md"
+  },
+  "aligned_contracts": [
+    "task.execution",
+    "worker.lifecycle",
+    "console.view",
+    "model.route",
+    "supervisor.health",
+    "guardian.decision",
+    "evidence.artifact"
+  ],
+  "work_queue_contract": {
+    "display_state_only": true,
+    "metadata_only_queue_entries": true,
+    "future_intent_envelope_mapping": true,
+    "live_program_execution_allowed": false,
+    "customer_system_mutation_allowed": false,
+    "external_message_send_allowed": false
+  },
+  "runtime_settings_contract": {
+    "display_state_only": true,
+    "local_runtime_install_route_documented": true,
+    "model_route_readiness_metadata_documented": true,
+    "live_model_inference_allowed": false,
+    "tool_execution_allowed": false,
+    "credential_storage_allowed": false,
+    "provider_token_storage_allowed": false,
+    "raw_runtime_payload_persistence_allowed": false,
+    "runtime_route_change_without_approval_allowed": false
+  },
+  "boundaries": {
+    "runtime_behavior_added": false,
+    "frontend_code_added": false,
+    "backend_code_added": false,
+    "lima_runtime_imports_added": false,
+    "lima_runtime_calls_added": false,
+    "provider_model_calls_added": false,
+    "provider_sdk_added": false,
+    "network_calls_added": false,
+    "secret_or_credential_access_added": false,
+    "file_mutation_added": false,
+    "connector_behavior_added": false,
+    "browser_network_device_robotics_physical_world_behavior_added": false,
+    "product_readiness_claimed": false,
+    "production_readiness_claimed": false
+  },
+  "recommended_next_step": "keep_arc_bot_operator_console_work_queue_and_runtime_settings_as_docs_only_until_lima_runtime_authority_is_approved"
+}

@@ -151,6 +151,35 @@ Blocked if missing:
 - token verification where approval is required
 - model-route status for high-risk task paths
 
+### Work Program State
+
+Server-side source of truth when implemented:
+
+- work program ID and title
+- work objective and detail summary
+- assigned worker role/class
+- worker type tags and status (`draft`, `ready`, `active`, `completed`)
+- training memo and safety notes
+- attached SOP/work file references
+- required model route posture for dispatch readiness
+- local model-seat readiness reference
+- operator-created evidence refs and blocked reason
+
+Aligned contracts:
+
+- `task.execution`
+- `model.route`
+- `guardian.decision`
+- `evidence.artifact`
+
+Blocked if missing:
+
+- tenant context and operator role for program scope
+- policy refs for local dispatch preparation
+- evidence refs where program state gates high-risk or external work
+- model-route readiness refs before active/deployment transition
+- task or worker mapping references for assignment
+
 ### Approval State
 
 Server-side source of truth when implemented:
