@@ -241,6 +241,7 @@ This repo is currently a roadmap/staging repo for the Arc Bot business worker-bo
 - [Arc Bot Operator Console Foundation](docs/OPERATOR_CONSOLE_FOUNDATION.md)
 - [Arc Bot Operator Console State Contract](docs/contracts/ARC_BOT_OPERATOR_CONSOLE_STATE.md)
 - [Arc Guardian/Spine Base](docs/ARC_GUARDIAN_SPINE_BASE.md)
+- [Arc Bot Basic Guardian Console](ui/arc_bot_basic_console.html)
 - [Arc Bot Client Configuration Schema](docs/contracts/schemas/arc_bot_client_configuration.schema.json)
 - [Arc Bot No-Execution Skeleton Plan](docs/NO_EXECUTION_SKELETON_PLAN.md)
 - [Arc Bot Client Configuration Fixture](tests/fixtures/arc_bot_phase1_client_configuration.json)
@@ -303,6 +304,13 @@ The operator-console foundation defines the first office-worker control-room sur
 - Phase-3 runtime-control execution planning preview (execution still blocked by default): `python -m phase0_runtime_ui_scaffold.runtime_control_execution`.
 - Arc Guardian/Spine base preview (local-model PC shell, execution blocked): `python -m arc_guardian_spine.preview`.
 - Arc Guardian/Spine Phase-1 contract shape includes non-reusable approval requests, redacted evidence refs, and a projection-only local Spine ledger.
+- Basic Guardian console preview projection: `python -m phase0_runtime_ui_scaffold.basic_console`.
+- Basic Guardian console static UI: `ui/arc_bot_basic_console.html`.
+  - Shows Local Model and LIMA Office connection indicators with connect buttons.
+  - Includes file upload, training notes, self-learning review mode, and chat panels.
+  - Buttons and inputs create local preview/pending states only; no model call,
+    LIMA Office connector action, file processing, training write, or memory write
+    occurs from the static page.
 - End-to-end phase-chain seam preview (preview -> runtime consumer -> control handoff -> control consumer): `python -m phase0_runtime_ui_scaffold.phase_chain`.
 - Include guardian-suite seam summary in phase-chain preview: `python -m phase0_runtime_ui_scaffold.phase_chain --with-guardian-suite-seam`.
 - Include phase-3 execution planning in phase-chain/status-snapshot preview:

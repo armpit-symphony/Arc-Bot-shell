@@ -1,0 +1,472 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Arc Bot Guardian Console</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f5f7fa;
+      --panel: #ffffff;
+      --ink: #17202a;
+      --muted: #667085;
+      --line: #d6dbe3;
+      --green: #16803c;
+      --red: #b42318;
+      --amber: #9a6700;
+      --blue: #2454a6;
+      --soft-blue: #e9f0fb;
+      --soft-green: #e9f7ef;
+      --soft-red: #fdecea;
+      --soft-amber: #fff5d6;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+    }
+
+    main {
+      width: min(1180px, calc(100% - 32px));
+      margin: 24px auto;
+      display: grid;
+      gap: 16px;
+    }
+
+    header {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 16px;
+      border-bottom: 1px solid var(--line);
+      padding-bottom: 14px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 28px;
+      line-height: 1.15;
+      letter-spacing: 0;
+    }
+
+    h2 {
+      margin: 0 0 12px;
+      font-size: 18px;
+      line-height: 1.25;
+      letter-spacing: 0;
+    }
+
+    h3 {
+      margin: 0 0 8px;
+      font-size: 15px;
+      line-height: 1.25;
+      letter-spacing: 0;
+    }
+
+    p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
+    .status-strip {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 16px;
+    }
+
+    .connection-card {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      gap: 12px;
+      min-height: 82px;
+    }
+
+    .indicator {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      display: inline-grid;
+      place-items: center;
+      color: #ffffff;
+      font-size: 20px;
+      font-weight: 700;
+      flex: none;
+    }
+
+    .indicator.ok {
+      background: var(--green);
+    }
+
+    .indicator.bad {
+      background: var(--red);
+    }
+
+    .status-label {
+      font-size: 12px;
+      color: var(--muted);
+      text-transform: uppercase;
+    }
+
+    button,
+    .file-button {
+      appearance: none;
+      border: 1px solid #1f4f99;
+      background: var(--blue);
+      color: #ffffff;
+      border-radius: 6px;
+      min-height: 38px;
+      padding: 0 12px;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    button.secondary {
+      background: #ffffff;
+      color: var(--blue);
+    }
+
+    button:disabled {
+      cursor: not-allowed;
+      opacity: 0.64;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 16px;
+      align-items: start;
+    }
+
+    .dropzone {
+      border: 2px dashed #98a2b3;
+      border-radius: 8px;
+      min-height: 190px;
+      display: grid;
+      align-content: center;
+      justify-items: center;
+      gap: 10px;
+      padding: 20px;
+      background: #fbfcfe;
+      text-align: center;
+    }
+
+    input[type="file"] {
+      width: 1px;
+      height: 1px;
+      opacity: 0;
+      position: absolute;
+      pointer-events: none;
+    }
+
+    textarea,
+    input[type="text"] {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 10px;
+      font: inherit;
+      resize: vertical;
+      background: #ffffff;
+      color: var(--ink);
+    }
+
+    textarea {
+      min-height: 130px;
+    }
+
+    .chat-shell {
+      display: grid;
+      grid-template-rows: minmax(260px, 1fr) auto;
+      gap: 12px;
+      min-height: 430px;
+    }
+
+    .messages {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fbfcfe;
+      padding: 12px;
+      display: grid;
+      align-content: start;
+      gap: 10px;
+      overflow: auto;
+    }
+
+    .message {
+      max-width: 78%;
+      border-radius: 8px;
+      padding: 10px;
+      line-height: 1.4;
+    }
+
+    .message.bot {
+      background: var(--soft-blue);
+      color: #173b73;
+    }
+
+    .message.user {
+      justify-self: end;
+      background: var(--soft-green);
+      color: #155724;
+    }
+
+    .composer {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+    }
+
+    .learning-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      align-items: center;
+      padding: 12px;
+      background: var(--soft-amber);
+      border: 1px solid #f1c232;
+      border-radius: 8px;
+    }
+
+    .toggle {
+      width: 52px;
+      height: 30px;
+      border-radius: 999px;
+      border: 1px solid #b68700;
+      background: #ffffff;
+      position: relative;
+      padding: 0;
+    }
+
+    .toggle::after {
+      content: "";
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: var(--amber);
+      position: absolute;
+      top: 3px;
+      left: 4px;
+      transition: left 140ms ease;
+    }
+
+    .toggle[aria-pressed="true"]::after {
+      left: 24px;
+      background: var(--green);
+    }
+
+    .audit {
+      min-height: 56px;
+      border-left: 4px solid var(--amber);
+      background: #fffaf0;
+    }
+
+    @media (max-width: 820px) {
+      main {
+        width: min(100% - 20px, 1180px);
+        margin: 12px auto;
+      }
+
+      header,
+      .status-strip,
+      .grid,
+      .composer,
+      .learning-row {
+        grid-template-columns: 1fr;
+      }
+
+      header {
+        align-items: start;
+      }
+
+      .connection-card {
+        grid-template-columns: auto 1fr;
+      }
+
+      .connection-card button {
+        grid-column: 1 / -1;
+      }
+
+      .message {
+        max-width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <div>
+        <h1>Arc Bot Guardian Console</h1>
+        <p>Local office shell surface for Guardian-gated document work.</p>
+      </div>
+      <button class="secondary" type="button" id="refresh-status" data-guardian-action="refresh-status">Refresh Status</button>
+    </header>
+
+    <section class="status-strip" aria-label="Connection status">
+      <article class="panel connection-card" id="local-model-card" data-connected="false">
+        <span class="indicator bad" id="local-model-indicator" aria-hidden="true">!</span>
+        <div>
+          <h2>Local Model</h2>
+          <div class="status-label" id="local-model-status">Disconnected</div>
+        </div>
+        <button type="button" id="connect-local-model" data-guardian-action="connect-local-model">Connect</button>
+      </article>
+
+      <article class="panel connection-card" id="lima-office-card" data-connected="false">
+        <span class="indicator bad" id="lima-office-indicator" aria-hidden="true">!</span>
+        <div>
+          <h2>LIMA Office</h2>
+          <div class="status-label" id="lima-office-status">Disconnected</div>
+        </div>
+        <button type="button" id="connect-lima-office" data-guardian-action="connect-lima-office">Connect</button>
+      </article>
+    </section>
+
+    <section class="grid">
+      <article class="panel">
+        <h2>File Upload</h2>
+        <div class="dropzone" id="file-upload-box">
+          <p>Drop office documents here or select files for intake preview.</p>
+          <label class="file-button" for="file-upload-input">Choose Files</label>
+          <input id="file-upload-input" type="file" multiple accept=".pdf,.png,.jpg,.jpeg,.docx,.txt" data-guardian-action="stage-file-preview">
+          <p id="file-upload-status">No files staged. Guardian approval required before processing.</p>
+        </div>
+      </article>
+
+      <article class="panel">
+        <h2>Training</h2>
+        <textarea id="training-box" placeholder="Add office workflow examples, policy notes, or corrections for review." data-guardian-action="draft-training-note"></textarea>
+        <div class="learning-row">
+          <div>
+            <h3>Self Learning</h3>
+            <p>Operator-reviewed memory candidates only. No automatic memory writes.</p>
+          </div>
+          <button class="toggle" type="button" id="self-learning-toggle" aria-pressed="false" aria-label="Toggle self learning review mode" data-guardian-action="toggle-self-learning"></button>
+        </div>
+      </article>
+    </section>
+
+    <section class="panel chat-shell" id="chat-panel">
+      <div>
+        <h2>Chat</h2>
+        <div class="messages" id="chat-messages" aria-live="polite">
+          <div class="message bot">Guardian console is ready. Connect Local Model and LIMA Office before requesting document work.</div>
+        </div>
+      </div>
+      <div class="composer">
+        <input id="chat-input" type="text" placeholder="Ask Arc Bot to summarize, classify, draft, or prepare office documents." data-guardian-action="queue-chat-preview">
+        <button type="button" id="send-chat" data-guardian-action="send-chat-preview">Send</button>
+      </div>
+    </section>
+
+    <section class="panel audit" id="guardian-audit-note">
+      <h2>Guardian State</h2>
+      <p id="guardian-state-text">All buttons create local pending states only. No model call, connector action, file processing, training write, or LIMA Office mutation is performed by this page.</p>
+    </section>
+  </main>
+
+  <script>
+    const state = {
+      localModel: false,
+      limaOffice: false,
+      selfLearning: false
+    };
+
+    function setConnection(kind, connected) {
+      const prefix = kind === "localModel" ? "local-model" : "lima-office";
+      const card = document.getElementById(`${prefix}-card`);
+      const indicator = document.getElementById(`${prefix}-indicator`);
+      const status = document.getElementById(`${prefix}-status`);
+      const button = document.getElementById(`connect-${prefix}`);
+
+      card.dataset.connected = String(connected);
+      indicator.className = `indicator ${connected ? "ok" : "bad"}`;
+      indicator.textContent = connected ? "✓" : "!";
+      status.textContent = connected ? "Connected" : "Disconnected";
+      button.hidden = connected;
+    }
+
+    function addMessage(text, kind) {
+      const messages = document.getElementById("chat-messages");
+      const bubble = document.createElement("div");
+      bubble.className = `message ${kind}`;
+      bubble.textContent = text;
+      messages.appendChild(bubble);
+      messages.scrollTop = messages.scrollHeight;
+    }
+
+    function guardianNote(text) {
+      document.getElementById("guardian-state-text").textContent = text;
+    }
+
+    document.getElementById("connect-local-model").addEventListener("click", () => {
+      state.localModel = true;
+      setConnection("localModel", true);
+      guardianNote("Local Model connection marked active in UI preview. Real model calls remain Guardian-gated.");
+    });
+
+    document.getElementById("connect-lima-office").addEventListener("click", () => {
+      state.limaOffice = true;
+      setConnection("limaOffice", true);
+      guardianNote("LIMA Office connection marked active in UI preview. Real connector actions remain blocked.");
+    });
+
+    document.getElementById("refresh-status").addEventListener("click", () => {
+      setConnection("localModel", state.localModel);
+      setConnection("limaOffice", state.limaOffice);
+      guardianNote("Status refreshed from local UI state only.");
+    });
+
+    document.getElementById("file-upload-input").addEventListener("change", (event) => {
+      const files = Array.from(event.target.files || []);
+      const names = files.map((file) => file.name).join(", ");
+      document.getElementById("file-upload-status").textContent = files.length
+        ? `${files.length} file(s) staged for Guardian preview: ${names}`
+        : "No files staged. Guardian approval required before processing.";
+      guardianNote("Files are selected in the browser only. This page does not upload, read, persist, or process file content.");
+    });
+
+    document.getElementById("self-learning-toggle").addEventListener("click", (event) => {
+      state.selfLearning = !state.selfLearning;
+      event.currentTarget.setAttribute("aria-pressed", String(state.selfLearning));
+      guardianNote(state.selfLearning
+        ? "Self learning review mode is on. Memory candidates still require operator approval."
+        : "Self learning review mode is off. No memory candidates will be proposed.");
+    });
+
+    document.getElementById("send-chat").addEventListener("click", () => {
+      const input = document.getElementById("chat-input");
+      const text = input.value.trim();
+      if (!text) {
+        return;
+      }
+      addMessage(text, "user");
+      addMessage("Queued as a Guardian preview request. Connectors, model execution, and memory writes are not invoked by this static console.", "bot");
+      input.value = "";
+    });
+
+    document.getElementById("chat-input").addEventListener("keydown", (event) => {
+      if (event.key === "Enter") {
+        document.getElementById("send-chat").click();
+      }
+    });
+  </script>
+</body>
+</html>

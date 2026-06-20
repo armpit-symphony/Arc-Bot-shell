@@ -58,7 +58,9 @@ drafting.
   - every non-preview action returns blocked or approval-required,
   - every decision has policy, evidence, and runbook refs,
   - approval requests are non-reusable and grant no runtime execution,
-  - local Spine ledger helpers are projection-only.
+  - local Spine ledger helpers are projection-only,
+  - basic operator UI can display Local Model, LIMA Office, upload, training,
+    self-learning review, and chat controls without live execution.
 
 ## Phase 2 - Local Model Seat Readiness
 

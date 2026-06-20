@@ -12,6 +12,7 @@ Status: Foundation contracts and invariants
 - `arc_bot_runtime_settings_state.schema.json`
 - `arc_bot_overview_state.schema.json`
 - `arc_guardian_spine_base_projection`
+- `arc_bot_basic_guardian_console_projection`
 - fixture contracts under `tests/fixtures/*`
 - proof packets under `docs/proof_packets/*`
 
@@ -24,6 +25,9 @@ Status: Foundation contracts and invariants
 - `runtime_authority_blocked` must be `true` for all seam outputs.
 - Arc Guardian/Spine base projections must remain local-model-only, single-tenant, and connector-disabled.
 - Arc Guardian/Spine base projections must not invoke the local model; they may only emit approval-required or preview-only decisions.
+- Basic Guardian console projections must keep Local Model, LIMA Office, upload,
+  training, self-learning, and chat controls Guardian-gated and blocked from
+  runtime execution until later approved wiring exists.
 - `source_access_mode` must be `read_only`.
 - `projection_gate.required` must be `true` and gate checks enforced in builders.
 - `contract_refs`, `policy_refs`, `evidence_refs`, `runbook_refs` must be present and non-empty where applicable.
@@ -41,6 +45,14 @@ Status: Foundation contracts and invariants
 ### Runtime Settings
 - Metadata and readiness posture only.
 - No model/provider/connector mutation or execution paths.
+
+### Basic Guardian Console
+- Static operator-facing UI shell for local model status, LIMA Office status,
+  document upload staging, training notes, self-learning review mode, and chat.
+- Connection buttons are approval-required placeholders only.
+- File selection must not upload, read, persist, or process file content.
+- Training and self-learning must not write memory directly.
+- Chat must not invoke local or cloud models directly from the page.
 
 ### Arc Guardian/Spine Base
 - Minimal contract/stub layer for Arc-local Guardian decisions and Spine events.

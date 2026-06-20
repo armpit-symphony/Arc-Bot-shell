@@ -55,6 +55,26 @@ The Arc Bot operator console foundation contains these top-level surfaces:
 | Governance / Audit | Show access review, identity/MFA placeholders, breakglass posture, retention/export/delete posture | Documented foundation only | `governance.identity`, `governance.access_review`, `governance.breakglass`, `governance.audit_export` | Future auth/policy/storage seam; no secret or breakglass runtime |
 | Runbooks / Blocked Guidance | Show next safe manual review lane for blocked actions | Documented foundation only | `docs/runbooks/*`, `console.action`, `console.alert` | Human control surface guidance before future governed runtime |
 
+### Basic Guardian Console Preview
+
+The repository includes a static operator preview at
+`ui/arc_bot_basic_console.html` and a matching projection at
+`phase0_runtime_ui_scaffold.basic_console`.
+
+The preview covers the requested MVP operator controls:
+
+- Local Model connection status with green connected and red disconnected state.
+- LIMA Office connection status with green connected and red disconnected state.
+- Connect buttons that mark local UI preview state only.
+- File upload staging box for office-document intake preview.
+- Training note box for operator-reviewed workflow examples.
+- Self-learning review toggle for memory candidates that still require approval.
+- Chat panel for queueing preview requests.
+
+This UI remains non-authoritative. It does not perform model calls, LIMA Office
+connector actions, file uploads, file reads, training writes, automatic memory
+writes, network actions, or customer-system mutation.
+
 ## Phase 0 Scope Lock (Runtime UI Scaffold)
 
 This branch defines a runtime UI scaffold only.
