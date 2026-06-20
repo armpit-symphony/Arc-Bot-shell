@@ -14,6 +14,7 @@ Status: Foundation contracts and invariants
 - `arc_guardian_spine_base_projection`
 - `arc_bot_basic_guardian_console_projection`
 - `phase2_ollama_qwen_readiness_projection`
+- `phase3_document_intake_preview`
 - fixture contracts under `tests/fixtures/*`
 - proof packets under `docs/proof_packets/*`
 
@@ -34,6 +35,8 @@ Status: Foundation contracts and invariants
   no-cloud-fallback.
 - LIMA Office Ollama/Qwen readiness packets may be consumed only as read-only
   metadata. Packet fields are labels/refs, not execution authority.
+- Phase-3 document intake previews must validate metadata only and must not
+  read, parse, OCR, persist, or model-process raw document content.
 - `source_access_mode` must be `read_only`.
 - `projection_gate.required` must be `true` and gate checks enforced in builders.
 - `contract_refs`, `policy_refs`, `evidence_refs`, `runbook_refs` must be present and non-empty where applicable.
@@ -73,6 +76,18 @@ Status: Foundation contracts and invariants
 - LIMA Office packet `route_status = degraded` maps to setup-required.
   `denied`, `blocked_mvp`, and `unavailable` map to blocked. `mock_only` never
   maps to live-ready.
+
+### Phase-3 Document Intake
+- Intake request metadata must include document ID, source/upload ref, document
+  type or auto classification, tenant ID, sensitivity class, intake operator,
+  and allowed processing mode.
+- Supported MVP document types are PDF, text, image scan, and Word document.
+- Only metadata preview and manual-review modes are allowed.
+- Intake previews must return ready-for-review or blocked status.
+- Raw document content must not appear in projections, proof packets, fixtures,
+  logs, or repo state.
+- OCR, parser calls, local model calls, file reads/writes, connector actions,
+  and customer-system mutation remain blocked.
 
 ### Arc Guardian/Spine Base
 - Minimal contract/stub layer for Arc-local Guardian decisions and Spine events.

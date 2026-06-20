@@ -64,6 +64,20 @@ The following remain blocked:
 - production deployment,
 - unrestricted tool execution.
 
+## Phase-3 Document Intake Boundary
+
+Document intake is metadata-only in Phase 3. Arc Bot may classify supported
+document types from declared type or upload/source reference labels:
+
+- PDF,
+- text,
+- image scan placeholder,
+- Word document placeholder.
+
+The intake preview may return `ready_for_review` or `blocked`. It must not read
+file bytes, persist raw document content, run OCR, invoke parsers, call the
+local model, mutate files, call connectors, or update customer systems.
+
 ## Preview Command
 
 ```powershell

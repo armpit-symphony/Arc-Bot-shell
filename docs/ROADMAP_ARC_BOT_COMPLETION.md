@@ -116,7 +116,8 @@ drafting.
 - Completion gate:
   - document intake metadata validates,
   - raw content is not persisted in repo/project state,
-  - no OCR/model/parser side effects beyond metadata preview.
+  - no OCR/model/parser side effects beyond metadata preview,
+  - basic console can surface the document intake metadata preview contract.
 
 ## Phase 4 - Local Document Extraction Preview
 

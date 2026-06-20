@@ -18,6 +18,10 @@ from phase2_local_model_readiness import (
     OllamaQwenReadinessInput,
     build_ollama_qwen_readiness_projection,
 )
+from phase3_document_intake import (
+    DocumentIntakeRequest,
+    build_document_intake_preview,
+)
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -72,6 +76,19 @@ def _assert_guardrails(projection: dict[str, Any]) -> None:
         if surface["runtime_execution_blocked"] is not True:
             raise BasicConsoleProjectionError("Console surfaces must remain blocked")
 
+    intake_preview = projection["file_upload"].get("document_intake_preview", {})
+    for blocked_flag in (
+        "raw_content_persisted",
+        "file_read_performed",
+        "ocr_performed",
+        "parser_invoked",
+        "model_invocation_performed",
+    ):
+        if intake_preview.get(blocked_flag) is not False:
+            raise BasicConsoleProjectionError(
+                f"Document intake preview must keep {blocked_flag}=False"
+            )
+
 
 def build_basic_guardian_console_projection(
     *,
@@ -79,6 +96,7 @@ def build_basic_guardian_console_projection(
     lima_office_connected: bool = False,
     self_learning_enabled: bool = False,
     local_model_readiness: dict[str, Any] | None = None,
+    document_intake_preview: dict[str, Any] | None = None,
     phase_gate_name: str = EXPECTED_PHASE_GATE_NAME,
 ) -> dict[str, Any]:
     """Build the basic Arc Bot console projection for the static UI."""
@@ -91,6 +109,13 @@ def build_basic_guardian_console_projection(
     readiness_projection = local_model_readiness or build_ollama_qwen_readiness_projection()
     local_model_connected = (
         local_model_connected or readiness_projection["readiness_status"] == "ready"
+    )
+    intake_projection = document_intake_preview or build_document_intake_preview(
+        DocumentIntakeRequest(
+            document_id="doc-intake-preview-001",
+            source_ref="upload://arc-bot/manual-staging/sample-intake.pdf",
+            document_type="auto",
+        )
     )
 
     projection: dict[str, Any] = {
@@ -131,6 +156,7 @@ def build_basic_guardian_console_projection(
             "runtime_execution_blocked": True,
             "raw_file_persistence_allowed": False,
             "allowed_result": "redacted_metadata_preview",
+            "document_intake_preview": intake_projection,
         },
         "training": {
             "surface": "training",

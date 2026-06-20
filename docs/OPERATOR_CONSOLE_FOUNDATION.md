@@ -68,6 +68,8 @@ The preview covers the requested MVP operator controls:
 - LIMA Office connection status with green connected and red disconnected state.
 - Connect buttons that mark local UI preview state only.
 - File upload staging box for office-document intake preview.
+- Phase-3 document intake metadata preview for PDF, text, image scan, and Word
+  document uploads.
 - Training note box for operator-reviewed workflow examples.
 - Self-learning review toggle for memory candidates that still require approval.
 - Chat panel for queueing preview requests.
@@ -75,6 +77,11 @@ The preview covers the requested MVP operator controls:
 This UI remains non-authoritative. It does not perform model calls, LIMA Office
 connector actions, file uploads, file reads, training writes, automatic memory
 writes, network actions, or customer-system mutation.
+
+The Phase-3 document intake contract is available through
+`phase3_document_intake.intake`. It validates metadata only and returns
+ready-for-review or blocked status. It does not read file bytes, persist raw
+content, run OCR, invoke parsers, call models, or write to customer systems.
 
 The Phase-2 local model readiness projection is available through
 `phase2_local_model_readiness.readiness`. It uses Ollama as the runtime target

@@ -317,6 +317,13 @@ The operator-console foundation defines the first office-worker control-room sur
   - LIMA Office handoff packets can be consumed in-memory as read-only metadata
     through `build_ollama_qwen_readiness_from_lima_packet`; `degraded` remains
     setup-required, and blocked statuses remain blocked.
+- Phase-3 document intake metadata preview:
+  `python -m phase3_document_intake.intake`.
+  - Supports PDF, text, image scan, and Word document metadata.
+  - Validates document ID, source/upload ref, tenant, sensitivity, intake
+    operator, and processing mode.
+  - Does not read files, persist raw content, run OCR/parsers, call models, or
+    mutate customer systems.
 - Basic Guardian console static UI: `ui/arc_bot_basic_console.html`.
   - Shows Local Model and LIMA Office connection indicators with connect buttons.
   - Includes file upload, training notes, self-learning review mode, and chat panels.
