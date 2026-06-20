@@ -314,6 +314,9 @@ The operator-console foundation defines the first office-worker control-room sur
   - Endpoint label: `http://127.0.0.1:11434`.
   - No Ollama API call, model invocation, socket probe, provider SDK, provider
     credential, or cloud fallback is used by the projection.
+  - LIMA Office handoff packets can be consumed in-memory as read-only metadata
+    through `build_ollama_qwen_readiness_from_lima_packet`; `degraded` remains
+    setup-required, and blocked statuses remain blocked.
 - Basic Guardian console static UI: `ui/arc_bot_basic_console.html`.
   - Shows Local Model and LIMA Office connection indicators with connect buttons.
   - Includes file upload, training notes, self-learning review mode, and chat panels.

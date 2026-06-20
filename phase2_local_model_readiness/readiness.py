@@ -18,6 +18,20 @@ DEFAULT_QWEN_MODEL_ID = "qwen2.5:7b"
 DEFAULT_OLLAMA_ENDPOINT_LABEL = "http://127.0.0.1:11434"
 EXPECTED_RUNTIME = "ollama"
 EXPECTED_MODEL_FAMILY = "qwen"
+LIMA_ALLOWED_ROUTE_MODES = frozenset({"mock_only", "local_planned"})
+LIMA_ALLOWED_ROUTE_STATUSES = frozenset(
+    {"selected", "degraded", "denied", "blocked_mvp", "unavailable"}
+)
+LIMA_STOP_ROUTE_STATUSES = frozenset({"denied", "blocked_mvp", "unavailable"})
+LIMA_REQUIRED_BLOCKED_CAPABILITIES = frozenset(
+    {"cloud_fallback", "provider_token", "live_connector"}
+)
+LIMA_REQUIRED_POLICY_GROUPS = frozenset(
+    {"local_model_only", "no_cloud_fallback", "no_provider_token"}
+)
+LIMA_REQUIRED_ATTESTATION_REFS = frozenset(
+    {"ollama_install", "ollama_service_reachable", "qwen_model_present"}
+)
 
 ReadinessStatus = Literal["ready", "setup_required", "blocked"]
 
@@ -162,6 +176,155 @@ def build_ollama_qwen_readiness_projection(
     }
     _assert_readiness_guardrails(projection)
     return projection
+
+
+def build_ollama_qwen_readiness_from_lima_packet(
+    packet: dict[str, Any],
+) -> dict[str, Any]:
+    """Map LIMA Office's read-only readiness packet into Arc readiness state."""
+
+    if not isinstance(packet, dict):
+        raise OllamaQwenReadinessProjectionError("LIMA readiness packet must be an object")
+
+    missing = sorted(field for field in _required_lima_fields() if field not in packet)
+    if missing:
+        raise OllamaQwenReadinessProjectionError(
+            f"LIMA readiness packet missing required fields: {', '.join(missing)}"
+        )
+
+    _assert_lima_packet_value(
+        packet["supervisor_attachment_status"] == "operator_attested_no_probe",
+        "supervisor_attachment_status must be operator_attested_no_probe",
+    )
+    _assert_lima_packet_value(
+        packet["route_mode"] in LIMA_ALLOWED_ROUTE_MODES,
+        "route_mode must be mock_only or local_planned",
+    )
+    _assert_lima_packet_value(
+        packet["route_status"] in LIMA_ALLOWED_ROUTE_STATUSES,
+        "route_status is outside the current LIMA schema set",
+    )
+    _assert_lima_packet_value(
+        packet["approved_runtime_family"] == EXPECTED_RUNTIME,
+        "approved_runtime_family must be ollama",
+    )
+    _assert_lima_packet_value(
+        packet["approved_model_family"] == EXPECTED_MODEL_FAMILY,
+        "approved_model_family must be qwen",
+    )
+    _assert_lima_packet_value(
+        str(packet["approved_model_alias"]).startswith(EXPECTED_MODEL_FAMILY),
+        "approved_model_alias must identify a Qwen model tag",
+    )
+    _assert_lima_packet_value(
+        isinstance(packet["localhost_endpoint_label_or_route_id"], str)
+        and bool(packet["localhost_endpoint_label_or_route_id"].strip()),
+        "localhost endpoint label or route ID must be a non-empty label",
+    )
+
+    attestation_refs = packet["attestation_refs"]
+    policy_refs = packet["policy_refs"]
+    blocked_capabilities = set(packet["blocked_capabilities"])
+    _assert_lima_packet_value(
+        isinstance(attestation_refs, dict)
+        and LIMA_REQUIRED_ATTESTATION_REFS.issubset(attestation_refs)
+        and all(attestation_refs.get(key) for key in LIMA_REQUIRED_ATTESTATION_REFS),
+        "all required Ollama/Qwen attestation refs must be present",
+    )
+    _assert_lima_packet_value(
+        isinstance(policy_refs, dict)
+        and LIMA_REQUIRED_POLICY_GROUPS.issubset(policy_refs)
+        and all(policy_refs.get(key) for key in LIMA_REQUIRED_POLICY_GROUPS),
+        "local/no-cloud/no-token policy refs must be present",
+    )
+    _assert_lima_packet_value(
+        LIMA_REQUIRED_BLOCKED_CAPABILITIES.issubset(blocked_capabilities),
+        "blocked_capabilities must include cloud_fallback, provider_token, and live_connector",
+    )
+    _assert_lima_packet_value(
+        isinstance(packet["guardian_decision_refs"], list)
+        and bool(packet["guardian_decision_refs"]),
+        "guardian_decision_refs must be a non-empty list",
+    )
+    _assert_lima_packet_value(
+        isinstance(packet["evidence_refs"], list) and bool(packet["evidence_refs"]),
+        "evidence_refs must be a non-empty list",
+    )
+
+    projection = build_ollama_qwen_readiness_projection(
+        OllamaQwenReadinessInput(
+            worker_id=str(packet["worker_id"]),
+            tenant_id=str(packet["tenant_id"]),
+            model_id=str(packet["approved_model_alias"]),
+            endpoint_label=str(packet["localhost_endpoint_label_or_route_id"]),
+            ollama_installed=True,
+            ollama_service_reachable=True,
+            qwen_model_present=True,
+            lima_office_attached=True,
+        )
+    )
+
+    route_status = str(packet["route_status"])
+    if packet["route_mode"] == "mock_only" or route_status == "degraded":
+        projection["readiness_status"] = "setup_required"
+        projection["connection_indicator"] = "red_attention"
+    if route_status in LIMA_STOP_ROUTE_STATUSES:
+        projection["readiness_status"] = "blocked"
+        projection["connection_indicator"] = "red_attention"
+        projection["missing_requirements"] = sorted(
+            set(projection["missing_requirements"]) | {f"lima_route_status_{route_status}"}
+        )
+
+    projection["source_access_mode"] = "lima_office_packet_read_only_no_probe"
+    projection["lima_office_packet"] = {
+        "contract_version": packet["contract_version"],
+        "model_route_ref": packet["model_route_ref"],
+        "route_mode": packet["route_mode"],
+        "route_status": route_status,
+        "supervisor_attachment_status": packet["supervisor_attachment_status"],
+        "readiness_status": packet["readiness_status"],
+        "reason_codes": list(packet.get("reason_codes", [])),
+        "hardware_profile_ref": packet["hardware_profile_ref"],
+        "attestation_refs": dict(attestation_refs),
+        "guardian_decision_refs": list(packet["guardian_decision_refs"]),
+        "blocked_capabilities": sorted(blocked_capabilities),
+    }
+    projection["evidence_refs"] = list(packet["evidence_refs"])
+    projection["policy_refs"] = [
+        ref
+        for refs in policy_refs.values()
+        for ref in (refs if isinstance(refs, list) else [refs])
+    ]
+    _assert_readiness_guardrails(projection)
+    return projection
+
+
+def _required_lima_fields() -> tuple[str, ...]:
+    return (
+        "contract_version",
+        "tenant_id",
+        "worker_id",
+        "supervisor_attachment_status",
+        "model_route_ref",
+        "route_mode",
+        "route_status",
+        "approved_runtime_family",
+        "approved_model_family",
+        "approved_model_alias",
+        "localhost_endpoint_label_or_route_id",
+        "hardware_profile_ref",
+        "attestation_refs",
+        "guardian_decision_refs",
+        "evidence_refs",
+        "policy_refs",
+        "blocked_capabilities",
+        "readiness_status",
+    )
+
+
+def _assert_lima_packet_value(condition: bool, message: str) -> None:
+    if not condition:
+        raise OllamaQwenReadinessProjectionError(message)
 
 
 def _build_parser() -> argparse.ArgumentParser:

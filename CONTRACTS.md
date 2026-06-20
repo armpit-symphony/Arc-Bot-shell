@@ -32,6 +32,8 @@ Status: Foundation contracts and invariants
 - Phase-2 Ollama/Qwen readiness projections must remain operator-attested,
   local-model-only, no-probe, no-model-invocation, no-provider-token, and
   no-cloud-fallback.
+- LIMA Office Ollama/Qwen readiness packets may be consumed only as read-only
+  metadata. Packet fields are labels/refs, not execution authority.
 - `source_access_mode` must be `read_only`.
 - `projection_gate.required` must be `true` and gate checks enforced in builders.
 - `contract_refs`, `policy_refs`, `evidence_refs`, `runbook_refs` must be present and non-empty where applicable.
@@ -68,6 +70,9 @@ Status: Foundation contracts and invariants
   SDKs, invoke local/cloud models, store credentials, or mutate LIMA Office.
 - Future live readiness checks must be owned by Guardian/LIMA Office and mapped
   back as evidence refs.
+- LIMA Office packet `route_status = degraded` maps to setup-required.
+  `denied`, `blocked_mvp`, and `unavailable` map to blocked. `mock_only` never
+  maps to live-ready.
 
 ### Arc Guardian/Spine Base
 - Minimal contract/stub layer for Arc-local Guardian decisions and Spine events.

@@ -19,6 +19,10 @@ _REEXPORTS: dict[str, tuple[str, str]] = {
         ".readiness",
         "build_ollama_qwen_readiness_projection",
     ),
+    "build_ollama_qwen_readiness_from_lima_packet": (
+        ".readiness",
+        "build_ollama_qwen_readiness_from_lima_packet",
+    ),
     "run_ollama_qwen_readiness_preview": (
         ".readiness",
         "run_ollama_qwen_readiness_preview",

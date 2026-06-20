@@ -85,7 +85,9 @@ drafting.
   - no secrets or provider tokens are introduced,
   - tests prove no network/provider calls occur,
   - LIMA Office handoff request identifies the fields Arc Bot needs from the
-    control plane.
+    control plane,
+  - LIMA Office handoff packet can be consumed as read-only metadata and fails
+    closed for missing/mismatched fields or blocked statuses.
 
 ## Phase 3 - Document Intake Contract
 
