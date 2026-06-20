@@ -36,6 +36,16 @@ Arc Bot Shell is proprietary/customizable business infrastructure. It is not Spa
 - Not an unrestricted automation runner
 - Not allowed to execute, dispatch, persist, or mutate without future explicit approved wiring
 
+## Product Boundary Decision (Committed)
+
+- Arc Bot is explicitly **not** an execution platform in this repository; it is a
+  contract-first shell for guarded office worker workflows.
+- The shell is a boundary layer above LIMA Office / LIMA AI OS, with
+  runtime authority intentionally delayed to approved downstream phases.
+- Runtime decisions are display-first and preview-only until runtime authority
+  gates and migration criteria are accepted in later phases.
+- This aligns with `DECISIONS.md` ADR-05.
+
 ## Core Shell Surfaces
 
 ### Task Inbox
@@ -215,6 +225,13 @@ Arc Bot Shell is not the open-source hype bot. Sparkbot Public owns the communit
 
 The shell may use public-facing language in demos, but its roadmap should stay honest about the trust boundary: business actions, connector writes, admin actions, secrets, client workflows, and evidence records belong behind approved LIMA Office, LIMA AI OS, Guardian, and Vault contracts.
 
+### Repo distribution model
+
+- Arc Bot Shell is treated as a **private/internal repository** for phase-0 and phase-1 development in this branch.
+- Distribution is limited to approved internal review channels unless a future ADR changes this posture.
+- The repo includes an explicit proprietary license file:
+  `LICENSE`.
+
 ## Repo Status
 
 This repo is currently a roadmap/staging repo for the Arc Bot business worker-bot shell. It should remain documentation-only until the shell boundaries, client-safe configuration model, and LIMA Office/LIMA AI OS integration contracts are approved.
@@ -223,6 +240,7 @@ This repo is currently a roadmap/staging repo for the Arc Bot business worker-bo
 
 - [Arc Bot Operator Console Foundation](docs/OPERATOR_CONSOLE_FOUNDATION.md)
 - [Arc Bot Operator Console State Contract](docs/contracts/ARC_BOT_OPERATOR_CONSOLE_STATE.md)
+- [Arc Guardian/Spine Base](docs/ARC_GUARDIAN_SPINE_BASE.md)
 - [Arc Bot Client Configuration Schema](docs/contracts/schemas/arc_bot_client_configuration.schema.json)
 - [Arc Bot No-Execution Skeleton Plan](docs/NO_EXECUTION_SKELETON_PLAN.md)
 - [Arc Bot Client Configuration Fixture](tests/fixtures/arc_bot_phase1_client_configuration.json)
@@ -238,17 +256,24 @@ This repo is currently a roadmap/staging repo for the Arc Bot business worker-bo
 - [Arc Bot Runtime UI Scaffold Adapter Proof Packet](docs/proof_packets/ARC_BOT_RUNTIME_UI_SCAFFOLD_PHASE0_ADAPTER_PROOF_PACKET.md)
 - [Arc Bot Runtime UI Scaffold Guardian Suite Seam Proof Packet](docs/proof_packets/ARC_BOT_RUNTIME_UI_SCAFFOLD_PHASE0_GUARDIAN_SUITE_SEAM_PROOF_PACKET.md)
 - [Arc Bot Runtime UI Scaffold Scope-Lock Status Snapshot Proof Packet](docs/proof_packets/ARC_BOT_RUNTIME_UI_SCAFFOLD_PHASE0_SCOPE_LOCK_STATUS_SNAPSHOT_PROOF_PACKET.md)
+- [Arc Bot Runtime UI Scaffold Runtime-Control Renderer Proof Packet](docs/proof_packets/ARC_BOT_RUNTIME_UI_SCAFFOLD_PHASE2_RUNTIME_CONTROL_RENDERER_HANDOFF_PROOF_PACKET.md)
+- [Arc Bot Runtime UI Scaffold Runtime-Control Execution Planning Proof Packet](docs/proof_packets/ARC_BOT_RUNTIME_UI_SCAFFOLD_PHASE3_RUNTIME_CONTROL_EXECUTION_HANDOFF_PROOF_PACKET.md)
 - [Arc Bot Phase-1 Client Configuration No-Execution Packet](docs/proof_packets/ARC_BOT_PHASE1_CLIENT_CONFIGURATION_NO_EXECUTION_PACKET.md)
 - [Arc Bot Phase-1 Client Configuration Migration Gate Packet](docs/proof_packets/ARC_BOT_PHASE1_CLIENT_CONFIGURATION_MIGRATION_GATE_PACKET.md)
 - [Arc Bot Phase-1 Business MVP Roadmap Packet](docs/proof_packets/ARC_BOT_PHASE1_MVP_ROADMAP_PACKET.md)
 - [Arc Bot Phase-1 Readiness Bundle Packet](docs/proof_packets/ARC_BOT_PHASE1_READINESS_BUNDLE_PACKET.md)
 - [Arc Bot Phase-1 Runtime Authority Gating Packet](docs/proof_packets/ARC_BOT_PHASE1_RUNTIME_AUTHORITY_GATING_PACKET.md)
+- [Phase-0 Scope-Lock Contract Change Handoff Runbook](docs/runbooks/phase0_scope_lock_contract_change_handoff.md)
 - [Arc Bot Phase-1 Business Inventory Proof Packet](docs/proof_packets/ARC_BOT_PHASE1_BUSINESS_INVENTORY_PROOF_PACKET.md)
 - [Arc Bot Phase-1 Business Inventory Migration Gate Packet](docs/proof_packets/ARC_BOT_PHASE1_BUSINESS_INVENTORY_MIGRATION_GATE_PACKET.md)
 - [Arc Bot Phase-1 Business MVP Roadmap](docs/ROADMAP_PHASE1_BUSINESS_MVP.md)
+- [Arc Bot Completion Roadmap](docs/ROADMAP_ARC_BOT_COMPLETION.md)
 - [Arc Bot Runtime UI Scope Lock Punch List](docs/ROADMAP_SCOPE_LOCK_PUNCH_LIST.md)
+- [Arc Bot Phase-0 Scope Lock Punch List](docs/ROADMAP_SCOPE_LOCK_PHASE0_PUNCH_LIST.md)
+- [Arc Bot Phase-1 Readiness Handoff Punch List](docs/ROADMAP_PHASE1_HANDOFF_PUNCH_LIST.md)
 - [Arc Bot Reconstruction Docs And Source Map](docs/audits/ARC_BOT_RECONSTRUCTION_DOCS_AND_SOURCE_MAP.md)
 - [Arc Bot Phase-0 Roadmap](docs/ROADMAP.md)
+- [LIMA Office / LIMA AI OS Contract Assumptions (Reviewed)](docs/LIMA_OFFICE_LIMA_AI_OS_CONTRACT_ASSUMPTIONS.md)
 - Core architecture planning:
   - [ARCHITECTURE.md](ARCHITECTURE.md)
   - [MVP_SCOPE.md](MVP_SCOPE.md)
@@ -274,16 +299,30 @@ The operator-console foundation defines the first office-worker control-room sur
 - Phase-1 runtime consumer preview (for downstream UI/runtime handoff): `python -m phase0_runtime_ui_scaffold.runtime_consumer`.
 - Phase-2 runtime-control seam preview (downstream UI state handoff): `python -m phase0_runtime_ui_scaffold.phase2_runtime_control`.
 - Phase-2 runtime-control consumer handoff preview (for downstream bounded UI control consumer): `python -m phase0_runtime_ui_scaffold.runtime_control_consumer`.
+- Phase-2 runtime-control renderer preview (bounded UI controls, execution-disabled): `python -m phase0_runtime_ui_scaffold.runtime_control_renderer`.
+- Phase-3 runtime-control execution planning preview (execution still blocked by default): `python -m phase0_runtime_ui_scaffold.runtime_control_execution`.
+- Arc Guardian/Spine base preview (local-model PC shell, execution blocked): `python -m arc_guardian_spine.preview`.
 - End-to-end phase-chain seam preview (preview -> runtime consumer -> control handoff -> control consumer): `python -m phase0_runtime_ui_scaffold.phase_chain`.
 - Include guardian-suite seam summary in phase-chain preview: `python -m phase0_runtime_ui_scaffold.phase_chain --with-guardian-suite-seam`.
+- Include phase-3 execution planning in phase-chain/status-snapshot preview:
+  `python -m phase0_runtime_ui_scaffold.phase_chain --with-phase3-execution-projection`.
+- Scope-lock automation check command: `./scripts/scope_lock_guardrails.ps1`.
+- Scope-lock artifact refresh command (canonical fixture regeneration): `./scripts/refresh_scope_lock_artifacts.ps1`.
+- Combined phase-0 + phase-1 guardrail command: `./scripts/phase0_phase1_handoff_guardrails.ps1`.
+- Phase-1 readiness handoff check command: `./scripts/phase1_handoff_guardrails.ps1`.
+- Phase-2/3 runtime-control handoff guardrail command: `./scripts/phase2_handoff_guardrails.ps1`.
 - Emit read-only Phase-1 business inventory preview: `python -m phase1_business_shell_inventory.inventory`.
 - Emit read-only Phase-1 client configuration preview: `python -m phase1_client_configuration.configuration`.
 - Emit Phase-1 runtime authority gating projection: `python -m phase1_runtime_authority_gating.gating`.
+- Emit read-only Phase-1 business/runtime alignment projection: `python -m phase1_business_shell_inventory.runtime_alignment`.
 - Emit read-only Phase-1 readiness bundle: `python -m phase1_readiness.bundle`.
+- Emit deterministic phase-lock projection pack (chain/status snapshot + phase-2/3 control projections + readiness handoff artifacts): `python scripts/emit_arc_bot_artifacts.py --fixtures-dir tests/fixtures --compact`.
+- Emit projection pack via PowerShell helper (same as above): `./scripts/emit_arc_bot_artifacts.ps1`.
 - Emit canonical scope-lock status snapshot artifact: `python -m phase0_runtime_ui_scaffold.phase_chain --emit-status-snapshot --with-guardian-suite-seam`.
 - Emit and write canonical snapshot artifact: `python -m phase0_runtime_ui_scaffold.phase_chain --emit-status-snapshot --with-guardian-suite-seam --status-snapshot-path tests/fixtures/arc_bot_runtime_ui_scaffold_phase0_scope_lock_status_snapshot.json --compact`.
 - Scope-lock status snapshot fixture assertion: `python -m pytest -q tests/test_arc_bot_runtime_ui_scaffold_phase_chain.py::test_phase_chain_scope_lock_status_snapshot_matches_fixture`.
-- Reproducible local check (bypasses machine temp/cache write issues): `python -m pytest -p no:cacheprovider --basetemp tmp_pytest -q tests/test_arc_bot_runtime_ui_scaffold_phase_chain.py tests/test_arc_bot_runtime_ui_scaffold_guardian_suite_seam.py tests/test_arc_bot_phase0_scope_lock_runtime_ui.py tests/test_arc_bot_runtime_ui_scaffold_contracts.py`.
+- Reproducible local check: `python -m pytest -p no:cacheprovider --basetemp tmp_pytest -q tests/test_arc_bot_runtime_ui_scaffold_phase_chain.py tests/test_arc_bot_runtime_ui_scaffold_guardian_suite_seam.py tests/test_arc_bot_phase0_scope_lock_runtime_ui.py tests/test_arc_bot_runtime_ui_scaffold_contracts.py`.
+- CI guardrail workflow: `.github/workflows/guardrails.yml` (runs scope-lock, phase-1, and phase-2/3 handoff suites on push/PR).
 
 ## Reference Context (For Next Phase)
 
@@ -316,8 +355,8 @@ The operator-console foundation defines the first office-worker control-room sur
 
 ## Next Steps Checklist
 
-- [ ] Confirm Arc Bot product boundary
-- [ ] Decide repo visibility and license/distribution model
+- [x] Confirm Arc Bot product boundary
+- [x] Decide repo visibility and license/distribution model
 - [x] Define first target business role
 - [x] Define task status and risk labels
 - [x] Define approval posture labels
@@ -328,4 +367,4 @@ The operator-console foundation defines the first office-worker control-room sur
 - [x] Create shell wireframes
 - [x] Create no-execution skeleton plan
 - [x] Prepare first business MVP roadmap
-- [ ] Review LIMA Office/LIMA AI OS contract assumptions
+- [x] Review LIMA Office/LIMA AI OS contract assumptions

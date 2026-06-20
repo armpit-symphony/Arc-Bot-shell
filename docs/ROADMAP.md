@@ -75,8 +75,9 @@ Lock down runtime scope for the shell user surface so no action path can infer r
 
 ## 2) Next Milestones (post-scope lock)
 
-- [x] Add mock/read-only contract fixtures for full shell-state envelope.
-- [x] Add adapter contract package and proof packet for surface snapshots.
+  - [x] Add mock/read-only contract fixtures for full shell-state envelope.
+  - [x] Enforce scope-lock and phase-1 handoff guardrails through CI.
+  - [x] Add adapter contract package and proof packet for surface snapshots.
   - [x] Implement a phase-gated read-only render harness from adapter payload (mock-safe).
   - [x] Add read-feed runtime-seam projection helper behind phase gate for preview-only UI handoff.
   - [x] Add runtime-consumer handoff proof and validation for phase-2 transfer continuity.
@@ -84,6 +85,9 @@ Lock down runtime scope for the shell user surface so no action path can infer r
   - [x] Add a preview interface/entrypoint to render the read-only projection for downstream consumers.
   - [x] Add a runtime-control handoff proof seam and validation checks for UI state transfer.
   - [x] Implement phase-2 runtime-control seam consumer integration for downstream UI state handoff (still execution-disabled).
+  - [x] Add phase-2 runtime-control renderer seam for bounded UI controls (still preview-only).
+  - [x] Add phase-3 runtime-control execution planning seam (execution remains blocked by default).
+  - [x] Add minimal Arc Guardian/Spine base projection for local-model PC readiness (execution remains blocked).
   - [x] Add an end-to-end phase-chain continuity test across all preview/control seams.
 - [x] Add a full-phase chain preview command for operator review.
 - [x] Lock all phase-chain and phase outputs to source `app.services.guardian.suite` and `read_only` with execution blocked.
@@ -108,4 +112,5 @@ Lock down runtime scope for the shell user surface so no action path can infer r
 - Sparkbot reference: `https://github.com/armpit-symphony/Sparkbot`
 - Sparkbot shell reference: `https://github.com/armpit-symphony/Sparkbot_shell`
 - LIMA-Guardian-Suite reference: `https://github.com/armpit-symphony/LIMA-Guardian-Suite`
+- Arc Guardian/Spine base: `docs/ARC_GUARDIAN_SPINE_BASE.md` and `arc_guardian_spine/`
 - LIMA Office references and contracts remain the operator source of truth for state shaping.
