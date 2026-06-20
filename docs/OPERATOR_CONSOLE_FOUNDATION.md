@@ -70,6 +70,8 @@ The preview covers the requested MVP operator controls:
 - File upload staging box for office-document intake preview.
 - Phase-3 document intake metadata preview for PDF, text, image scan, and Word
   document uploads.
+- Phase-4 document extraction metadata preview for filename metadata, file
+  type, page-count placeholder, checksum placeholder, and operator category.
 - Training note box for operator-reviewed workflow examples.
 - Self-learning review toggle for memory candidates that still require approval.
 - Chat panel for queueing preview requests.
@@ -82,6 +84,14 @@ The Phase-3 document intake contract is available through
 `phase3_document_intake.intake`. It validates metadata only and returns
 ready-for-review or blocked status. It does not read file bytes, persist raw
 content, run OCR, invoke parsers, call models, or write to customer systems.
+
+The Phase-4 document extraction preview contract is available through
+`phase4_document_extraction.extraction`. It emits deterministic metadata-only
+preview artifacts, Guardian decision metadata, evidence refs, and a
+projection-only Spine event. Its local model provider interface is injectable
+for future approved work, but Phase 4 still blocks model invocation, provider
+SDK use, network egress, file reads, parser/OCR execution, raw content
+persistence, connector actions, and customer-system mutation.
 
 The Phase-2 local model readiness projection is available through
 `phase2_local_model_readiness.readiness`. It uses Ollama as the runtime target

@@ -205,8 +205,21 @@ def evaluate_arc_action(request: ArcActionRequest) -> ArcGuardianDecision:
             approval_required=False,
         )
 
+    if request.action_kind == "document_extract_preview":
+        if request.requested_tool_pack == "local_model_preview":
+            return _decision(
+                request,
+                decision="approval_required",
+                reason_code="local_model_preview_requires_guardian_approval",
+            )
+        return _decision(
+            request,
+            decision="allow_preview",
+            reason_code="deterministic_extraction_preview_no_model_call",
+            approval_required=False,
+        )
+
     if request.action_kind in {
-        "document_extract_preview",
         "document_draft_generation",
         "document_export_request",
     }:

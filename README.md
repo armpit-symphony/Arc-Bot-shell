@@ -242,6 +242,8 @@ This repo is currently a roadmap/staging repo for the Arc Bot business worker-bo
 - [Arc Bot Operator Console State Contract](docs/contracts/ARC_BOT_OPERATOR_CONSOLE_STATE.md)
 - [Arc Guardian/Spine Base](docs/ARC_GUARDIAN_SPINE_BASE.md)
 - [Arc Bot Basic Guardian Console](ui/arc_bot_basic_console.html)
+- Arc Bot Phase-4 document extraction preview:
+  `python -m phase4_document_extraction.extraction`
 - [Arc Bot Phase-2 Ollama/Qwen Readiness Request For LIMA Office](docs/LIMA_OFFICE_TEAM_PHASE2_REQUEST.md)
 - [Arc Bot Client Configuration Schema](docs/contracts/schemas/arc_bot_client_configuration.schema.json)
 - [Arc Bot No-Execution Skeleton Plan](docs/NO_EXECUTION_SKELETON_PLAN.md)
@@ -324,6 +326,20 @@ The operator-console foundation defines the first office-worker control-room sur
     operator, and processing mode.
   - Does not read files, persist raw content, run OCR/parsers, call models, or
     mutate customer systems.
+- Phase-4 document extraction preview:
+  `python -m phase4_document_extraction.extraction`.
+  - Returns deterministic filename metadata, classified file type, page-count
+    placeholder, checksum placeholder, and operator-supplied document category.
+  - Emits Guardian decision metadata, evidence refs, and a projection-only Spine
+    event.
+  - Provides an injectable local model preview provider interface, but the
+    default provider is blocked and does not invoke any model.
+  - Missing local model seat health, approval token, redaction policy, or output
+    policy keeps model-assisted preview approval-required; even complete gate
+    data does not grant runtime execution in Phase 4.
+  - Does not read files, persist raw content, run OCR/parsers, use provider SDKs,
+    call models, open network paths, call connectors, or mutate customer
+    systems.
 - Basic Guardian console static UI: `ui/arc_bot_basic_console.html`.
   - Shows Local Model and LIMA Office connection indicators with connect buttons.
   - Includes file upload, training notes, self-learning review mode, and chat panels.

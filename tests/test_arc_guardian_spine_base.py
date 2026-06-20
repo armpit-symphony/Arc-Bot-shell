@@ -55,11 +55,34 @@ def test_arc_document_intake_preview_allows_preview_only() -> None:
     assert decision.policy_refs
 
 
-def test_arc_document_extract_preview_requires_guardian_approval() -> None:
+def test_arc_document_extract_preview_allows_deterministic_preview_only() -> None:
     projection = build_arc_guardian_spine_base(
         ArcActionRequest(
             action_id="arc-action-test-extract",
             action_kind="document_extract_preview",
+        )
+    )
+
+    decision = projection["guardian_decision"]
+    assert decision["decision"] == "allow_preview"
+    assert decision["reason_code"] == "deterministic_extraction_preview_no_model_call"
+    assert decision["approval_required"] is False
+    assert decision["local_model_execution_blocked"] is True
+    assert projection["approval_request"] is None
+
+    event = projection["spine_event"]
+    assert event["event_type"] == "guardian_decision_projected"
+    assert event["persistence_mode"] == "projection_only"
+    assert event["guardian_decision_ref"] == decision["decision_id"]
+    assert event["guardian_decision_result"] == "allow_preview"
+
+
+def test_arc_document_extract_preview_requires_guardian_approval_for_model_tool_pack() -> None:
+    projection = build_arc_guardian_spine_base(
+        ArcActionRequest(
+            action_id="arc-action-test-extract",
+            action_kind="document_extract_preview",
+            requested_tool_pack="local_model_preview",
         )
     )
 
@@ -191,6 +214,8 @@ def test_arc_guardian_spine_preview_cli_outputs_projection() -> None:
             "arc_guardian_spine.preview",
             "--action-kind",
             "document_extract_preview",
+            "--requested-tool-pack",
+            "local_model_preview",
             "--compact",
         ],
         check=True,

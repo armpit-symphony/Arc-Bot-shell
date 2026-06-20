@@ -121,6 +121,9 @@ drafting.
 
 ## Phase 4 - Local Document Extraction Preview
 
+Status: completed as a deterministic, projection-only contract. Runtime model
+execution remains blocked for later approved phases.
+
 - Add first guarded local extraction path behind Guardian:
   - classify action,
   - require approval if local model invocation is needed,

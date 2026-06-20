@@ -15,6 +15,7 @@ Status: Foundation contracts and invariants
 - `arc_bot_basic_guardian_console_projection`
 - `phase2_ollama_qwen_readiness_projection`
 - `phase3_document_intake_preview`
+- `phase4_document_extraction_preview`
 - fixture contracts under `tests/fixtures/*`
 - proof packets under `docs/proof_packets/*`
 
@@ -37,6 +38,9 @@ Status: Foundation contracts and invariants
   metadata. Packet fields are labels/refs, not execution authority.
 - Phase-3 document intake previews must validate metadata only and must not
   read, parse, OCR, persist, or model-process raw document content.
+- Phase-4 document extraction previews must remain deterministic metadata
+  previews unless a later approved phase grants runtime authority. The local
+  model provider interface is injectable only and must not call a model.
 - `source_access_mode` must be `read_only`.
 - `projection_gate.required` must be `true` and gate checks enforced in builders.
 - `contract_refs`, `policy_refs`, `evidence_refs`, `runbook_refs` must be present and non-empty where applicable.
@@ -88,6 +92,23 @@ Status: Foundation contracts and invariants
   logs, or repo state.
 - OCR, parser calls, local model calls, file reads/writes, connector actions,
   and customer-system mutation remain blocked.
+
+### Phase-4 Document Extraction Preview
+- Extraction previews must reuse the Phase-3 intake metadata boundary.
+- Deterministic preview output may include filename metadata, classified file
+  type, page-count placeholder, checksum placeholder, and operator-supplied
+  document category.
+- Every extraction preview must include Guardian decision metadata, evidence
+  refs, policy refs, runbook refs, and a projection-only Spine event.
+- If local model assistance is requested, the projection must require gate data:
+  local model seat health, approval token ref, redaction policy ref, and output
+  policy ref.
+- Even when gate data is present, Phase 4 must not grant local model execution;
+  the provider interface remains projection-only until a later approved runtime
+  gate.
+- File reads/writes, OCR, parser calls, local/cloud model calls, provider SDKs,
+  network egress, connector actions, raw content persistence, and
+  customer-system mutation remain blocked.
 
 ### Arc Guardian/Spine Base
 - Minimal contract/stub layer for Arc-local Guardian decisions and Spine events.

@@ -34,11 +34,20 @@ def run_arc_guardian_spine_preview(argv: list[str] | None = None) -> int:
         "--action-id",
         default="arc-action-local-doc-preview-001",
     )
+    parser.add_argument(
+        "--requested-tool-pack",
+        default="office_docs",
+        choices=["office_docs", "local_model_preview", "spine_readiness"],
+    )
     parser.add_argument("--compact", action="store_true")
     args = parser.parse_args(argv)
 
     projection = build_arc_guardian_spine_base(
-        ArcActionRequest(action_id=args.action_id, action_kind=args.action_kind)
+        ArcActionRequest(
+            action_id=args.action_id,
+            action_kind=args.action_kind,
+            requested_tool_pack=args.requested_tool_pack,
+        )
     )
     json.dump(
         projection,

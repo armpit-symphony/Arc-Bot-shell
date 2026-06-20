@@ -22,6 +22,10 @@ from phase3_document_intake import (
     DocumentIntakeRequest,
     build_document_intake_preview,
 )
+from phase4_document_extraction import (
+    DocumentExtractionRequest,
+    build_document_extraction_preview,
+)
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -89,6 +93,22 @@ def _assert_guardrails(projection: dict[str, Any]) -> None:
                 f"Document intake preview must keep {blocked_flag}=False"
             )
 
+    extraction_preview = projection["file_upload"].get("document_extraction_preview", {})
+    for blocked_flag in (
+        "raw_content_persisted",
+        "file_read_performed",
+        "ocr_performed",
+        "parser_invoked",
+        "model_invocation_performed",
+        "network_egress_performed",
+    ):
+        if extraction_preview.get(blocked_flag) is not False:
+            raise BasicConsoleProjectionError(
+                f"Document extraction preview must keep {blocked_flag}=False"
+            )
+    if extraction_preview.get("runtime_execution_blocked") is not True:
+        raise BasicConsoleProjectionError("Document extraction preview must remain blocked")
+
 
 def build_basic_guardian_console_projection(
     *,
@@ -97,6 +117,7 @@ def build_basic_guardian_console_projection(
     self_learning_enabled: bool = False,
     local_model_readiness: dict[str, Any] | None = None,
     document_intake_preview: dict[str, Any] | None = None,
+    document_extraction_preview: dict[str, Any] | None = None,
     phase_gate_name: str = EXPECTED_PHASE_GATE_NAME,
 ) -> dict[str, Any]:
     """Build the basic Arc Bot console projection for the static UI."""
@@ -115,6 +136,15 @@ def build_basic_guardian_console_projection(
             document_id="doc-intake-preview-001",
             source_ref="upload://arc-bot/manual-staging/sample-intake.pdf",
             document_type="auto",
+        )
+    )
+    extraction_projection = document_extraction_preview or build_document_extraction_preview(
+        DocumentExtractionRequest(
+            extraction_id="extract-preview-001",
+            document_id="doc-intake-preview-001",
+            source_ref="upload://arc-bot/manual-staging/sample-intake.pdf",
+            document_type="auto",
+            operator_supplied_category="office_document_preview",
         )
     )
 
@@ -157,6 +187,7 @@ def build_basic_guardian_console_projection(
             "raw_file_persistence_allowed": False,
             "allowed_result": "redacted_metadata_preview",
             "document_intake_preview": intake_projection,
+            "document_extraction_preview": extraction_projection,
         },
         "training": {
             "surface": "training",

@@ -29,6 +29,12 @@ def test_basic_console_projection_defaults_to_disconnected_and_guarded() -> None
     assert projection["local_model_readiness"]["model_invocation_performed"] is False
     assert projection["file_upload"]["document_intake_preview"]["phase"] == "phase-3"
     assert projection["file_upload"]["document_intake_preview"]["file_read_performed"] is False
+    extraction = projection["file_upload"]["document_extraction_preview"]
+    assert extraction["phase"] == "phase-4"
+    assert extraction["extraction_status"] == "ready_for_review"
+    assert extraction["file_read_performed"] is False
+    assert extraction["model_invocation_performed"] is False
+    assert extraction["runtime_execution_blocked"] is True
 
     local_model = projection["connections"]["local_model"]
     lima_office = projection["connections"]["lima_office"]
@@ -115,6 +121,7 @@ def test_static_basic_console_html_contains_required_controls() -> None:
         'id="file-upload-box"',
         'id="file-upload-input"',
         'id="document-intake-contract"',
+        'id="document-extraction-contract"',
         'id="training-box"',
         'id="self-learning-toggle"',
         'id="chat-panel"',
@@ -131,5 +138,6 @@ def test_static_basic_console_html_contains_required_controls() -> None:
     assert "\\u2713" in html
     assert "No model call, connector action, file processing, training write" in html
     assert "Phase 3 intake accepts PDF, text, image scan, and Word metadata only" in html
+    assert "Phase 4 extraction preview returns filename metadata" in html
     assert "<script src=" not in html
     assert "<form" not in html

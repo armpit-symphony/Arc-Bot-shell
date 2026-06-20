@@ -78,11 +78,30 @@ The intake preview may return `ready_for_review` or `blocked`. It must not read
 file bytes, persist raw document content, run OCR, invoke parsers, call the
 local model, mutate files, call connectors, or update customer systems.
 
+## Phase-4 Document Extraction Preview Boundary
+
+Document extraction preview is deterministic metadata-only in Phase 4. Arc Bot
+may return filename metadata, classified document type, page-count placeholder,
+checksum placeholder, and operator-supplied document category.
+
+Every extraction preview must remain behind Guardian classification, redacted
+evidence refs, policy refs, runbook refs, and a projection-only Spine event. If
+a request says local model assistance is needed, the projection requires local
+model seat health, approval token, redaction policy, and output policy metadata.
+Those fields are gate data only. They do not grant runtime execution in Phase 4.
+
+The local model provider is an injectable interface for later approved runtime
+work. The default provider is blocked and performs no local model call, provider
+SDK use, socket/network action, parser/OCR action, file read/write, connector
+action, raw content persistence, or customer-system mutation.
+
 ## Preview Command
 
 ```powershell
 python -m arc_guardian_spine.preview
 python -m arc_guardian_spine.preview --action-kind document_extract_preview
+python -m arc_guardian_spine.preview --action-kind document_extract_preview --requested-tool-pack local_model_preview
+python -m phase4_document_extraction.extraction
 ```
 
 The preview emits JSON only and performs no runtime action.
