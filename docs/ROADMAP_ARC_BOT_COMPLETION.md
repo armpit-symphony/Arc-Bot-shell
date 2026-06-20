@@ -56,7 +56,9 @@ drafting.
 - Completion gate:
   - import-only tests pass,
   - every non-preview action returns blocked or approval-required,
-  - every decision has policy, evidence, and runbook refs.
+  - every decision has policy, evidence, and runbook refs,
+  - approval requests are non-reusable and grant no runtime execution,
+  - local Spine ledger helpers are projection-only.
 
 ## Phase 2 - Local Model Seat Readiness
 

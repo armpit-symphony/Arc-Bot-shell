@@ -47,6 +47,9 @@ Status: Foundation contracts and invariants
 - Source-of-truth references are Sparkbot for working Guardian/Spine behavior and LIMA-Guardian-Suite for extraction context.
 - No direct import of Sparkbot runtime modules, no direct import of LIMA-Guardian-Suite runtime modules, and no model/connector/file/network execution.
 - Local model seat metadata is allowed only as readiness posture for a PC attached to LIMA Office.
+- Approval requests must be non-reusable and must not grant runtime or local-model execution in Phase-1.
+- Evidence refs must be redacted-reference metadata only; raw office/customer content must not be persisted.
+- Local Spine ledger helpers must remain projection-only and must not write to disk.
 
 ### Client Configuration
 - Static planning contract for tenant boundary, deployment topology, operator roles, connector posture, policy posture, and evidence requirements.

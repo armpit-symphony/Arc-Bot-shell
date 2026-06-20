@@ -19,11 +19,15 @@ def run_arc_guardian_spine_preview(argv: list[str] | None = None) -> int:
         choices=[
             "document_intake_preview",
             "document_extract_preview",
+            "document_draft_generation",
+            "document_export_request",
+            "connector_request",
             "local_model_call",
             "connector_action",
             "customer_record_mutation",
             "external_send",
             "runtime_tool_execution",
+            "admin_remediation",
         ],
     )
     parser.add_argument(

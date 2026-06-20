@@ -302,6 +302,7 @@ The operator-console foundation defines the first office-worker control-room sur
 - Phase-2 runtime-control renderer preview (bounded UI controls, execution-disabled): `python -m phase0_runtime_ui_scaffold.runtime_control_renderer`.
 - Phase-3 runtime-control execution planning preview (execution still blocked by default): `python -m phase0_runtime_ui_scaffold.runtime_control_execution`.
 - Arc Guardian/Spine base preview (local-model PC shell, execution blocked): `python -m arc_guardian_spine.preview`.
+- Arc Guardian/Spine Phase-1 contract shape includes non-reusable approval requests, redacted evidence refs, and a projection-only local Spine ledger.
 - End-to-end phase-chain seam preview (preview -> runtime consumer -> control handoff -> control consumer): `python -m phase0_runtime_ui_scaffold.phase_chain`.
 - Include guardian-suite seam summary in phase-chain preview: `python -m phase0_runtime_ui_scaffold.phase_chain --with-guardian-suite-seam`.
 - Include phase-3 execution planning in phase-chain/status-snapshot preview:

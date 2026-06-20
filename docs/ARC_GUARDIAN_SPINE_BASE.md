@@ -21,7 +21,10 @@ Arc Bot starts with these pieces only:
 
 - `ArcActionRequest`: metadata-only office action request.
 - `ArcGuardianDecision`: fail-closed decision record.
+- `ArcApprovalRequest`: non-reusable approval request metadata.
+- `ArcEvidenceRef`: redacted evidence reference metadata.
 - `ArcSpineEvent`: read-only event projection for future LIMA Office ingestion.
+- `ArcSpineLedger`: projection-only local Spine helper with no disk writes.
 - `ArcLocalModelSeat`: local model readiness metadata for one worker PC.
 
 The implementation lives in `arc_guardian_spine/` and is import-only safe.
@@ -61,6 +64,21 @@ python -m arc_guardian_spine.preview --action-kind document_extract_preview
 ```
 
 The preview emits JSON only and performs no runtime action.
+
+## Phase-1 Contract Shape
+
+The Phase-1 base supports the minimum Arc Guardian/Spine runtime shape without
+runtime execution:
+
+- deterministic action classification,
+- structured policy/evidence/runbook refs,
+- non-reusable approval request projection,
+- projection-only Spine events,
+- in-memory/projection-only local Spine ledger helpers for recent, blocked, and
+  approval-required actions.
+
+The local Spine ledger is not persistence. It is a contract surface for a later
+LIMA Office handoff.
 
 ## Next Gate
 

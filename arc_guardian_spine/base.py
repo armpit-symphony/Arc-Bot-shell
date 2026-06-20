@@ -32,18 +32,30 @@ ARC_RUNBOOK_REFS = (
     "runbook://arc-bot/local-model-seat-readiness",
     "runbook://arc-bot/document-intake-preview",
 )
+ARC_EVIDENCE_TYPES = (
+    "local_model_seat_readiness",
+    "document_intake_contract",
+    "guardian_decision",
+    "approval_request",
+    "spine_event",
+)
 
 ActionKind = Literal[
     "document_intake_preview",
     "document_extract_preview",
+    "document_draft_generation",
+    "document_export_request",
+    "connector_request",
     "local_model_call",
     "connector_action",
     "customer_record_mutation",
     "external_send",
     "runtime_tool_execution",
+    "admin_remediation",
 ]
 
 Decision = Literal["allow_preview", "approval_required", "deny"]
+ApprovalStatus = Literal["not_required", "pending", "approved", "denied", "expired", "revoked"]
 
 
 @dataclass(frozen=True)
@@ -81,6 +93,18 @@ class ArcActionRequest:
 
 
 @dataclass(frozen=True)
+class ArcEvidenceRef:
+    """Evidence reference metadata without storing raw office content."""
+
+    ref_id: str
+    evidence_type: str
+    required: bool = True
+    sensitivity: str = "office_internal"
+    raw_content_persisted: bool = False
+    redacted_summary_only: bool = True
+
+
+@dataclass(frozen=True)
 class ArcGuardianDecision:
     """Fail-closed decision projection for Arc's stripped Guardian shell."""
 
@@ -99,6 +123,23 @@ class ArcGuardianDecision:
 
 
 @dataclass(frozen=True)
+class ArcApprovalRequest:
+    """Approval request contract for actions that may later become consequential."""
+
+    approval_id: str
+    action_id: str
+    guardian_decision_ref: str
+    status: ApprovalStatus = "pending"
+    operator_id: str = "operator-local"
+    reusable: bool = False
+    grants_runtime_execution: bool = False
+    grants_local_model_execution: bool = False
+    policy_refs: tuple[str, ...] = ARC_POLICY_REFS
+    evidence_refs: tuple[str, ...] = field(default_factory=tuple)
+    runbook_refs: tuple[str, ...] = ARC_RUNBOOK_REFS
+
+
+@dataclass(frozen=True)
 class ArcSpineEvent:
     """Read-only event projection for future LIMA Office spine ingestion."""
 
@@ -113,6 +154,37 @@ class ArcSpineEvent:
     persistence_mode: str = "projection_only"
     evidence_refs: tuple[str, ...] = field(default_factory=tuple)
     guardian_decision_ref: str = ""
+    guardian_decision_result: Decision = "deny"
+    reason_code: str = ""
+
+
+@dataclass(frozen=True)
+class ArcSpineLedger:
+    """Projection-only local Spine ledger helper.
+
+    The ledger keeps events in memory and never writes to disk. It is a contract
+    shape for the future LIMA Office handoff, not a persistence implementation.
+    """
+
+    events: tuple[ArcSpineEvent, ...] = ()
+
+    def append_planned_event(self, event: ArcSpineEvent) -> "ArcSpineLedger":
+        return ArcSpineLedger(events=(*self.events, event))
+
+    def list_recent_events(self, limit: int = 10) -> tuple[ArcSpineEvent, ...]:
+        if limit <= 0:
+            return ()
+        return self.events[-limit:]
+
+    def list_blocked_actions(self) -> tuple[ArcSpineEvent, ...]:
+        return tuple(event for event in self.events if event.guardian_decision_result == "deny")
+
+    def list_approval_required_actions(self) -> tuple[ArcSpineEvent, ...]:
+        return tuple(
+            event
+            for event in self.events
+            if event.guardian_decision_result == "approval_required"
+        )
 
 
 def evaluate_arc_action(request: ArcActionRequest) -> ArcGuardianDecision:
@@ -133,7 +205,11 @@ def evaluate_arc_action(request: ArcActionRequest) -> ArcGuardianDecision:
             approval_required=False,
         )
 
-    if request.action_kind == "document_extract_preview":
+    if request.action_kind in {
+        "document_extract_preview",
+        "document_draft_generation",
+        "document_export_request",
+    }:
         return _decision(
             request,
             decision="approval_required",
@@ -159,6 +235,8 @@ def build_arc_guardian_spine_base(
     )
     model_seat = local_model_seat or ArcLocalModelSeat()
     decision = evaluate_arc_action(action_request)
+    evidence_refs = build_arc_evidence_refs(action_request, decision)
+    approval_request = build_arc_approval_request(action_request, decision)
     spine_event = ArcSpineEvent(
         event_id=f"spine-event:{action_request.action_id}",
         event_type="guardian_decision_projected",
@@ -168,7 +246,10 @@ def build_arc_guardian_spine_base(
         tenant_id=action_request.tenant_id,
         evidence_refs=action_request.evidence_refs,
         guardian_decision_ref=decision.decision_id,
+        guardian_decision_result=decision.decision,
+        reason_code=decision.reason_code,
     )
+    ledger = ArcSpineLedger().append_planned_event(spine_event)
 
     return {
         "artifact_id": "arc_guardian_spine_base_v1",
@@ -186,7 +267,17 @@ def build_arc_guardian_spine_base(
         "local_model_seat": asdict(model_seat),
         "action_request": asdict(action_request),
         "guardian_decision": asdict(decision),
+        "evidence_refs": [asdict(evidence_ref) for evidence_ref in evidence_refs],
+        "approval_request": asdict(approval_request) if approval_request else None,
         "spine_event": asdict(spine_event),
+        "spine_ledger": {
+            "persistence_mode": "projection_only",
+            "recent_events": [asdict(event) for event in ledger.list_recent_events()],
+            "blocked_actions": [asdict(event) for event in ledger.list_blocked_actions()],
+            "approval_required_actions": [
+                asdict(event) for event in ledger.list_approval_required_actions()
+            ],
+        },
         "reference_repos": {
             "sparkbot": "C:/Users/limap/Sparkbot",
             "guardian_suite": "C:/Users/limap/LIMA-Guardian-Suite",
@@ -208,4 +299,48 @@ def _decision(
         reason_code=reason_code,
         approval_required=approval_required,
         evidence_refs=request.evidence_refs,
+    )
+
+
+def build_arc_evidence_refs(
+    request: ArcActionRequest,
+    decision: ArcGuardianDecision,
+) -> tuple[ArcEvidenceRef, ...]:
+    """Build structured evidence references for an Arc decision projection."""
+
+    evidence = [
+        ArcEvidenceRef(
+            ref_id=ref,
+            evidence_type=(
+                "local_model_seat_readiness"
+                if "local-model-seat" in ref
+                else "document_intake_contract"
+            ),
+        )
+        for ref in request.evidence_refs
+    ]
+    evidence.append(
+        ArcEvidenceRef(
+            ref_id=f"evidence://arc-bot/guardian-decision/{decision.action_id}",
+            evidence_type="guardian_decision",
+        )
+    )
+    return tuple(evidence)
+
+
+def build_arc_approval_request(
+    request: ArcActionRequest,
+    decision: ArcGuardianDecision,
+) -> ArcApprovalRequest | None:
+    """Build a non-reusable approval request when policy requires one."""
+
+    if not decision.approval_required:
+        return None
+
+    return ArcApprovalRequest(
+        approval_id=f"approval-request:{request.action_id}",
+        action_id=request.action_id,
+        guardian_decision_ref=decision.decision_id,
+        operator_id=request.operator_id,
+        evidence_refs=decision.evidence_refs,
     )
