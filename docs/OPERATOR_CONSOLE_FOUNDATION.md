@@ -64,6 +64,7 @@ The repository includes a static operator preview at
 The preview covers the requested MVP operator controls:
 
 - Local Model connection status with green connected and red disconnected state.
+- Ollama/Qwen readiness details for the Phase-2 local model seat.
 - LIMA Office connection status with green connected and red disconnected state.
 - Connect buttons that mark local UI preview state only.
 - File upload staging box for office-document intake preview.
@@ -74,6 +75,12 @@ The preview covers the requested MVP operator controls:
 This UI remains non-authoritative. It does not perform model calls, LIMA Office
 connector actions, file uploads, file reads, training writes, automatic memory
 writes, network actions, or customer-system mutation.
+
+The Phase-2 local model readiness projection is available through
+`phase2_local_model_readiness.readiness`. It uses Ollama as the runtime target
+and Qwen as the model family target, with `qwen2.5:7b` as the default planning
+tag. Its status is operator-attested only; the shell does not probe
+`127.0.0.1:11434` or invoke the model.
 
 ## Phase 0 Scope Lock (Runtime UI Scaffold)
 

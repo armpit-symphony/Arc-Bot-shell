@@ -24,6 +24,9 @@ def test_basic_console_projection_defaults_to_disconnected_and_guarded() -> None
     assert projection["runtime_execution_blocked"] is True
     assert projection["local_model_only"] is True
     assert projection["cloud_fallback_allowed"] is False
+    assert projection["local_model_readiness"]["runtime"] == "ollama"
+    assert projection["local_model_readiness"]["model_family"] == "qwen"
+    assert projection["local_model_readiness"]["model_invocation_performed"] is False
 
     local_model = projection["connections"]["local_model"]
     lima_office = projection["connections"]["lima_office"]
@@ -79,6 +82,7 @@ def test_basic_console_preview_cli_exports_projection(tmp_path: Path) -> None:
             [
                 "--local-model-connected",
                 "--lima-office-connected",
+                "--ollama-qwen-ready",
                 "--compact",
                 f"--snapshot-path={snapshot_path}",
             ]
@@ -90,6 +94,7 @@ def test_basic_console_preview_cli_exports_projection(tmp_path: Path) -> None:
     assert cli_payload == file_payload
     assert cli_payload["connections"]["local_model"]["status"] == "connected"
     assert cli_payload["connections"]["lima_office"]["status"] == "connected"
+    assert cli_payload["local_model_readiness"]["readiness_status"] == "ready"
     assert cli_payload["static_html_path"] == str(DEFAULT_HTML_PATH)
 
 
@@ -99,6 +104,10 @@ def test_static_basic_console_html_contains_required_controls() -> None:
     required_ids = [
         'id="local-model-status"',
         'id="connect-local-model"',
+        'id="ollama-qwen-readiness"',
+        'id="ollama-qwen-model"',
+        'id="ollama-qwen-endpoint"',
+        'id="ollama-qwen-state"',
         'id="lima-office-status"',
         'id="connect-lima-office"',
         'id="file-upload-box"',
@@ -114,6 +123,9 @@ def test_static_basic_console_html_contains_required_controls() -> None:
 
     assert 'data-guardian-action="connect-local-model"' in html
     assert 'data-guardian-action="connect-lima-office"' in html
+    assert "qwen2.5:7b" in html
+    assert "http://127.0.0.1:11434" in html
+    assert "\\u2713" in html
     assert "No model call, connector action, file processing, training write" in html
     assert "<script src=" not in html
     assert "<form" not in html

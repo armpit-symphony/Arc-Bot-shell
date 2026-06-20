@@ -325,6 +325,7 @@
         <div>
           <h2>Local Model</h2>
           <div class="status-label" id="local-model-status">Disconnected</div>
+          <p id="local-model-detail">Ollama / Qwen readiness not confirmed.</p>
         </div>
         <button type="button" id="connect-local-model" data-guardian-action="connect-local-model">Connect</button>
       </article>
@@ -340,6 +341,14 @@
     </section>
 
     <section class="grid">
+      <article class="panel" id="ollama-qwen-readiness">
+        <h2>Ollama / Qwen Readiness</h2>
+        <p id="ollama-qwen-model">Model target: qwen2.5:7b</p>
+        <p id="ollama-qwen-endpoint">Endpoint label: http://127.0.0.1:11434</p>
+        <p id="ollama-qwen-state">Setup required: Ollama install, Qwen model, and LIMA Office worker attachment must be confirmed.</p>
+        <p>Readiness is operator-attested in this shell. No Ollama API call or model invocation is performed by this page.</p>
+      </article>
+
       <article class="panel">
         <h2>File Upload</h2>
         <div class="dropzone" id="file-upload-box">
@@ -398,9 +407,14 @@
 
       card.dataset.connected = String(connected);
       indicator.className = `indicator ${connected ? "ok" : "bad"}`;
-      indicator.textContent = connected ? "✓" : "!";
+      indicator.textContent = connected ? "\u2713" : "!";
       status.textContent = connected ? "Connected" : "Disconnected";
       button.hidden = connected;
+      if (kind === "localModel") {
+        document.getElementById("local-model-detail").textContent = connected
+          ? "Ollama / Qwen readiness marked active for preview."
+          : "Ollama / Qwen readiness not confirmed.";
+      }
     }
 
     function addMessage(text, kind) {
@@ -419,6 +433,7 @@
     document.getElementById("connect-local-model").addEventListener("click", () => {
       state.localModel = true;
       setConnection("localModel", true);
+      document.getElementById("ollama-qwen-state").textContent = "Preview marked ready. Future real readiness must come from Guardian/LIMA Office checks.";
       guardianNote("Local Model connection marked active in UI preview. Real model calls remain Guardian-gated.");
     });
 

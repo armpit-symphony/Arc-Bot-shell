@@ -63,9 +63,9 @@ class ArcLocalModelSeat:
     """Readiness metadata for one local model installed on an Arc worker PC."""
 
     provider_kind: str = "local_model"
-    runtime: str = "ollama_or_llama_cpp_pending_selection"
-    model_id: str = "local-office-model-pending"
-    endpoint_label: str = "localhost_only_not_invoked"
+    runtime: str = "ollama"
+    model_id: str = "qwen2.5:7b"
+    endpoint_label: str = "http://127.0.0.1:11434"
     installed_on: str = "arc_worker_pc"
     lima_office_attached: bool = True
     cloud_fallback_allowed: bool = False

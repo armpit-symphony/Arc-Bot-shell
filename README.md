@@ -242,6 +242,7 @@ This repo is currently a roadmap/staging repo for the Arc Bot business worker-bo
 - [Arc Bot Operator Console State Contract](docs/contracts/ARC_BOT_OPERATOR_CONSOLE_STATE.md)
 - [Arc Guardian/Spine Base](docs/ARC_GUARDIAN_SPINE_BASE.md)
 - [Arc Bot Basic Guardian Console](ui/arc_bot_basic_console.html)
+- [Arc Bot Phase-2 Ollama/Qwen Readiness Request For LIMA Office](docs/LIMA_OFFICE_TEAM_PHASE2_REQUEST.md)
 - [Arc Bot Client Configuration Schema](docs/contracts/schemas/arc_bot_client_configuration.schema.json)
 - [Arc Bot No-Execution Skeleton Plan](docs/NO_EXECUTION_SKELETON_PLAN.md)
 - [Arc Bot Client Configuration Fixture](tests/fixtures/arc_bot_phase1_client_configuration.json)
@@ -305,6 +306,14 @@ The operator-console foundation defines the first office-worker control-room sur
 - Arc Guardian/Spine base preview (local-model PC shell, execution blocked): `python -m arc_guardian_spine.preview`.
 - Arc Guardian/Spine Phase-1 contract shape includes non-reusable approval requests, redacted evidence refs, and a projection-only local Spine ledger.
 - Basic Guardian console preview projection: `python -m phase0_runtime_ui_scaffold.basic_console`.
+- Phase-2 Ollama/Qwen local model readiness projection:
+  `python -m phase2_local_model_readiness.readiness`.
+  - Runtime target: Ollama.
+  - Model family target: Qwen.
+  - Default planning model tag: `qwen2.5:7b`.
+  - Endpoint label: `http://127.0.0.1:11434`.
+  - No Ollama API call, model invocation, socket probe, provider SDK, provider
+    credential, or cloud fallback is used by the projection.
 - Basic Guardian console static UI: `ui/arc_bot_basic_console.html`.
   - Shows Local Model and LIMA Office connection indicators with connect buttons.
   - Includes file upload, training notes, self-learning review mode, and chat panels.

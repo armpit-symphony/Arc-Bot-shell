@@ -65,9 +65,10 @@ drafting.
 ## Phase 2 - Local Model Seat Readiness
 
 - Define the local model install contract:
-  - runtime choice: Ollama or llama.cpp,
-  - model ID,
-  - localhost endpoint label,
+  - runtime choice: Ollama for this phase,
+  - model family: Qwen,
+  - default planning model tag: `qwen2.5:7b`,
+  - localhost endpoint label: `http://127.0.0.1:11434`,
   - hardware profile,
   - memory/CPU/GPU posture,
   - LIMA Office attachment status.
@@ -82,7 +83,9 @@ drafting.
 - Completion gate:
   - local model readiness can be displayed without invoking the model,
   - no secrets or provider tokens are introduced,
-  - tests prove no network/provider calls occur.
+  - tests prove no network/provider calls occur,
+  - LIMA Office handoff request identifies the fields Arc Bot needs from the
+    control plane.
 
 ## Phase 3 - Document Intake Contract
 

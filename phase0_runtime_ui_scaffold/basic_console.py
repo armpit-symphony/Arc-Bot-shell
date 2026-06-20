@@ -14,6 +14,11 @@ import sys
 from pathlib import Path
 from typing import Any
 
+from phase2_local_model_readiness import (
+    OllamaQwenReadinessInput,
+    build_ollama_qwen_readiness_projection,
+)
+
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_HTML_PATH = REPO_ROOT / "ui" / "arc_bot_basic_console.html"
@@ -73,6 +78,7 @@ def build_basic_guardian_console_projection(
     local_model_connected: bool = False,
     lima_office_connected: bool = False,
     self_learning_enabled: bool = False,
+    local_model_readiness: dict[str, Any] | None = None,
     phase_gate_name: str = EXPECTED_PHASE_GATE_NAME,
 ) -> dict[str, Any]:
     """Build the basic Arc Bot console projection for the static UI."""
@@ -81,6 +87,11 @@ def build_basic_guardian_console_projection(
         raise BasicConsoleProjectionError(
             f"Unexpected phase gate: {phase_gate_name} != {EXPECTED_PHASE_GATE_NAME}"
         )
+
+    readiness_projection = local_model_readiness or build_ollama_qwen_readiness_projection()
+    local_model_connected = (
+        local_model_connected or readiness_projection["readiness_status"] == "ready"
+    )
 
     projection: dict[str, Any] = {
         "artifact_id": "arc_bot_basic_guardian_console_v1",
@@ -111,6 +122,7 @@ def build_basic_guardian_console_projection(
                 "connect-lima-office",
             ),
         },
+        "local_model_readiness": readiness_projection,
         "file_upload": {
             "surface": "file_upload",
             "label": "Office document intake",
@@ -157,6 +169,11 @@ def _build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--local-model-connected", action="store_true")
     parser.add_argument("--lima-office-connected", action="store_true")
     parser.add_argument("--self-learning-enabled", action="store_true")
+    parser.add_argument(
+        "--ollama-qwen-ready",
+        action="store_true",
+        help="Render local model readiness as operator-attested ready without probing Ollama.",
+    )
     parser.add_argument("--compact", action="store_true")
     parser.add_argument("--snapshot-path")
     parser.add_argument(
@@ -172,10 +189,23 @@ def run_basic_console_preview(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
 
     try:
+        readiness_projection = (
+            build_ollama_qwen_readiness_projection(
+                OllamaQwenReadinessInput(
+                    ollama_installed=True,
+                    ollama_service_reachable=True,
+                    qwen_model_present=True,
+                    lima_office_attached=True,
+                )
+            )
+            if args.ollama_qwen_ready
+            else None
+        )
         projection = build_basic_guardian_console_projection(
             local_model_connected=args.local_model_connected,
             lima_office_connected=args.lima_office_connected,
             self_learning_enabled=args.self_learning_enabled,
+            local_model_readiness=readiness_projection,
         )
     except BasicConsoleProjectionError as err:
         print(f"basic console preview failed: {err}", file=sys.stderr)

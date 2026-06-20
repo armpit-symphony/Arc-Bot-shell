@@ -31,6 +31,8 @@ def test_arc_guardian_spine_base_is_local_model_only_and_fail_closed() -> None:
 
     model = projection["local_model_seat"]
     assert model["provider_kind"] == "local_model"
+    assert model["runtime"] == "ollama"
+    assert model["model_id"] == "qwen2.5:7b"
     assert model["lima_office_attached"] is True
     assert model["cloud_fallback_allowed"] is False
     assert model["network_egress_allowed"] is False

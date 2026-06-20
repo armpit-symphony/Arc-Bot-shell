@@ -13,6 +13,7 @@ Status: Foundation contracts and invariants
 - `arc_bot_overview_state.schema.json`
 - `arc_guardian_spine_base_projection`
 - `arc_bot_basic_guardian_console_projection`
+- `phase2_ollama_qwen_readiness_projection`
 - fixture contracts under `tests/fixtures/*`
 - proof packets under `docs/proof_packets/*`
 
@@ -28,6 +29,9 @@ Status: Foundation contracts and invariants
 - Basic Guardian console projections must keep Local Model, LIMA Office, upload,
   training, self-learning, and chat controls Guardian-gated and blocked from
   runtime execution until later approved wiring exists.
+- Phase-2 Ollama/Qwen readiness projections must remain operator-attested,
+  local-model-only, no-probe, no-model-invocation, no-provider-token, and
+  no-cloud-fallback.
 - `source_access_mode` must be `read_only`.
 - `projection_gate.required` must be `true` and gate checks enforced in builders.
 - `contract_refs`, `policy_refs`, `evidence_refs`, `runbook_refs` must be present and non-empty where applicable.
@@ -53,6 +57,17 @@ Status: Foundation contracts and invariants
 - File selection must not upload, read, persist, or process file content.
 - Training and self-learning must not write memory directly.
 - Chat must not invoke local or cloud models directly from the page.
+
+### Phase-2 Ollama/Qwen Readiness
+- Runtime target is `ollama`.
+- Model family target is `qwen`.
+- Default planning model tag is `qwen2.5:7b`.
+- Endpoint is a label only: `http://127.0.0.1:11434`.
+- Readiness status may be displayed as `ready`, `setup_required`, or `blocked`.
+- The readiness projection must not open sockets, call Ollama APIs, use provider
+  SDKs, invoke local/cloud models, store credentials, or mutate LIMA Office.
+- Future live readiness checks must be owned by Guardian/LIMA Office and mapped
+  back as evidence refs.
 
 ### Arc Guardian/Spine Base
 - Minimal contract/stub layer for Arc-local Guardian decisions and Spine events.

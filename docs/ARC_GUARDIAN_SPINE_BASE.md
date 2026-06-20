@@ -31,8 +31,9 @@ The implementation lives in `arc_guardian_spine/` and is import-only safe.
 
 ## Local Model Boundary
 
-The first target is a local model installed on an Arc worker PC. The base
-records local model readiness only:
+The first target is a local model installed on an Arc worker PC. Phase 2 pins
+the readiness target to Ollama with Qwen local models. The base records local
+model readiness only:
 
 - local model only,
 - localhost endpoint label only,
@@ -40,6 +41,13 @@ records local model readiness only:
 - no provider credentials,
 - no network egress,
 - no model invocation in this phase.
+
+Default Phase-2 planning values:
+
+- runtime: `ollama`,
+- model family: `qwen`,
+- model tag: `qwen2.5:7b`,
+- endpoint label: `http://127.0.0.1:11434`.
 
 Future local model calls must pass through Guardian before execution.
 
