@@ -35,6 +35,10 @@ def test_basic_console_projection_defaults_to_disconnected_and_guarded() -> None
     assert extraction["file_read_performed"] is False
     assert extraction["model_invocation_performed"] is False
     assert extraction["runtime_execution_blocked"] is True
+    workflows = projection["office_workflows"]["workflow_template_catalog"]
+    assert workflows["phase"] == "phase-5"
+    assert workflows["runtime_execution_blocked"] is True
+    assert workflows["customer_system_mutation_performed"] is False
 
     local_model = projection["connections"]["local_model"]
     lima_office = projection["connections"]["lima_office"]
@@ -122,6 +126,9 @@ def test_static_basic_console_html_contains_required_controls() -> None:
         'id="file-upload-input"',
         'id="document-intake-contract"',
         'id="document-extraction-contract"',
+        'id="office-workflow-templates"',
+        'id="phase5-workflow-contract"',
+        'id="phase5-blocked-actions"',
         'id="training-box"',
         'id="self-learning-toggle"',
         'id="chat-panel"',
@@ -139,5 +146,6 @@ def test_static_basic_console_html_contains_required_controls() -> None:
     assert "No model call, connector action, file processing, training write" in html
     assert "Phase 3 intake accepts PDF, text, image scan, and Word metadata only" in html
     assert "Phase 4 extraction preview returns filename metadata" in html
+    assert "Phase 5 workflow templates produce draft previews only" in html
     assert "<script src=" not in html
     assert "<form" not in html

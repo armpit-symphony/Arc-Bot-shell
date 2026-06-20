@@ -244,6 +244,8 @@ This repo is currently a roadmap/staging repo for the Arc Bot business worker-bo
 - [Arc Bot Basic Guardian Console](ui/arc_bot_basic_console.html)
 - Arc Bot Phase-4 document extraction preview:
   `python -m phase4_document_extraction.extraction`
+- Arc Bot Phase-5 office workflow templates:
+  `python -m phase5_office_workflows.workflows`
 - [Arc Bot Phase-2 Ollama/Qwen Readiness Request For LIMA Office](docs/LIMA_OFFICE_TEAM_PHASE2_REQUEST.md)
 - [Arc Bot Client Configuration Schema](docs/contracts/schemas/arc_bot_client_configuration.schema.json)
 - [Arc Bot No-Execution Skeleton Plan](docs/NO_EXECUTION_SKELETON_PLAN.md)
@@ -340,9 +342,24 @@ The operator-console foundation defines the first office-worker control-room sur
   - Does not read files, persist raw content, run OCR/parsers, use provider SDKs,
     call models, open network paths, call connectors, or mutate customer
     systems.
+- Phase-5 office workflow templates:
+  `python -m phase5_office_workflows.workflows`.
+  - Defines intake note summary, insurance claim packet triage, policy document
+    summary, missing information checklist, customer-service draft reply, and
+    internal follow-up task draft workflows.
+  - Defines Document Processing Bot, Customer Support Draft Bot, Billing Intake
+    Assistant, and Compliance Review Assistant role profiles.
+  - Each workflow has schema coverage, fixture coverage, proof tests, and a
+    blocked-action matrix.
+  - Outputs are draft previews only and remain pending operator review.
+  - Saving final output, external sends, customer-record updates, form
+    submissions, and connector writes require approval and remain blocked.
+  - Does not read files, persist raw content, invoke models, use provider SDKs,
+    call connectors, send messages, submit forms, or mutate customer systems.
 - Basic Guardian console static UI: `ui/arc_bot_basic_console.html`.
   - Shows Local Model and LIMA Office connection indicators with connect buttons.
-  - Includes file upload, training notes, self-learning review mode, and chat panels.
+  - Includes file upload, office workflow templates, training notes,
+    self-learning review mode, and chat panels.
   - Buttons and inputs create local preview/pending states only; no model call,
     LIMA Office connector action, file processing, training write, or memory write
     occurs from the static page.

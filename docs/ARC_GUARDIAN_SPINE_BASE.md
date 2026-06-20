@@ -95,6 +95,20 @@ work. The default provider is blocked and performs no local model call, provider
 SDK use, socket/network action, parser/OCR action, file read/write, connector
 action, raw content persistence, or customer-system mutation.
 
+## Phase-5 Office Workflow Template Boundary
+
+Office workflows are templates and draft previews only in Phase 5. The catalog
+defines intake note summary, insurance claim packet triage, policy document
+summary, missing information checklist, customer-service draft reply, and
+internal follow-up task draft workflows.
+
+Each workflow has schema and fixture coverage plus a blocked-action matrix.
+Saving final output, sending external messages, updating customer records,
+submitting forms, and connector writes remain approval-required and blocked.
+Role profiles scope which draft templates an Arc worker role may prepare, but
+they do not grant runtime execution, connector access, external send authority,
+form submission, or customer-system mutation.
+
 ## Preview Command
 
 ```powershell
@@ -102,6 +116,8 @@ python -m arc_guardian_spine.preview
 python -m arc_guardian_spine.preview --action-kind document_extract_preview
 python -m arc_guardian_spine.preview --action-kind document_extract_preview --requested-tool-pack local_model_preview
 python -m phase4_document_extraction.extraction
+python -m phase5_office_workflows.workflows
+python -m phase5_office_workflows.workflows --workflow-id insurance_claim_packet_triage
 ```
 
 The preview emits JSON only and performs no runtime action.

@@ -26,6 +26,7 @@ from phase4_document_extraction import (
     DocumentExtractionRequest,
     build_document_extraction_preview,
 )
+from phase5_office_workflows import build_office_workflow_template_catalog
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -71,6 +72,7 @@ def _assert_guardrails(projection: dict[str, Any]) -> None:
     guarded_surfaces = (
         projection["file_upload"],
         projection["training"],
+        projection["office_workflows"],
         projection["chat"],
         projection["self_learning"],
     )
@@ -109,6 +111,19 @@ def _assert_guardrails(projection: dict[str, Any]) -> None:
     if extraction_preview.get("runtime_execution_blocked") is not True:
         raise BasicConsoleProjectionError("Document extraction preview must remain blocked")
 
+    workflow_catalog = projection["office_workflows"].get("workflow_template_catalog", {})
+    for blocked_flag in (
+        "file_read_performed",
+        "model_invocation_performed",
+        "connector_action_performed",
+        "customer_system_mutation_performed",
+        "external_message_send_performed",
+    ):
+        if workflow_catalog.get(blocked_flag) is not False:
+            raise BasicConsoleProjectionError(
+                f"Office workflow catalog must keep {blocked_flag}=False"
+            )
+
 
 def build_basic_guardian_console_projection(
     *,
@@ -118,6 +133,7 @@ def build_basic_guardian_console_projection(
     local_model_readiness: dict[str, Any] | None = None,
     document_intake_preview: dict[str, Any] | None = None,
     document_extraction_preview: dict[str, Any] | None = None,
+    office_workflow_catalog: dict[str, Any] | None = None,
     phase_gate_name: str = EXPECTED_PHASE_GATE_NAME,
 ) -> dict[str, Any]:
     """Build the basic Arc Bot console projection for the static UI."""
@@ -146,6 +162,9 @@ def build_basic_guardian_console_projection(
             document_type="auto",
             operator_supplied_category="office_document_preview",
         )
+    )
+    workflow_catalog_projection = (
+        office_workflow_catalog or build_office_workflow_template_catalog()
     )
 
     projection: dict[str, Any] = {
@@ -196,6 +215,14 @@ def build_basic_guardian_console_projection(
             "runtime_execution_blocked": True,
             "writes_memory_directly": False,
             "allowed_result": "training_draft_pending_review",
+        },
+        "office_workflows": {
+            "surface": "office_workflows",
+            "label": "Office workflow templates",
+            "guardian_required": True,
+            "runtime_execution_blocked": True,
+            "allowed_result": "draft_preview_pending_operator_review",
+            "workflow_template_catalog": workflow_catalog_projection,
         },
         "chat": {
             "surface": "chat",

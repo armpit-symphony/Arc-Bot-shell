@@ -1,0 +1,107 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "schema://arc-bot/phase5-office-workflow-template",
+  "title": "Arc Bot Phase-5 Office Workflow Template",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "workflow_id",
+    "name",
+    "purpose",
+    "output_artifact_type",
+    "output_mode",
+    "schema_ref",
+    "fixture_ref",
+    "allowed_input_artifacts",
+    "draft_sections",
+    "recommended_role_profile_ids",
+    "guardian_required",
+    "requires_operator_review",
+    "finalization_requires_approval",
+    "blocked_action_matrix",
+    "approval_required_actions",
+    "runtime_execution_blocked",
+    "runtime_authority_blocked"
+  ],
+  "properties": {
+    "workflow_id": {
+      "type": "string",
+      "enum": [
+        "intake_note_summary",
+        "insurance_claim_packet_triage",
+        "policy_document_summary",
+        "missing_information_checklist",
+        "customer_service_draft_reply",
+        "internal_follow_up_task_draft"
+      ]
+    },
+    "name": { "type": "string", "minLength": 1 },
+    "purpose": { "type": "string", "minLength": 1 },
+    "output_artifact_type": { "type": "string", "minLength": 1 },
+    "output_mode": { "const": "draft_preview_only" },
+    "schema_ref": { "const": "schema://arc-bot/phase5-office-workflow-template" },
+    "fixture_ref": {
+      "const": "fixture://tests/fixtures/arc_bot_phase5_office_workflow_templates.json"
+    },
+    "allowed_input_artifacts": {
+      "type": "array",
+      "contains": { "const": "phase3_document_intake_preview" }
+    },
+    "draft_sections": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "recommended_role_profile_ids": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "enum": [
+          "document_processing_bot",
+          "customer_support_draft_bot",
+          "billing_intake_assistant",
+          "compliance_review_assistant"
+        ]
+      }
+    },
+    "guardian_required": { "const": true },
+    "requires_operator_review": { "const": true },
+    "finalization_requires_approval": { "const": true },
+    "local_model_required_for_template": { "const": false },
+    "approval_required_actions": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "save_final_output",
+          "send_external_message",
+          "update_customer_record",
+          "submit_form",
+          "connector_write"
+        ]
+      },
+      "minItems": 5
+    },
+    "blocked_action_matrix": {
+      "type": "object",
+      "required": [
+        "save_final_output",
+        "send_external_message",
+        "update_customer_record",
+        "submit_form",
+        "connector_write"
+      ]
+    },
+    "raw_content_persisted": { "const": false },
+    "file_read_performed": { "const": false },
+    "file_write_performed": { "const": false },
+    "model_invocation_performed": { "const": false },
+    "connector_action_performed": { "const": false },
+    "customer_system_mutation_performed": { "const": false },
+    "external_message_send_performed": { "const": false },
+    "form_submission_performed": { "const": false },
+    "runtime_execution_blocked": { "const": true },
+    "runtime_authority_blocked": { "const": true }
+  }
+}

@@ -1,0 +1,132 @@
+{
+  "artifact_id": "arc_bot_phase5_office_workflow_templates_fixture",
+  "artifact_type": "phase5_office_workflow_templates_fixture",
+  "phase": "phase-5",
+  "schema_ref": "schema://arc-bot/phase5-office-workflow-template",
+  "workflow_ids": [
+    "intake_note_summary",
+    "insurance_claim_packet_triage",
+    "policy_document_summary",
+    "missing_information_checklist",
+    "customer_service_draft_reply",
+    "internal_follow_up_task_draft"
+  ],
+  "role_profile_ids": [
+    "document_processing_bot",
+    "customer_support_draft_bot",
+    "billing_intake_assistant",
+    "compliance_review_assistant"
+  ],
+  "approval_required_actions": [
+    "save_final_output",
+    "send_external_message",
+    "update_customer_record",
+    "submit_form",
+    "connector_write"
+  ],
+  "blocked_action_matrix": {
+    "save_final_output": "approval_required_before_execution",
+    "send_external_message": "approval_required_before_execution",
+    "update_customer_record": "approval_required_before_execution",
+    "submit_form": "approval_required_before_execution",
+    "connector_write": "approval_required_before_execution"
+  },
+  "workflow_templates": [
+    {
+      "workflow_id": "intake_note_summary",
+      "output_mode": "draft_preview_only",
+      "schema_ref": "schema://arc-bot/phase5-office-workflow-template",
+      "fixture_ref": "fixture://tests/fixtures/arc_bot_phase5_office_workflow_templates.json",
+      "draft_sections": [
+        "source_metadata",
+        "customer_or_case_refs_placeholder",
+        "key_dates_placeholder",
+        "operator_review_notes"
+      ]
+    },
+    {
+      "workflow_id": "insurance_claim_packet_triage",
+      "output_mode": "draft_preview_only",
+      "schema_ref": "schema://arc-bot/phase5-office-workflow-template",
+      "fixture_ref": "fixture://tests/fixtures/arc_bot_phase5_office_workflow_templates.json",
+      "draft_sections": [
+        "claim_packet_type_placeholder",
+        "policy_or_claim_refs_placeholder",
+        "loss_event_metadata_placeholder",
+        "triage_route_recommendation_placeholder"
+      ]
+    },
+    {
+      "workflow_id": "policy_document_summary",
+      "output_mode": "draft_preview_only",
+      "schema_ref": "schema://arc-bot/phase5-office-workflow-template",
+      "fixture_ref": "fixture://tests/fixtures/arc_bot_phase5_office_workflow_templates.json",
+      "draft_sections": [
+        "policy_metadata",
+        "coverage_sections_placeholder",
+        "exclusions_placeholder",
+        "operator_review_questions"
+      ]
+    },
+    {
+      "workflow_id": "missing_information_checklist",
+      "output_mode": "draft_preview_only",
+      "schema_ref": "schema://arc-bot/phase5-office-workflow-template",
+      "fixture_ref": "fixture://tests/fixtures/arc_bot_phase5_office_workflow_templates.json",
+      "draft_sections": [
+        "missing_identifiers_placeholder",
+        "missing_dates_placeholder",
+        "missing_signatures_placeholder",
+        "operator_verification_items"
+      ]
+    },
+    {
+      "workflow_id": "customer_service_draft_reply",
+      "output_mode": "draft_preview_only",
+      "schema_ref": "schema://arc-bot/phase5-office-workflow-template",
+      "fixture_ref": "fixture://tests/fixtures/arc_bot_phase5_office_workflow_templates.json",
+      "draft_sections": [
+        "customer_context_placeholder",
+        "acknowledgement_draft_placeholder",
+        "requested_information_placeholder",
+        "approval_before_send_notice"
+      ]
+    },
+    {
+      "workflow_id": "internal_follow_up_task_draft",
+      "output_mode": "draft_preview_only",
+      "schema_ref": "schema://arc-bot/phase5-office-workflow-template",
+      "fixture_ref": "fixture://tests/fixtures/arc_bot_phase5_office_workflow_templates.json",
+      "draft_sections": [
+        "assignee_placeholder",
+        "due_date_placeholder",
+        "source_document_refs",
+        "blocked_external_actions_notice"
+      ]
+    }
+  ],
+  "role_profiles": [
+    {
+      "role_profile_id": "document_processing_bot",
+      "name": "Document Processing Bot"
+    },
+    {
+      "role_profile_id": "customer_support_draft_bot",
+      "name": "Customer Support Draft Bot"
+    },
+    {
+      "role_profile_id": "billing_intake_assistant",
+      "name": "Billing Intake Assistant"
+    },
+    {
+      "role_profile_id": "compliance_review_assistant",
+      "name": "Compliance Review Assistant"
+    }
+  ],
+  "runtime_execution_blocked": true,
+  "runtime_authority_blocked": true,
+  "customer_system_mutation_performed": false,
+  "external_message_send_performed": false,
+  "connector_action_performed": false,
+  "form_submission_performed": false
+}

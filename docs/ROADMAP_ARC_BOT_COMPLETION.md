@@ -149,6 +149,9 @@ execution remains blocked for later approved phases.
 
 ## Phase 5 - Office Workflow Templates
 
+Status: completed as schema-backed, fixture-backed, draft/preview-only workflow
+templates. Runtime mutation and external action authority remain blocked.
+
 - Add MVP office workflows:
   - intake note summary,
   - insurance claim packet triage,

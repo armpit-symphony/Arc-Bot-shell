@@ -72,6 +72,9 @@ The preview covers the requested MVP operator controls:
   document uploads.
 - Phase-4 document extraction metadata preview for filename metadata, file
   type, page-count placeholder, checksum placeholder, and operator category.
+- Phase-5 office workflow templates for intake notes, insurance claim triage,
+  policy summaries, missing-information checklists, customer-service draft
+  replies, and internal follow-up task drafts.
 - Training note box for operator-reviewed workflow examples.
 - Self-learning review toggle for memory candidates that still require approval.
 - Chat panel for queueing preview requests.
@@ -92,6 +95,12 @@ projection-only Spine event. Its local model provider interface is injectable
 for future approved work, but Phase 4 still blocks model invocation, provider
 SDK use, network egress, file reads, parser/OCR execution, raw content
 persistence, connector actions, and customer-system mutation.
+
+The Phase-5 office workflow template catalog is available through
+`phase5_office_workflows.workflows`. It exposes six MVP office workflow
+templates and four role profiles. Outputs are draft previews only. Saving final
+output, external sends, customer-record updates, form submissions, and connector
+writes require approval and remain blocked in this shell.
 
 The Phase-2 local model readiness projection is available through
 `phase2_local_model_readiness.readiness`. It uses Ollama as the runtime target

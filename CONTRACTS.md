@@ -16,6 +16,8 @@ Status: Foundation contracts and invariants
 - `phase2_ollama_qwen_readiness_projection`
 - `phase3_document_intake_preview`
 - `phase4_document_extraction_preview`
+- `phase5_office_workflow_template_catalog`
+- `phase5_office_workflow_preview`
 - fixture contracts under `tests/fixtures/*`
 - proof packets under `docs/proof_packets/*`
 
@@ -41,6 +43,10 @@ Status: Foundation contracts and invariants
 - Phase-4 document extraction previews must remain deterministic metadata
   previews unless a later approved phase grants runtime authority. The local
   model provider interface is injectable only and must not call a model.
+- Phase-5 office workflow templates must remain draft/preview-only. Saving
+  final output, sending external messages, updating customer records,
+  submitting forms, and connector writes require approval and remain blocked in
+  this phase.
 - `source_access_mode` must be `read_only`.
 - `projection_gate.required` must be `true` and gate checks enforced in builders.
 - `contract_refs`, `policy_refs`, `evidence_refs`, `runbook_refs` must be present and non-empty where applicable.
@@ -109,6 +115,30 @@ Status: Foundation contracts and invariants
 - File reads/writes, OCR, parser calls, local/cloud model calls, provider SDKs,
   network egress, connector actions, raw content persistence, and
   customer-system mutation remain blocked.
+
+### Phase-5 Office Workflow Templates
+- The MVP workflow catalog includes:
+  - intake note summary,
+  - insurance claim packet triage,
+  - policy document summary,
+  - missing information checklist,
+  - customer-service draft reply,
+  - internal follow-up task draft.
+- Each workflow must have schema coverage, fixture coverage, proof tests, and a
+  blocked-action matrix.
+- Workflow output mode is `draft_preview_only`; every output remains pending
+  operator review.
+- Role profiles are:
+  - Document Processing Bot,
+  - Customer Support Draft Bot,
+  - Billing Intake Assistant,
+  - Compliance Review Assistant.
+- Role profiles cannot send external messages, update customer records, submit
+  forms, write connectors, or grant runtime execution.
+- Workflow templates may reference Phase-3 intake and Phase-4 extraction
+  preview artifacts, but they must not read files, persist raw content, invoke
+  models, use provider SDKs, call connectors, send messages, submit forms, or
+  mutate customer systems.
 
 ### Arc Guardian/Spine Base
 - Minimal contract/stub layer for Arc-local Guardian decisions and Spine events.
