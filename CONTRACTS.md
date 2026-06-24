@@ -16,6 +16,7 @@ Status: Foundation contracts and invariants
 - `arc_lima_office_read_adapter_projection`
 - `arc_phase_d_approval_evidence_dependency_projection`
 - `arc_remaining_implementation_gate_response_projection`
+- `arc_remaining_implementation_gate_response.schema.json`
 - `arc_field_deployment_readiness_projection`
 - `arc_narrow_pilot_readiness_projection`
 - `arc_mvp_completion_gate_projection`
@@ -72,6 +73,10 @@ Status: Foundation contracts and invariants
   `approval.binding`, verifier result refs, and read-only supervisor
   projection refs do not grant approval issuance, verification, durable
   evidence writing, local-model execution, connector I/O, or runtime authority.
+- Remaining implementation-gate response schemas and templates are intake aids only.
+  Blank template values remain incomplete, and a shape-complete response still
+  cannot grant runtime authority, local-model invocation, operator-console state
+  authority, durable evidence writes, or production deployment.
 - `source_access_mode` must be `read_only`.
 - `projection_gate.required` must be `true` and gate checks enforced in builders.
 - `contract_refs`, `policy_refs`, `evidence_refs`, `runbook_refs` must be present and non-empty where applicable.
@@ -214,6 +219,19 @@ Status: Foundation contracts and invariants
   and durable evidence implementation blocked until later gates.
 - Must not issue approval tokens, verify signatures, write durable evidence,
   publish audit/Spine events, or grant runtime authority.
+
+### Arc Remaining Implementation-Gate Response
+- Defines the local JSON response shape requested from LIMA Office / Guardian
+  owners for the two remaining Phase-D external dependencies.
+- The schema requires owner, canonical contract family, authoritative/required
+  field lists, Arc-consumable refs, and explicit Arc Bot prohibitions.
+- The blank template is intentionally incomplete until an external owner fills
+  every required field.
+- Complete response-shape inspection still keeps `runtime_authority_blocked` and
+  `runtime_execution_blocked` true and must not start implementation by itself.
+- Must not assign ownership locally, invoke models, issue or verify approvals,
+  write durable evidence, attach to a live Supervisor Server, mutate operator
+  console state, or claim MVP completion.
 
 ### Arc Field Deployment Package
 - Defines the Phase-G setup guides, support runbooks, and read-only smoke

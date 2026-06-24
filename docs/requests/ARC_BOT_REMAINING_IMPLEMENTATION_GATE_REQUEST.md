@@ -37,7 +37,14 @@ start:
 2. Which Guardian-owned contract gates local-model executor authority for
    approved preview work on an Arc worker PC?
 
-Please answer using this shape:
+Please answer using the JSON template and schema, or the equivalent text shape below:
+
+- Template: `docs/examples/arc_lima/remaining_implementation_gate_response.template.json`
+- Schema: `docs/contracts/schemas/arc_remaining_implementation_gate_response.schema.json`
+
+Blank template values are not accepted as answers; Arc Bot treats them as incomplete and runtime-blocked.
+
+Text equivalent:
 
 ```text
 operator_console_server_state_owner:
@@ -75,11 +82,13 @@ guardian_owned_local_model_executor_boundary:
 - `docs/readiness/ARC_BOT_MVP_COMPLETION_GATE.md`
 - `phase7_approval_evidence/readiness.py`
 - `phase7_approval_evidence/remaining_gate_response.py`
+- `docs/examples/arc_lima/remaining_implementation_gate_response.template.json`
+- `docs/contracts/schemas/arc_remaining_implementation_gate_response.schema.json`
 - `phase12_mvp_completion/completion.py`
 
 ## Arc Bot Response Intake
 
-After the owner response arrives, Arc Bot can inspect the local JSON packet without granting runtime authority:
+After the owner response arrives, Arc Bot can inspect the local JSON packet without granting runtime authority. Start from the blank template, fill every required field, and then run:
 
 ```powershell
 python -m phase7_approval_evidence.remaining_gate_response --response-path path\to\owner_response.json --compact

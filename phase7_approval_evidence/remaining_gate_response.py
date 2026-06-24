@@ -78,7 +78,8 @@ def build_remaining_implementation_gate_response_projection(
             else "awaiting_or_incomplete_external_owner_response"
         ),
         "projection_scope": "planning_read_only",
-        "source_access_mode": "local_json_inspection_only",
+        "source_access_mode": "read_only",
+        "inspection_mode": "local_json_inspection_only",
         "runtime_authority_blocked": True,
         "runtime_execution_blocked": True,
         "response_shape_complete": complete,

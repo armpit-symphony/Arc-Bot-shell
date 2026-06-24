@@ -47,6 +47,8 @@ def test_remaining_gate_response_projection_defaults_to_awaiting_response() -> N
     assert projection["response_shape_complete"] is False
     assert projection["response_schema_ref"] == REMAINING_GATE_RESPONSE_SCHEMA_REF
     assert projection["response_template_ref"] == REMAINING_GATE_RESPONSE_TEMPLATE_REF
+    assert projection["source_access_mode"] == "read_only"
+    assert projection["inspection_mode"] == "local_json_inspection_only"
     assert projection["runtime_authority_blocked"] is True
     assert projection["runtime_execution_blocked"] is True
     assert {
