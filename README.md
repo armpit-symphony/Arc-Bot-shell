@@ -239,8 +239,19 @@ This repo is currently a roadmap/staging repo for the Arc Bot business worker-bo
 ## Current Foundation Docs
 
 - [Arc Bot Operator Console Foundation](docs/OPERATOR_CONSOLE_FOUNDATION.md)
+- [Arc Bot Completion Audit And Phase Plan](docs/audits/ARC_BOT_COMPLETION_AUDIT_AND_PHASE_PLAN.md)
 - [Arc Bot Operator Console State Contract](docs/contracts/ARC_BOT_OPERATOR_CONSOLE_STATE.md)
 - [Arc Guardian/Spine Base](docs/ARC_GUARDIAN_SPINE_BASE.md)
+- [Arc Intent Envelope Contract](docs/contracts/ARC_INTENT_ENVELOPE.md)
+- [Arc LIMA Office Read Adapter Contract](docs/contracts/ARC_LIMA_OFFICE_READ_ADAPTER.md)
+- [Arc Approval And Evidence Dependency Contract](docs/contracts/ARC_APPROVAL_EVIDENCE_DEPENDENCY.md)
+- [Arc Bot Lima Office External Answers](docs/interop/ARC_BOT_LIMA_OFFICE_EXTERNAL_ANSWERS.md)
+- [Arc Bot Remaining Implementation Gate Request](docs/requests/ARC_BOT_REMAINING_IMPLEMENTATION_GATE_REQUEST.md)
+- [Arc Worker Local PC Setup Guide](docs/deployment/ARC_WORKER_LOCAL_PC_SETUP.md)
+- [Arc Field Deployment Package](docs/deployment/ARC_FIELD_DEPLOYMENT_PACKAGE.md)
+- [Insurance Intake Narrow Pilot](docs/pilots/INSURANCE_INTAKE_NARROW_PILOT.md)
+- [Insurance Intake Sample Data Policy](docs/pilots/INSURANCE_INTAKE_SAMPLE_DATA_POLICY.md)
+- [Arc Bot MVP Completion Gate](docs/readiness/ARC_BOT_MVP_COMPLETION_GATE.md)
 - [Arc Bot Basic Guardian Console](ui/arc_bot_basic_console.html)
 - Arc Bot Phase-4 document extraction preview:
   `python -m phase4_document_extraction.extraction`
@@ -269,7 +280,19 @@ This repo is currently a roadmap/staging repo for the Arc Bot business worker-bo
 - [Arc Bot Phase-1 Business MVP Roadmap Packet](docs/proof_packets/ARC_BOT_PHASE1_MVP_ROADMAP_PACKET.md)
 - [Arc Bot Phase-1 Readiness Bundle Packet](docs/proof_packets/ARC_BOT_PHASE1_READINESS_BUNDLE_PACKET.md)
 - [Arc Bot Phase-1 Runtime Authority Gating Packet](docs/proof_packets/ARC_BOT_PHASE1_RUNTIME_AUTHORITY_GATING_PACKET.md)
+- [Arc Bot Phase-B Intent Envelope Packet](docs/proof_packets/ARC_BOT_PHASE_B_INTENT_ENVELOPE_PACKET.md)
+- [Arc Bot Phase-C LIMA Office Read Adapter Packet](docs/proof_packets/ARC_BOT_PHASE_C_LIMA_OFFICE_READ_ADAPTER_PACKET.md)
+- [Arc Bot Phase-D Approval Evidence Dependency Packet](docs/proof_packets/ARC_BOT_PHASE_D_APPROVAL_EVIDENCE_DEPENDENCY_PACKET.md)
+- [Arc Bot Phase-G Field Deployment Package Packet](docs/proof_packets/ARC_BOT_PHASE_G_FIELD_DEPLOYMENT_PACKAGE_PACKET.md)
+- [Arc Bot Phase-H Narrow Pilot Readiness Packet](docs/proof_packets/ARC_BOT_PHASE_H_NARROW_PILOT_READINESS_PACKET.md)
+- [Arc Bot Phase-I MVP Completion Gate Packet](docs/proof_packets/ARC_BOT_PHASE_I_MVP_COMPLETION_GATE_PACKET.md)
 - [Phase-0 Scope-Lock Contract Change Handoff Runbook](docs/runbooks/phase0_scope_lock_contract_change_handoff.md)
+- Field support runbooks:
+  - [Worker Offline](docs/runbooks/worker_offline.md)
+  - [Model Not Reachable](docs/runbooks/model_not_reachable.md)
+  - [Approval Queue Stuck](docs/runbooks/approval_queue_stuck.md)
+  - [Evidence Packet Missing](docs/runbooks/evidence_packet_missing.md)
+  - [Document Preview Failed](docs/runbooks/document_preview_failed.md)
 - [Arc Bot Phase-1 Business Inventory Proof Packet](docs/proof_packets/ARC_BOT_PHASE1_BUSINESS_INVENTORY_PROOF_PACKET.md)
 - [Arc Bot Phase-1 Business Inventory Migration Gate Packet](docs/proof_packets/ARC_BOT_PHASE1_BUSINESS_INVENTORY_MIGRATION_GATE_PACKET.md)
 - [Arc Bot Phase-1 Business MVP Roadmap](docs/ROADMAP_PHASE1_BUSINESS_MVP.md)
@@ -308,6 +331,12 @@ The operator-console foundation defines the first office-worker control-room sur
 - Phase-2 runtime-control renderer preview (bounded UI controls, execution-disabled): `python -m phase0_runtime_ui_scaffold.runtime_control_renderer`.
 - Phase-3 runtime-control execution planning preview (execution still blocked by default): `python -m phase0_runtime_ui_scaffold.runtime_control_execution`.
 - Arc Guardian/Spine base preview (local-model PC shell, execution blocked): `python -m arc_guardian_spine.preview`.
+- Arc intent envelope preview (future signed-request boundary, execution blocked): `python -m arc_guardian_spine.intent_envelope_preview`.
+- Arc LIMA Office read adapter preview (RuntimeStateSnapshot-style metadata, execution blocked): `python -m phase6_lima_office_integration.read_adapter`.
+- Arc Phase-D approval/evidence dependency preview (Lima Office answers recorded, runtime still blocked): `python -m phase7_approval_evidence.readiness`.
+- Arc Phase-G field deployment package preview (read-only setup/runbook/smoke posture): `python -m phase10_field_deployment.package`.
+- Arc Phase-H narrow pilot readiness preview (sanitized insurance-intake pilot planning): `python -m phase11_pilot_readiness.pilot`.
+- Arc Phase-I MVP completion gate preview (completion-readiness, not MVP-complete): `python -m phase12_mvp_completion.completion`.
 - Arc Guardian/Spine Phase-1 contract shape includes non-reusable approval requests, redacted evidence refs, and a projection-only local Spine ledger.
 - Basic Guardian console preview projection: `python -m phase0_runtime_ui_scaffold.basic_console`.
 - Phase-2 Ollama/Qwen local model readiness projection:
@@ -356,6 +385,31 @@ The operator-console foundation defines the first office-worker control-room sur
     submissions, and connector writes require approval and remain blocked.
   - Does not read files, persist raw content, invoke models, use provider SDKs,
     call connectors, send messages, submit forms, or mutate customer systems.
+- Phase-G field deployment package:
+  `python -m phase10_field_deployment.package`.
+  - Defines local worker PC setup docs, support runbooks, and read-only smoke
+    commands for one Supervisor Server, 1-8 Arc workers, and a single tenant.
+  - Production deployment remains disallowed.
+  - Does not install/update software, start services, register workers, probe
+    sockets, invoke models, call connectors, write durable evidence, or mutate
+    customer systems.
+- Phase-H narrow pilot readiness:
+  `python -m phase11_pilot_readiness.pilot`.
+  - Defines the first sanitized insurance-intake pilot package for insurance
+    claim packet triage and missing-information checklist drafts.
+  - Uses Phase-5 draft-preview workflow templates only.
+  - Live pilot execution remains disallowed.
+  - Does not process raw customer documents, invoke models, call connectors,
+    send external messages, write durable evidence, or mutate customer systems.
+- Phase-I MVP completion gate:
+  `python -m phase12_mvp_completion.completion`.
+  - Evaluates documented MVP completion criteria against current repo evidence.
+  - Records five Lima Office external answers from
+    `docs/interop/ARC_BOT_LIMA_OFFICE_EXTERNAL_ANSWERS.md`.
+  - Reports the repo as not MVP-complete while remaining owner questions and
+    runtime dependencies remain unresolved.
+  - Does not grant runtime authority, invoke models, call connectors, write
+    evidence, mutate customer systems, or claim production readiness.
 - Basic Guardian console static UI: `ui/arc_bot_basic_console.html`.
   - Shows Local Model and LIMA Office connection indicators with connect buttons.
   - Includes file upload, office workflow templates, training notes,
@@ -372,6 +426,7 @@ The operator-console foundation defines the first office-worker control-room sur
 - Combined phase-0 + phase-1 guardrail command: `./scripts/phase0_phase1_handoff_guardrails.ps1`.
 - Phase-1 readiness handoff check command: `./scripts/phase1_handoff_guardrails.ps1`.
 - Phase-2/3 runtime-control handoff guardrail command: `./scripts/phase2_handoff_guardrails.ps1`.
+- Arc worker read-only smoke command: `./scripts/arc_worker_smoke.ps1`.
 - Emit read-only Phase-1 business inventory preview: `python -m phase1_business_shell_inventory.inventory`.
 - Emit read-only Phase-1 client configuration preview: `python -m phase1_client_configuration.configuration`.
 - Emit Phase-1 runtime authority gating projection: `python -m phase1_runtime_authority_gating.gating`.

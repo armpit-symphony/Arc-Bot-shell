@@ -12,6 +12,12 @@ Status: Foundation contracts and invariants
 - `arc_bot_runtime_settings_state.schema.json`
 - `arc_bot_overview_state.schema.json`
 - `arc_guardian_spine_base_projection`
+- `arc_intent_envelope_projection`
+- `arc_lima_office_read_adapter_projection`
+- `arc_phase_d_approval_evidence_dependency_projection`
+- `arc_field_deployment_readiness_projection`
+- `arc_narrow_pilot_readiness_projection`
+- `arc_mvp_completion_gate_projection`
 - `arc_bot_basic_guardian_console_projection`
 - `phase2_ollama_qwen_readiness_projection`
 - `phase3_document_intake_preview`
@@ -47,6 +53,24 @@ Status: Foundation contracts and invariants
   final output, sending external messages, updating customer records,
   submitting forms, and connector writes require approval and remain blocked in
   this phase.
+- Phase-G field deployment package projections must remain planning/read-only.
+  They must not install software, start services, register workers, probe
+  sockets, invoke models, call connectors, write durable evidence, or claim
+  production deployment readiness.
+- Phase-H narrow pilot readiness projections must remain sanitized,
+  planning/read-only, and blocked from live pilot execution. They must use
+  Phase-5 draft-preview workflows only and must not process raw customer data,
+  invoke models, call connectors, send external messages, write durable
+  evidence, or mutate customer systems.
+- Phase-12 MVP completion gate projections must not claim MVP completion or
+  production readiness while runtime, Guardian, approval, evidence-writer,
+  operator-console, local-model, connector, or field deployment gates remain
+  unresolved.
+- Lima Office external answer packets may be consumed only as contract
+  metadata. `approval_token_id`, `approval.token:<approval_token_id>`,
+  `approval.binding`, verifier result refs, and read-only supervisor
+  projection refs do not grant approval issuance, verification, durable
+  evidence writing, local-model execution, connector I/O, or runtime authority.
 - `source_access_mode` must be `read_only`.
 - `projection_gate.required` must be `true` and gate checks enforced in builders.
 - `contract_refs`, `policy_refs`, `evidence_refs`, `runbook_refs` must be present and non-empty where applicable.
@@ -148,6 +172,83 @@ Status: Foundation contracts and invariants
 - Approval requests must be non-reusable and must not grant runtime or local-model execution in Phase-1.
 - Evidence refs must be redacted-reference metadata only; raw office/customer content must not be persisted.
 - Local Spine ledger helpers must remain projection-only and must not write to disk.
+
+### Arc Intent Envelope
+- Defines the future signed request boundary for Arc-to-LIMA Office handoff.
+- Requires action, tenant, worker, operator, task, policy, evidence, runbook,
+  redaction policy, output policy, replay-protection, and signature refs.
+- Signature refs are metadata only. Arc Bot Shell must not create signatures,
+  verify signatures, issue approval tokens, or claim runtime authority.
+- Envelope projections must keep `runtime_authority_blocked` and
+  `runtime_execution_blocked` true.
+- Future verification and replay protection must be owned by LIMA Office /
+  Guardian before execution is enabled.
+
+### Arc LIMA Office Read Adapter
+- Exports Arc worker shell metadata in a LIMA Office-readable
+  `RuntimeStateSnapshot` style shape.
+- May include worker posture, local model readiness metadata, preview queue,
+  blocked queue, approval-required queue, preview artifact refs, policy refs,
+  and evidence refs.
+- Must not import LIMA runtime modules, open sockets, persist state, dispatch
+  workers, issue approvals, call models, call connectors, mutate customer
+  systems, or send external messages.
+- Must preserve one Supervisor Server, 1-8 Arc workers, and single-tenant MVP
+  assumptions.
+- Must keep runtime authority and runtime execution blocked.
+
+### Arc Approval And Evidence Dependency
+- Records the Guardian/LIMA Office answers required before approval token
+  lineage, replay protection, durable evidence writing, or execution-adjacent
+  approval paths can be implemented.
+- Must remain `external_answers_recorded_runtime_still_blocked` after the Lima
+  Office handoff until remaining owner/runtime gates are approved.
+- Records `approval_token_id`, `approval.token:<approval_token_id>`,
+  `approval.binding`, LIMA Office Guardian/Supervisor verifier ownership,
+  read-only runtime state projection sources, and LIMA Office Supervisor
+  evidence-plane ownership as metadata only.
+- Must keep operator-console server-state ownership, Guardian-owned
+  local-model executor authority, approval issuance/verification
+  implementation, verifier-result ingestion, supervisor projection ingestion,
+  and durable evidence implementation blocked until later gates.
+- Must not issue approval tokens, verify signatures, write durable evidence,
+  publish audit/Spine events, or grant runtime authority.
+
+### Arc Field Deployment Package
+- Defines the Phase-G setup guides, support runbooks, and read-only smoke
+  commands for one Supervisor Server, 1-8 Arc workers, and a single tenant.
+- Must keep `runtime_authority_blocked`, `runtime_execution_blocked`,
+  `production_ready`, and `production_deployment_allowed` fail-closed.
+- Smoke commands may run local projections and tests only.
+- Must not install/update software, start services, attach to a live
+  Supervisor Server, register with LIMA Office, probe local model sockets,
+  invoke local/cloud models, call connectors, send external messages, mutate
+  customer systems, write durable evidence, or issue/verify approvals.
+
+### Arc Narrow Pilot Readiness
+- Defines the first Phase-H/Phase-11 pilot package for insurance intake
+  summary and missing-information checklist.
+- Must use sanitized local sample metadata only.
+- Must reuse Phase-5 draft-preview workflow IDs:
+  `insurance_claim_packet_triage` and `missing_information_checklist`.
+- Must keep `runtime_authority_blocked`, `runtime_execution_blocked`,
+  `production_ready`, and `pilot_execution_allowed` fail-closed.
+- Must not process raw customer documents, invoke local/cloud models, call
+  connectors, update customer records, submit forms, send external messages,
+  write durable evidence, or claim live pilot/production readiness.
+
+### Arc MVP Completion Gate
+- Evaluates Arc Bot against the Phase-12 MVP completion criteria using repo
+  artifacts only.
+- Must keep `mvp_complete`, `production_ready`, `runtime_authority_blocked`,
+  and `runtime_execution_blocked` fail-closed while any criterion lacks direct
+  runtime evidence.
+- Must identify blocked criteria and missing evidence for supervisor
+  attachment, local model execution, approval/evidence lineage, durable
+  Spine/audit publication, operator approval workflow, and LIMA Office worker
+  state intake.
+- Must not grant runtime authority, invoke models, call connectors, write
+  evidence, mutate customer systems, or claim completion.
 
 ### Client Configuration
 - Static planning contract for tenant boundary, deployment topology, operator roles, connector posture, policy posture, and evidence requirements.

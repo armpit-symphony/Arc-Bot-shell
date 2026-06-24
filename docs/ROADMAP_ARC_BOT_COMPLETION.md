@@ -224,6 +224,8 @@ templates. Runtime mutation and external action authority remain blocked.
   - approval cannot be reused across actions,
   - approval cannot bypass policy,
   - every consequential action has an evidence chain.
+  - remaining implementation-gate questions are tracked in
+    `docs/requests/ARC_BOT_REMAINING_IMPLEMENTATION_GATE_REQUEST.md`.
 
 ## Phase 8 - Controlled Local Model Execution
 
@@ -275,12 +277,14 @@ templates. Runtime mutation and external action authority remain blocked.
 
 ## Phase 10 - Field Deployment Package
 
+Status: Phase-G planning package added. Runtime deployment remains blocked.
+
 - Add local PC setup guide:
-  - install Python/runtime dependencies,
-  - install local model runtime,
-  - attach to LIMA Office,
-  - verify Guardian/Spine health,
-  - run smoke tests.
+  - identify local Arc worker PC,
+  - confirm tenant/workspace label,
+  - confirm operator/approval owner labels,
+  - verify Guardian/Spine health through projections only,
+  - run read-only smoke tests.
 - Add small-business deployment profile:
   - one supervisor,
   - 1-8 Arc workers,
@@ -289,16 +293,20 @@ templates. Runtime mutation and external action authority remain blocked.
   - backup/export policy.
 - Add support runbooks:
   - model not reachable,
-  - document parse failed,
+  - document preview failed,
   - approval queue stuck,
   - evidence packet missing,
   - worker offline.
 - Completion gate:
-  - fresh local PC setup can pass smoke tests,
-  - rollback steps are documented,
+  - package docs and read-only smoke tests pass,
+  - rollback posture is documented as docs-only for this phase,
+  - software install/update, live supervisor attachment, model invocation,
+    connector action, and durable evidence writing remain blocked,
   - no production-readiness claim until field pilot succeeds.
 
 ## Phase 11 - Pilot Readiness
+
+Status: Phase-H planning package added. Live pilot execution remains blocked.
 
 - Select one narrow pilot workflow:
   - insurance intake summary and missing-information checklist.
@@ -311,12 +319,15 @@ templates. Runtime mutation and external action authority remain blocked.
   - model latency,
   - operator correction rate.
 - Completion gate:
-  - pilot workflow succeeds on sample documents,
+  - sanitized pilot workflow previews render,
+  - pilot execution remains blocked until Phase-D/E/F/G gates are approved,
   - operator can inspect every action,
   - all failures produce evidence,
   - no autonomous external/customer mutation occurs.
 
 ## Phase 12 - MVP Completion Criteria
+
+Status: completion-readiness gate added. MVP completion remains blocked.
 
 - Arc Bot runs locally on a PC attached to LIMA Office.
 - Arc Bot uses only a local model for approved preview work.
@@ -328,3 +339,10 @@ templates. Runtime mutation and external action authority remain blocked.
 - No hidden background actions.
 - No live connector writes without a later approved phase.
 - No production claims until field deployment evidence exists.
+- Completion gate:
+  - `python -m phase12_mvp_completion.completion --compact` reports
+    `mvp_complete = true` only when every criterion has direct runtime evidence,
+  - no Phase-D/E/F/G/H blocker remains,
+  - full tests, smoke, guardrails, and `git diff --check` pass.
+  - current open questions are tracked in
+    `docs/requests/ARC_BOT_REMAINING_IMPLEMENTATION_GATE_REQUEST.md`.

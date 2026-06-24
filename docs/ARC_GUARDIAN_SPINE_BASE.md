@@ -26,6 +26,8 @@ Arc Bot starts with these pieces only:
 - `ArcSpineEvent`: read-only event projection for future LIMA Office ingestion.
 - `ArcSpineLedger`: projection-only local Spine helper with no disk writes.
 - `ArcLocalModelSeat`: local model readiness metadata for one worker PC.
+- `ArcIntentEnvelope`: future signed-request boundary metadata for LIMA Office /
+  Guardian handoff.
 
 The implementation lives in `arc_guardian_spine/` and is import-only safe.
 
@@ -147,3 +149,8 @@ Before any real local model call is enabled, Arc Bot needs:
 - raw document redaction policy,
 - evidence and rollback refs,
 - LIMA Office handoff contract for the resulting preview artifact.
+
+The first `ArcIntentEnvelope` shape now exists as a contract scaffold in
+`arc_guardian_spine/intent_envelope.py`. It records signature and replay refs
+only. Arc Bot Shell does not sign, verify, issue approval tokens, dispatch, or
+execute from the envelope.
