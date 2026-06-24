@@ -19,6 +19,12 @@ from phase7_approval_evidence.remaining_gate_response import (
 REPO_ROOT = Path(__file__).resolve().parents[1]
 SCHEMA_PATH = REPO_ROOT / REMAINING_GATE_RESPONSE_SCHEMA_REF
 TEMPLATE_PATH = REPO_ROOT / REMAINING_GATE_RESPONSE_TEMPLATE_REF
+PROOF_PACKET_PATH = (
+    REPO_ROOT
+    / "docs"
+    / "proof_packets"
+    / "ARC_BOT_REMAINING_IMPLEMENTATION_GATE_RESPONSE_PACKET.md"
+)
 
 COMPLETE_RESPONSE = {
     "operator_console_server_state_owner": {
@@ -110,6 +116,23 @@ def test_remaining_gate_response_template_is_blank_and_runtime_blocked() -> None
     assert set(projection["unresolved_external_dependencies"]) == set(
         REMAINING_GATE_RESPONSE_REQUIRED_FIELDS
     )
+
+
+def test_remaining_gate_response_proof_packet_references_handoff_artifacts() -> None:
+    packet = PROOF_PACKET_PATH.read_text(encoding="utf-8")
+
+    for required_ref in (
+        "phase7_approval_evidence/remaining_gate_response.py",
+        "docs/requests/ARC_BOT_REMAINING_IMPLEMENTATION_GATE_REQUEST.md",
+        REMAINING_GATE_RESPONSE_SCHEMA_REF,
+        REMAINING_GATE_RESPONSE_TEMPLATE_REF,
+        "tests/test_arc_remaining_implementation_gate_response.py",
+    ):
+        assert required_ref in packet
+
+    assert "`runtime_authority_blocked = true`" in packet
+    assert "`runtime_execution_blocked = true`" in packet
+    assert "shape-complete response still cannot grant runtime authority" in packet
 
 
 def test_remaining_gate_response_cli_compact_output() -> None:
