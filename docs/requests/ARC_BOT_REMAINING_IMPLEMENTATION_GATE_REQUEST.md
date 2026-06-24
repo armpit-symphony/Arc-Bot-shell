@@ -74,4 +74,15 @@ guardian_owned_local_model_executor_boundary:
 - `docs/contracts/ARC_APPROVAL_EVIDENCE_DEPENDENCY.md`
 - `docs/readiness/ARC_BOT_MVP_COMPLETION_GATE.md`
 - `phase7_approval_evidence/readiness.py`
+- `phase7_approval_evidence/remaining_gate_response.py`
 - `phase12_mvp_completion/completion.py`
+
+## Arc Bot Response Intake
+
+After the owner response arrives, Arc Bot can inspect the local JSON packet without granting runtime authority:
+
+```powershell
+python -m phase7_approval_evidence.remaining_gate_response --response-path path\to\owner_response.json --compact
+```
+
+A complete response shape still reports runtime authority and runtime execution as blocked. Implementation work must remain separate from response-shape inspection.

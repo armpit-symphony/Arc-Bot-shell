@@ -334,6 +334,7 @@ The operator-console foundation defines the first office-worker control-room sur
 - Arc intent envelope preview (future signed-request boundary, execution blocked): `python -m arc_guardian_spine.intent_envelope_preview`.
 - Arc LIMA Office read adapter preview (RuntimeStateSnapshot-style metadata, execution blocked): `python -m phase6_lima_office_integration.read_adapter`.
 - Arc Phase-D approval/evidence dependency preview (Lima Office answers recorded, runtime still blocked): `python -m phase7_approval_evidence.readiness`.
+- Arc remaining implementation-gate response inspection (local JSON only, runtime still blocked): `python -m phase7_approval_evidence.remaining_gate_response`.
 - Arc Phase-G field deployment package preview (read-only setup/runbook/smoke posture): `python -m phase10_field_deployment.package`.
 - Arc Phase-H narrow pilot readiness preview (sanitized insurance-intake pilot planning): `python -m phase11_pilot_readiness.pilot`.
 - Arc Phase-I MVP completion gate preview (completion-readiness, not MVP-complete): `python -m phase12_mvp_completion.completion`.

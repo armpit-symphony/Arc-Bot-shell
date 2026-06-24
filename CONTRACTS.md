@@ -1,4 +1,4 @@
-﻿# Arc Bot Shell Contracts (Phase-0)
+# Arc Bot Shell Contracts (Phase-0)
 
 Date: 2026-06-18
 Status: Foundation contracts and invariants
@@ -15,6 +15,7 @@ Status: Foundation contracts and invariants
 - `arc_intent_envelope_projection`
 - `arc_lima_office_read_adapter_projection`
 - `arc_phase_d_approval_evidence_dependency_projection`
+- `arc_remaining_implementation_gate_response_projection`
 - `arc_field_deployment_readiness_projection`
 - `arc_narrow_pilot_readiness_projection`
 - `arc_mvp_completion_gate_projection`
