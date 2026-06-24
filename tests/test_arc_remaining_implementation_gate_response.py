@@ -4,13 +4,21 @@ from __future__ import annotations
 
 import io
 import json
+from pathlib import Path
 from unittest.mock import patch
 
 from phase7_approval_evidence.remaining_gate_response import (
+    REMAINING_GATE_RESPONSE_REQUIRED_FIELDS,
+    REMAINING_GATE_RESPONSE_SCHEMA_REF,
+    REMAINING_GATE_RESPONSE_TEMPLATE_REF,
     build_remaining_implementation_gate_response_projection,
     run_remaining_implementation_gate_response_preview,
 )
 
+
+REPO_ROOT = Path(__file__).resolve().parents[1]
+SCHEMA_PATH = REPO_ROOT / REMAINING_GATE_RESPONSE_SCHEMA_REF
+TEMPLATE_PATH = REPO_ROOT / REMAINING_GATE_RESPONSE_TEMPLATE_REF
 
 COMPLETE_RESPONSE = {
     "operator_console_server_state_owner": {
@@ -37,6 +45,8 @@ def test_remaining_gate_response_projection_defaults_to_awaiting_response() -> N
     assert projection["artifact_type"] == "arc_remaining_implementation_gate_response_projection"
     assert projection["status"] == "awaiting_or_incomplete_external_owner_response"
     assert projection["response_shape_complete"] is False
+    assert projection["response_schema_ref"] == REMAINING_GATE_RESPONSE_SCHEMA_REF
+    assert projection["response_template_ref"] == REMAINING_GATE_RESPONSE_TEMPLATE_REF
     assert projection["runtime_authority_blocked"] is True
     assert projection["runtime_execution_blocked"] is True
     assert {
@@ -71,6 +81,35 @@ def test_remaining_gate_response_reports_missing_fields() -> None:
     assert "owner" in missing["guardian_owned_local_model_executor_boundary"]
 
 
+def test_remaining_gate_response_schema_matches_required_fields() -> None:
+    schema = json.loads(SCHEMA_PATH.read_text(encoding="utf-8"))
+
+    assert schema["$id"] == "schema://arc-bot/remaining-implementation-gate-response"
+    assert schema["additionalProperties"] is False
+    assert set(schema["required"]) == set(REMAINING_GATE_RESPONSE_REQUIRED_FIELDS)
+
+    for dependency_id, required_fields in REMAINING_GATE_RESPONSE_REQUIRED_FIELDS.items():
+        dependency_schema = schema["properties"][dependency_id]
+        assert dependency_schema["additionalProperties"] is False
+        assert dependency_schema["required"] == list(required_fields)
+
+
+def test_remaining_gate_response_template_is_blank_and_runtime_blocked() -> None:
+    template = json.loads(TEMPLATE_PATH.read_text(encoding="utf-8"))
+
+    assert set(template) == set(REMAINING_GATE_RESPONSE_REQUIRED_FIELDS)
+    for dependency_id, required_fields in REMAINING_GATE_RESPONSE_REQUIRED_FIELDS.items():
+        assert set(template[dependency_id]) == set(required_fields)
+
+    projection = build_remaining_implementation_gate_response_projection(template)
+    assert projection["response_shape_complete"] is False
+    assert projection["runtime_authority_blocked"] is True
+    assert projection["runtime_execution_blocked"] is True
+    assert set(projection["unresolved_external_dependencies"]) == set(
+        REMAINING_GATE_RESPONSE_REQUIRED_FIELDS
+    )
+
+
 def test_remaining_gate_response_cli_compact_output() -> None:
     output = io.StringIO()
     with patch("sys.stdout", output):
@@ -79,4 +118,21 @@ def test_remaining_gate_response_cli_compact_output() -> None:
     assert status == 0
     parsed = json.loads(output.getvalue())
     assert parsed["artifact_id"] == "arc_remaining_implementation_gate_response_v1"
+    assert parsed["runtime_execution_blocked"] is True
+
+
+def test_remaining_gate_response_cli_accepts_response_path(tmp_path: Path) -> None:
+    response_path = tmp_path / "owner_response.json"
+    response_path.write_text(json.dumps(COMPLETE_RESPONSE), encoding="utf-8")
+
+    output = io.StringIO()
+    with patch("sys.stdout", output):
+        status = run_remaining_implementation_gate_response_preview(
+            ["--response-path", str(response_path), "--compact"]
+        )
+
+    assert status == 0
+    parsed = json.loads(output.getvalue())
+    assert parsed["response_shape_complete"] is True
+    assert parsed["runtime_authority_blocked"] is True
     assert parsed["runtime_execution_blocked"] is True

@@ -37,6 +37,13 @@ REMAINING_GATE_RESPONSE_REQUIRED_FIELDS: dict[str, tuple[str, ...]] = {
 }
 
 
+REMAINING_GATE_RESPONSE_SCHEMA_REF = (
+    "docs/contracts/schemas/arc_remaining_implementation_gate_response.schema.json"
+)
+REMAINING_GATE_RESPONSE_TEMPLATE_REF = (
+    "docs/examples/arc_lima/remaining_implementation_gate_response.template.json"
+)
+
 def build_remaining_implementation_gate_response_projection(
     response: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
@@ -79,6 +86,8 @@ def build_remaining_implementation_gate_response_projection(
             key: list(value)
             for key, value in REMAINING_GATE_RESPONSE_REQUIRED_FIELDS.items()
         },
+        "response_schema_ref": REMAINING_GATE_RESPONSE_SCHEMA_REF,
+        "response_template_ref": REMAINING_GATE_RESPONSE_TEMPLATE_REF,
         "present_response_fields": present,
         "missing_response_fields": missing,
         "unresolved_external_dependencies": [

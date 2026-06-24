@@ -1,0 +1,17 @@
+{
+  "operator_console_server_state_owner": {
+    "owner": "",
+    "canonical_contract_family": "",
+    "authoritative_fields": [],
+    "arc_bot_may_consume": [],
+    "arc_bot_must_not_do": []
+  },
+  "guardian_owned_local_model_executor_boundary": {
+    "owner": "",
+    "canonical_contract_family": "",
+    "required_guardian_inputs": [],
+    "required_verifier_evidence_outputs": [],
+    "arc_bot_may_consume": [],
+    "arc_bot_must_not_do": []
+  }
+}
