@@ -26,7 +26,8 @@ def test_mvp_completion_gate_does_not_claim_completion() -> None:
     assert projection["production_ready"] is False
     assert projection["runtime_authority_blocked"] is True
     assert projection["runtime_execution_blocked"] is True
-    assert projection["requires_external_owner_input"] is True
+    assert projection["requires_external_owner_input"] is False
+    assert projection["requires_runtime_implementation_gate_approval"] is True
     assert projection["lima_office_external_handoff"]["source_commit"].startswith("4e1ed0e")
 
 
@@ -73,11 +74,10 @@ def test_mvp_completion_gate_records_answered_and_remaining_dependencies() -> No
         "signature_replay_verification_owner",
         "runtime_state_snapshot_projection_boundary",
         "durable_evidence_writer_owner",
-    } == set(projection["answered_external_dependencies"])
-    assert {
         "operator_console_server_state_owner",
         "guardian_owned_local_model_executor_boundary",
-    } == set(projection["blocking_external_dependencies"])
+    } == set(projection["answered_external_dependencies"])
+    assert projection["blocking_external_dependencies"] == []
     assert len(projection["blocking_runtime_dependencies"]) == 7
 
 

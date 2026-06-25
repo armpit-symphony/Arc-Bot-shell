@@ -15,9 +15,9 @@ deployment criterion has direct evidence.
 Arc Bot Shell is not complete as an MVP.
 
 Current repo artifacts prove strong Phase-0/contract readiness, but they do
-not prove live runtime completion. Lima Office has answered five Phase-D
-dependency questions, but the gate must remain blocked until remaining owner
-questions and runtime implementation work are approved, added, and verified.
+not prove live runtime completion. Lima Office has answered the Phase-D owner
+and boundary questions now recorded in Arc Bot Shell, but the gate must remain
+blocked until runtime implementation work is approved, added, and verified.
 
 ## Preview Command
 
@@ -35,16 +35,22 @@ python -m phase12_mvp_completion.completion --compact
 - Runtime state: read-only projection over supervisor, worker, model route,
   Guardian, evidence, and console refs.
 - Durable evidence writer owner: LIMA Office Supervisor evidence plane.
+- Operator-console server-state owner: LIMA Office Supervisor and
+  operator-console plane.
+- Guardian-owned local-model executor boundary: LIMA Office Guardian plane
+  plus Supervisor model-route policy; no executor is approved and execution
+  remains disabled.
 
-Recorded handoff:
-`docs/interop/ARC_BOT_LIMA_OFFICE_EXTERNAL_ANSWERS.md`.
+Recorded handoffs:
+
+- `docs/interop/ARC_BOT_LIMA_OFFICE_EXTERNAL_ANSWERS.md`
+- `docs/interop/ARC_BOT_REMAINING_IMPLEMENTATION_GATE_RESPONSE.json`
 
 ## Blocking External Dependencies
 
-- Operator-console server-state owner.
-- Guardian-owned local-model executor boundary.
+No immediate owner-answer dependency remains open in Arc Bot Shell.
 
-Request packet:
+The original request packet remains as history:
 `docs/requests/ARC_BOT_REMAINING_IMPLEMENTATION_GATE_REQUEST.md`.
 
 ## Blocking Runtime Dependencies

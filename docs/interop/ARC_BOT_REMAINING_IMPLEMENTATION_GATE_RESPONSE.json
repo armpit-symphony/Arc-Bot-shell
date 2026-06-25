@@ -1,0 +1,57 @@
+{
+  "operator_console_server_state_owner": {
+    "owner": "LIMA Office Supervisor and operator-console plane",
+    "canonical_contract_family": "console.view, console.alert, console.action, supervisor.health",
+    "authoritative_fields": [
+      "canonical console server state",
+      "console.view refs",
+      "console.alert refs",
+      "console.action refs",
+      "supervisor.health refs"
+    ],
+    "arc_bot_may_consume": [
+      "read-only console.view refs",
+      "read-only console.alert refs",
+      "read-only supervisor.health refs",
+      "related evidence refs"
+    ],
+    "arc_bot_must_not_do": [
+      "become_source_of_truth_for_server_state",
+      "mutate_console_server_state",
+      "create_canonical_lima_office_evidence",
+      "use_local_display_state_as_authorization"
+    ]
+  },
+  "guardian_owned_local_model_executor_boundary": {
+    "owner": "LIMA Office Guardian plane plus Supervisor model-route policy",
+    "canonical_contract_family": "model.route",
+    "required_guardian_inputs": [
+      "model.route metadata",
+      "Guardian decision refs",
+      "Supervisor model-route policy refs",
+      "evidence refs",
+      "local_model_bundle_ref.execution_enabled=false"
+    ],
+    "required_verifier_evidence_outputs": [
+      "Guardian decision refs",
+      "model.route refs",
+      "evidence refs",
+      "blocked execution posture",
+      "local_model_bundle_ref.execution_enabled=false"
+    ],
+    "arc_bot_may_consume": [
+      "model.route mock_only metadata",
+      "model.route local_planned metadata",
+      "Guardian decision refs",
+      "evidence refs",
+      "local_model_bundle_ref refs"
+    ],
+    "arc_bot_must_not_do": [
+      "execute_local_inference",
+      "call_ollama_qwen",
+      "probe_endpoints",
+      "treat_route_metadata_as_execution_authority",
+      "enable_local_model_execution"
+    ]
+  }
+}

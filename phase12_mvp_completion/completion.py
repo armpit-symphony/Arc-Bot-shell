@@ -35,13 +35,12 @@ ANSWERED_EXTERNAL_DEPENDENCIES: tuple[str, ...] = (
     "signature_replay_verification_owner",
     "runtime_state_snapshot_projection_boundary",
     "durable_evidence_writer_owner",
-)
-
-
-UNRESOLVED_EXTERNAL_DEPENDENCIES: tuple[str, ...] = (
     "operator_console_server_state_owner",
     "guardian_owned_local_model_executor_boundary",
 )
+
+
+UNRESOLVED_EXTERNAL_DEPENDENCIES: tuple[str, ...] = ()
 
 
 MVP_COMPLETION_CRITERIA: tuple[dict[str, Any], ...] = (
@@ -66,9 +65,10 @@ MVP_COMPLETION_CRITERIA: tuple[dict[str, Any], ...] = (
         "evidence_refs": [
             "docs/LIMA_OFFICE_TEAM_PHASE2_REQUEST.md",
             "phase2_local_model_readiness/readiness.py",
+            "docs/interop/ARC_BOT_REMAINING_IMPLEMENTATION_GATE_RESPONSE.json",
         ],
         "missing_evidence": [
-            "Guardian-approved local model executor boundary",
+            "Guardian-owned local-model executor contract approved for execution",
             "durable model-preview evidence writer",
             "model-preview verifier result refs",
         ],
@@ -137,10 +137,10 @@ MVP_COMPLETION_CRITERIA: tuple[dict[str, Any], ...] = (
         "evidence_refs": [
             "docs/contracts/ARC_APPROVAL_EVIDENCE_DEPENDENCY.md",
             "docs/contracts/ARC_BOT_OPERATOR_CONSOLE_STATE.md",
+            "docs/interop/ARC_BOT_REMAINING_IMPLEMENTATION_GATE_RESPONSE.json",
         ],
         "missing_evidence": [
-            "operator-console MVP over server-side state",
-            "operator-console server-state owner",
+            "operator-console MVP over LIMA Office server-side state",
             "approval token issuance/verification implementation",
             "approval replay protection",
         ],
@@ -181,6 +181,17 @@ MVP_COMPLETION_CRITERIA: tuple[dict[str, Any], ...] = (
 )
 
 
+RUNTIME_DEPENDENCIES: tuple[str, ...] = (
+    "live_supervisor_attachment",
+    "worker_registration_lifecycle",
+    "approval_token_issuance_or_verification",
+    "verifier_result_ref_ingest",
+    "durable_evidence_writer_implementation",
+    "operator_console_server_state_implementation",
+    "local_model_executor_runtime_contract",
+)
+
+
 def build_arc_mvp_completion_gate_projection() -> dict[str, Any]:
     """Build deterministic MVP completion-readiness metadata."""
 
@@ -205,7 +216,8 @@ def build_arc_mvp_completion_gate_projection() -> dict[str, Any]:
         "runtime_execution_blocked": True,
         "mvp_complete": False,
         "production_ready": False,
-        "requires_external_owner_input": True,
+        "requires_external_owner_input": False,
+        "requires_runtime_implementation_gate_approval": True,
         "lima_office_external_handoff": dict(LIMA_OFFICE_EXTERNAL_HANDOFF),
         "criteria_total": len(criteria),
         "criteria_satisfied_by_static_contracts": len(satisfied),
@@ -213,21 +225,14 @@ def build_arc_mvp_completion_gate_projection() -> dict[str, Any]:
         "completion_criteria": criteria,
         "answered_external_dependencies": list(ANSWERED_EXTERNAL_DEPENDENCIES),
         "blocking_external_dependencies": list(UNRESOLVED_EXTERNAL_DEPENDENCIES),
-        "blocking_runtime_dependencies": [
-            "live_supervisor_attachment",
-            "worker_registration_lifecycle",
-            "approval_token_issuance_or_verification",
-            "verifier_result_ref_ingest",
-            "durable_evidence_writer_implementation",
-            "operator_console_server_state_implementation",
-            "local_model_executor_runtime_contract",
-        ],
+        "blocking_runtime_dependencies": list(RUNTIME_DEPENDENCIES),
         "safe_current_outputs": [
             "static_contracts",
             "read_only_projections",
             "sanitized_pilot_readiness",
             "field_deployment_planning_package",
             "smoke_and_guardrail_checks",
+            "recorded_owner_answer_refs",
         ],
         "must_not_implement_until_unblocked": [
             "live_supervisor_attachment",
@@ -245,6 +250,7 @@ def build_arc_mvp_completion_gate_projection() -> dict[str, Any]:
             "docs/requests/GUARDIAN_LIMA_OFFICE_PHASE_D_APPROVAL_EVIDENCE_REQUEST.md",
             "docs/requests/ARC_BOT_REMAINING_IMPLEMENTATION_GATE_REQUEST.md",
             "docs/interop/ARC_BOT_LIMA_OFFICE_EXTERNAL_ANSWERS.md",
+            "docs/interop/ARC_BOT_REMAINING_IMPLEMENTATION_GATE_RESPONSE.json",
         ],
     }
     _assert_projection_safe(projection)
@@ -260,17 +266,19 @@ def _assert_projection_safe(projection: dict[str, Any]) -> None:
         raise ArcMvpCompletionGateError("MVP completion gate cannot grant authority")
     if projection.get("runtime_execution_blocked") is not True:
         raise ArcMvpCompletionGateError("MVP completion gate cannot grant execution")
-    if projection.get("requires_external_owner_input") is not True:
-        raise ArcMvpCompletionGateError("MVP completion gate must require external input")
+    if projection.get("requires_external_owner_input") is not False:
+        raise ArcMvpCompletionGateError("MVP completion gate should have recorded owner answers")
+    if projection.get("requires_runtime_implementation_gate_approval") is not True:
+        raise ArcMvpCompletionGateError("MVP completion gate must require runtime implementation approval")
     if projection.get("criteria_total") != len(projection.get("completion_criteria", [])):
         raise ArcMvpCompletionGateError("criteria count mismatch")
     if projection.get("criteria_blocked_or_runtime_pending", 0) <= 0:
         raise ArcMvpCompletionGateError("completion must remain blocked while runtime gates are missing")
-    if len(projection.get("answered_external_dependencies", [])) != 5:
-        raise ArcMvpCompletionGateError("expected five recorded external answers")
-    if set(projection.get("blocking_external_dependencies", [])) != set(UNRESOLVED_EXTERNAL_DEPENDENCIES):
+    if len(projection.get("answered_external_dependencies", [])) != 7:
+        raise ArcMvpCompletionGateError("expected seven recorded external answers")
+    if projection.get("blocking_external_dependencies"):
         raise ArcMvpCompletionGateError("unexpected remaining external dependencies")
-    if len(projection.get("blocking_runtime_dependencies", [])) != 7:
+    if len(projection.get("blocking_runtime_dependencies", [])) != len(RUNTIME_DEPENDENCIES):
         raise ArcMvpCompletionGateError("expected seven runtime-dependent blockers")
 
 

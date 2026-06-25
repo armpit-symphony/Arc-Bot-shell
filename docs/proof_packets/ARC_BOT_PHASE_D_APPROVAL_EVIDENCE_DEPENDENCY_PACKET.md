@@ -19,6 +19,8 @@ execution-adjacent approval flows.
   `docs/requests/GUARDIAN_LIMA_OFFICE_PHASE_D_APPROVAL_EVIDENCE_REQUEST.md`
 - Recorded Lima Office answers:
   `docs/interop/ARC_BOT_LIMA_OFFICE_EXTERNAL_ANSWERS.md`
+- Recorded remaining-gate response:
+  `docs/interop/ARC_BOT_REMAINING_IMPLEMENTATION_GATE_RESPONSE.json`
 - Remaining implementation gate request:
   `docs/requests/ARC_BOT_REMAINING_IMPLEMENTATION_GATE_REQUEST.md`
 - Tests: `tests/test_arc_approval_evidence_dependency.py`
@@ -28,6 +30,8 @@ execution-adjacent approval flows.
 - `runtime_authority_blocked = true`
 - `runtime_execution_blocked = true`
 - `status = external_answers_recorded_runtime_still_blocked`
+- `requires_external_owner_input = false`
+- `requires_runtime_implementation_gate_approval = true`
 - No approval token issuance.
 - No signature verification.
 - No durable evidence writer.
@@ -44,11 +48,17 @@ execution-adjacent approval flows.
   `RuntimeStateSnapshot` schema exists yet.
 - Durable evidence writer owner: LIMA Office Supervisor evidence plane;
   durable implementation remains blocked.
+- Operator-console server-state owner: LIMA Office Supervisor and
+  operator-console plane; Arc Bot consumes read-only refs only.
+- Guardian-owned local-model executor boundary: LIMA Office Guardian plane plus
+  Supervisor model-route policy; no executor is approved and local execution
+  remains disabled.
 
 ## Remaining Blockers
 
-- Operator-console server-state owner.
-- Guardian-owned local-model executor boundary.
-- Runtime contracts and implementation for approval issuance/verification,
-  verifier-result ingestion, supervisor projection ingestion, and durable
-  evidence writes.
+No immediate owner-answer dependency remains open in Arc Bot Shell.
+
+Runtime contracts and implementation remain blocked for approval
+issuance/verification, verifier-result ingestion, supervisor projection
+ingestion, durable evidence writes, operator-console server-state runtime, and
+Guardian-owned local-model execution.

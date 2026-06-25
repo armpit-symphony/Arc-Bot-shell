@@ -1,8 +1,7 @@
 """Remaining implementation-gate response inspection.
 
-This module validates the shape of a future LIMA Office / Guardian owner
-response. It is intentionally read-only and cannot grant Arc Bot runtime
-authority.
+This module validates the shape of a LIMA Office / Guardian owner response.
+It is intentionally read-only and cannot grant Arc Bot runtime authority.
 """
 
 from __future__ import annotations
@@ -43,11 +42,34 @@ REMAINING_GATE_RESPONSE_SCHEMA_REF = (
 REMAINING_GATE_RESPONSE_TEMPLATE_REF = (
     "docs/examples/arc_lima/remaining_implementation_gate_response.template.json"
 )
+RECORDED_REMAINING_GATE_RESPONSE_REF = (
+    "docs/interop/ARC_BOT_REMAINING_IMPLEMENTATION_GATE_RESPONSE.json"
+)
+
+
+def load_recorded_remaining_gate_response(
+    response_path: str | Path = RECORDED_REMAINING_GATE_RESPONSE_REF,
+) -> dict[str, Any]:
+    """Load the recorded LIMA Office answer packet for shape inspection."""
+
+    parsed = json.loads(Path(response_path).read_text(encoding="utf-8"))
+    if not isinstance(parsed, dict):
+        raise ValueError("remaining gate response JSON must be an object")
+    return parsed
+
+
+def build_recorded_remaining_implementation_gate_response_projection() -> dict[str, Any]:
+    """Inspect the recorded owner response without granting runtime authority."""
+
+    return build_remaining_implementation_gate_response_projection(
+        load_recorded_remaining_gate_response()
+    )
+
 
 def build_remaining_implementation_gate_response_projection(
     response: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
-    """Inspect a future owner response without granting runtime authority."""
+    """Inspect an owner response without granting runtime authority."""
 
     response = response or {}
     missing: dict[str, list[str]] = {}
@@ -89,6 +111,7 @@ def build_remaining_implementation_gate_response_projection(
         },
         "response_schema_ref": REMAINING_GATE_RESPONSE_SCHEMA_REF,
         "response_template_ref": REMAINING_GATE_RESPONSE_TEMPLATE_REF,
+        "recorded_response_ref": RECORDED_REMAINING_GATE_RESPONSE_REF,
         "present_response_fields": present,
         "missing_response_fields": missing,
         "unresolved_external_dependencies": [
@@ -147,10 +170,7 @@ def run_remaining_implementation_gate_response_preview(argv: list[str] | None = 
     try:
         response: dict[str, Any] | None = None
         if args.response_path:
-            parsed = json.loads(Path(args.response_path).read_text(encoding="utf-8"))
-            if not isinstance(parsed, dict):
-                raise ValueError("remaining gate response JSON must be an object")
-            response = parsed
+            response = load_recorded_remaining_gate_response(args.response_path)
         projection = build_remaining_implementation_gate_response_projection(response)
     except (ArcRemainingGateResponseError, OSError, ValueError, json.JSONDecodeError) as err:
         print(f"remaining gate response preview failed: {err}", file=sys.stderr)

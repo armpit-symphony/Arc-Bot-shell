@@ -19,7 +19,8 @@ Arc Bot Shell may emit:
 - redacted evidence refs,
 - blocked queue projections,
 - approval-required queue projections,
-- read-only LIMA Office adapter projections.
+- read-only LIMA Office adapter projections,
+- recorded owner-answer refs.
 
 ## External Answers Recorded
 
@@ -34,10 +35,18 @@ Arc Bot Shell may emit:
   and console refs; no standalone `RuntimeStateSnapshot` schema exists yet.
 - Durable evidence writer owner: LIMA Office Supervisor evidence plane.
 - Durable evidence implementation: blocked.
+- Operator-console server-state owner: LIMA Office Supervisor and
+  operator-console plane; Arc Bot consumes read-only refs only.
+- Guardian-owned local-model executor boundary: LIMA Office Guardian plane plus
+  Supervisor model-route policy; no executor is approved and local execution
+  remains disabled.
 
-Source: `docs/interop/ARC_BOT_LIMA_OFFICE_EXTERNAL_ANSWERS.md`.
+Sources:
 
-Remaining request packet:
+- `docs/interop/ARC_BOT_LIMA_OFFICE_EXTERNAL_ANSWERS.md`
+- `docs/interop/ARC_BOT_REMAINING_IMPLEMENTATION_GATE_RESPONSE.json`
+
+Historical request packet:
 `docs/requests/ARC_BOT_REMAINING_IMPLEMENTATION_GATE_REQUEST.md`.
 
 ## Still Blocked
@@ -49,15 +58,14 @@ Remaining request packet:
 - Runtime authority acceptance.
 - Durable evidence writer.
 - Audit/Spine publication.
+- Operator-console state authority.
 - Local model execution approval.
 - Connector action approval.
 - External send approval.
 
 ## Remaining External Questions
 
-1. Which component owns authoritative operator-console server state?
-2. Which Guardian-owned contract gates local-model executor authority for
-   approved preview work?
+No immediate owner-answer dependency remains open in Arc Bot Shell.
 
 ## Current Safety Posture
 
@@ -66,3 +74,4 @@ Remaining request packet:
 - No approval token values are generated.
 - No cryptographic signing or verification is implemented.
 - No durable evidence writer is implemented.
+- No local-model executor is approved or invoked.

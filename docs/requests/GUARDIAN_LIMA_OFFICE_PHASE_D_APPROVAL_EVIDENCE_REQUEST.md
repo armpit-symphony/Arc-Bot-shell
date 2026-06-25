@@ -9,8 +9,10 @@ Arc Bot Shell requested Guardian/LIMA Office decisions before implementing the
 next approval and evidence phase. Lima Office answered the Phase-D dependency
 questions in commit `4e1ed0e54515d41933b8d7132d091b2915d9dff7`.
 
-Recorded Arc-side handoff:
-`docs/interop/ARC_BOT_LIMA_OFFICE_EXTERNAL_ANSWERS.md`.
+Recorded Arc-side handoffs:
+
+- `docs/interop/ARC_BOT_LIMA_OFFICE_EXTERNAL_ANSWERS.md`
+- `docs/interop/ARC_BOT_REMAINING_IMPLEMENTATION_GATE_RESPONSE.json`
 
 ## Questions
 
@@ -33,10 +35,9 @@ not implement approval token lineage, replay prevention, durable evidence
 packets, or execution-adjacent approval paths. The current repo remains
 metadata-only and fail-closed.
 
-Remaining owner questions:
-
-- Operator-console server-state owner.
-- Guardian-owned local-model executor boundary.
+The later remaining-gate response also records the operator-console server
+state owner and Guardian-owned local-model executor boundary. Those answers do
+not approve runtime implementation or local model execution.
 
 ## Current Safe Artifacts
 
@@ -44,3 +45,4 @@ Remaining owner questions:
 - `phase6_lima_office_integration/read_adapter.py`
 - `phase7_approval_evidence/readiness.py`
 - `docs/contracts/ARC_APPROVAL_EVIDENCE_DEPENDENCY.md`
+- `docs/interop/ARC_BOT_REMAINING_IMPLEMENTATION_GATE_RESPONSE.json`

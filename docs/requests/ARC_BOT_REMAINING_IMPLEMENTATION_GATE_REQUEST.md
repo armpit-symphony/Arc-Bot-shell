@@ -1,24 +1,39 @@
 # Arc Bot Remaining Implementation Gate Request
 
 Date: 2026-06-22
-Status: ready to send to LIMA Office / Guardian owners
+Status: answered by LIMA Office handoff, runtime still blocked
 
-## Send To
+## Sent To
 
 - LIMA Office Guardian/Supervisor owners.
 - LIMA Runtime / Guardian Model Harness owners.
 
 ## Subject
 
-Arc Bot remaining implementation-gate answers needed: operator console state
-and Guardian-owned local-model executor boundary
+Arc Bot remaining implementation-gate answers: operator console state and
+Guardian-owned local-model executor boundary
 
-## Message
+## Answer Status
 
-Arc Bot has recorded the Lima Office handoff answers from commit
+LIMA Office answered the two owner-decision questions in:
+
+- `Lima-Office/docs/interop/ARC_BOT_GUARDIAN_LIMA_EXTERNAL_ANSWERS.md`
+- Source commit: `4e1ed0e54515d41933b8d7132d091b2915d9dff7`
+
+Arc Bot recorded the shape-complete response at:
+
+- `docs/interop/ARC_BOT_REMAINING_IMPLEMENTATION_GATE_RESPONSE.json`
+
+The response is metadata only. It does not approve runtime implementation,
+local model execution, operator-console state mutation, durable evidence
+writes, or live Supervisor Server attachment.
+
+## Original Request Summary
+
+Arc Bot had recorded the Lima Office handoff answers from commit
 `4e1ed0e54515d41933b8d7132d091b2915d9dff7`.
 
-Five Phase-D dependency answers are now recorded:
+Five Phase-D dependency answers were already recorded:
 
 - Approval token canonical field: `approval_token_id`.
 - Approval token typed ref: `approval.token:<approval_token_id>`.
@@ -28,7 +43,7 @@ Five Phase-D dependency answers are now recorded:
 - Durable evidence writer owner: LIMA Office Supervisor evidence plane;
   durable implementation remains blocked.
 
-Arc Bot still needs two owner decisions before any implementation-gate lane can
+Arc Bot requested two owner decisions before any implementation-gate lane could
 start:
 
 1. Which component owns authoritative operator-console server state for
@@ -37,33 +52,17 @@ start:
 2. Which Guardian-owned contract gates local-model executor authority for
    approved preview work on an Arc worker PC?
 
-Please answer using the JSON template and schema, or the equivalent text shape below:
+## Recorded Answers
 
-- Template: `docs/examples/arc_lima/remaining_implementation_gate_response.template.json`
-- Schema: `docs/contracts/schemas/arc_remaining_implementation_gate_response.schema.json`
+- Operator-console canonical server state is owned by the LIMA Office
+  Supervisor and operator-console plane. Arc Bot may consume read-only
+  projections/refs only.
+- Future local-model executor authority is Guardian-owned through the LIMA
+  Office Guardian plane plus Supervisor model-route policy. No approved
+  local-model executor exists yet; `model.route` can represent `mock_only` or
+  `local_planned` metadata only, and execution remains disabled.
 
-Blank template values are not accepted as answers; Arc Bot treats them as incomplete and runtime-blocked.
-
-Text equivalent:
-
-```text
-operator_console_server_state_owner:
-  owner:
-  canonical contract family:
-  authoritative fields:
-  Arc Bot may consume:
-  Arc Bot must not do:
-
-guardian_owned_local_model_executor_boundary:
-  owner:
-  canonical contract family:
-  required Guardian inputs:
-  required verifier/evidence outputs:
-  Arc Bot may consume:
-  Arc Bot must not do:
-```
-
-## Arc Bot Assumptions Until Answered
+## Arc Bot Assumptions After Answer
 
 - `mvp_complete = false`.
 - Runtime authority remains blocked.
@@ -78,6 +77,7 @@ guardian_owned_local_model_executor_boundary:
 ## Arc Bot Reference Artifacts
 
 - `docs/interop/ARC_BOT_LIMA_OFFICE_EXTERNAL_ANSWERS.md`
+- `docs/interop/ARC_BOT_REMAINING_IMPLEMENTATION_GATE_RESPONSE.json`
 - `docs/contracts/ARC_APPROVAL_EVIDENCE_DEPENDENCY.md`
 - `docs/readiness/ARC_BOT_MVP_COMPLETION_GATE.md`
 - `phase7_approval_evidence/readiness.py`
@@ -88,10 +88,12 @@ guardian_owned_local_model_executor_boundary:
 
 ## Arc Bot Response Intake
 
-After the owner response arrives, Arc Bot can inspect the local JSON packet without granting runtime authority. Start from the blank template, fill every required field, and then run:
+Arc Bot can inspect the local JSON packet without granting runtime authority:
 
 ```powershell
-python -m phase7_approval_evidence.remaining_gate_response --response-path path\to\owner_response.json --compact
+python -m phase7_approval_evidence.remaining_gate_response --response-path docs\interop\ARC_BOT_REMAINING_IMPLEMENTATION_GATE_RESPONSE.json --compact
 ```
 
-A complete response shape still reports runtime authority and runtime execution as blocked. Implementation work must remain separate from response-shape inspection.
+A complete response shape still reports runtime authority and runtime execution
+as blocked. Implementation work must remain separate from response-shape
+inspection.

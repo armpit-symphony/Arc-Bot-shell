@@ -10,6 +10,8 @@ Status: external handoff recorded, runtime still blocked
 - Source commit: `4e1ed0e54515d41933b8d7132d091b2915d9dff7`
 - Source packet:
   `Lima-Office/docs/interop/ARC_BOT_GUARDIAN_LIMA_EXTERNAL_ANSWERS.md`
+- Recorded remaining-gate response:
+  `docs/interop/ARC_BOT_REMAINING_IMPLEMENTATION_GATE_RESPONSE.json`
 
 ## Answers Recorded
 
@@ -32,14 +34,27 @@ Status: external handoff recorded, runtime still blocked
 5. Durable evidence writer:
    - Owner: LIMA Office Supervisor evidence plane.
    - Durable implementation remains blocked.
+6. Operator-console server state:
+   - Owner: LIMA Office Supervisor and operator-console plane.
+   - Arc Bot may consume read-only console/supervisor/evidence refs.
+   - Arc Bot must not become source of truth, mutate console server state, or
+     use local display state as authorization.
+7. Guardian-owned local-model executor boundary:
+   - Owner: LIMA Office Guardian plane plus Supervisor model-route policy.
+   - Current contract family: `model.route` metadata only.
+   - `local_model_bundle_ref.execution_enabled` remains `false`.
+   - Arc Bot must not execute local inference, call Ollama/Qwen, probe
+     endpoints, or treat route metadata as execution authority.
 
-## Remaining Blockers
+## Remaining Runtime Blockers
 
-- Operator-console server-state owner.
-- Guardian-owned local-model executor boundary.
-- Runtime implementation contracts for approval issuance/verification,
-  verifier-result ingestion, supervisor projection ingestion, and durable
-  evidence writes.
+- Approval token issuance and verification contracts.
+- Verifier result-ref ingest contract.
+- Supervisor projection ingest implementation.
+- Durable evidence writer and audit/Spine implementation.
+- Operator-console server-state runtime implementation.
+- Guardian-owned local-model executor contract and implementation.
+- Live supervisor attachment and worker registration lifecycle.
 
 ## Arc Bot Rule
 

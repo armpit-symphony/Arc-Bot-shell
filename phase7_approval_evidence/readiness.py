@@ -2,8 +2,9 @@
 
 This projection records the Guardian/LIMA Office decisions received for
 approval token lineage, replay protection, durable evidence ownership, and
-read-only state projection. It also keeps Arc Bot runtime authority blocked
-until the remaining owner/runtime gates are explicitly approved.
+read-only state projection. It also records the remaining owner answers while
+keeping Arc Bot runtime authority blocked until implementation gates are
+explicitly approved.
 """
 
 from __future__ import annotations
@@ -87,25 +88,37 @@ ANSWERED_EXTERNAL_DEPENDENCIES: tuple[dict[str, Any], ...] = (
         "implementation_status": "durable_implementation_blocked",
         "blocks": ["durable_evidence_packets", "audit_spine_publication"],
     },
-)
-
-
-REMAINING_EXTERNAL_OWNER_QUESTIONS: tuple[dict[str, Any], ...] = (
     {
-        "question_id": "operator_console_server_state_owner",
-        "owner": "LIMA Office / Guardian",
-        "question": "Which component owns authoritative operator-console server state?",
+        "dependency_id": "operator_console_server_state_owner",
+        "owner": "LIMA Office Supervisor and operator-console plane",
+        "answer_status": "owner_answered_implementation_blocked",
+        "canonical_contract_family": "console.view, console.alert, console.action, supervisor.health",
+        "arc_bot_boundary": "read_only_refs_only",
         "blocks": ["operator_approval_lifecycle", "approval_queue_runtime_state"],
     },
     {
-        "question_id": "guardian_owned_local_model_executor_boundary",
-        "owner": "Guardian / LIMA Office",
-        "question": (
-            "Which Guardian-owned contract gates local-model executor authority "
-            "for approved preview work?"
-        ),
+        "dependency_id": "guardian_owned_local_model_executor_boundary",
+        "owner": "LIMA Office Guardian plane plus Supervisor model-route policy",
+        "answer_status": "owner_answered_executor_not_approved",
+        "canonical_contract_family": "model.route",
+        "execution_enabled": False,
+        "arc_bot_boundary": "route_metadata_only_no_local_inference",
         "blocks": ["local_model_execution_approval", "model_preview_authority"],
     },
+)
+
+
+REMAINING_EXTERNAL_OWNER_QUESTIONS: tuple[dict[str, Any], ...] = ()
+
+
+RUNTIME_IMPLEMENTATION_BLOCKERS: tuple[str, ...] = (
+    "durable_evidence_writer_implementation",
+    "approval_token_issuance_contract",
+    "approval_token_verification_contract",
+    "verifier_result_ref_ingest_contract",
+    "supervisor_projection_ingest_contract",
+    "operator_console_server_state_implementation",
+    "local_model_executor_runtime_contract",
 )
 
 
@@ -121,24 +134,17 @@ def build_arc_approval_evidence_dependency_projection() -> dict[str, Any]:
         "source_access_mode": "read_only",
         "runtime_authority_blocked": True,
         "runtime_execution_blocked": True,
-        "requires_external_owner_input": True,
+        "requires_external_owner_input": False,
+        "requires_runtime_implementation_gate_approval": True,
         "lima_office_external_handoff": dict(LIMA_OFFICE_EXTERNAL_HANDOFF),
         "handoff_request_refs": [
             "docs/requests/ARC_BOT_REMAINING_IMPLEMENTATION_GATE_REQUEST.md",
+            "docs/interop/ARC_BOT_REMAINING_IMPLEMENTATION_GATE_RESPONSE.json",
         ],
         "answered_external_dependencies": list(ANSWERED_EXTERNAL_DEPENDENCIES),
         "remaining_external_owner_questions": list(REMAINING_EXTERNAL_OWNER_QUESTIONS),
-        "unresolved_external_dependencies": [
-            "operator_console_server_state_owner",
-            "guardian_owned_local_model_executor_boundary",
-        ],
-        "runtime_implementation_blockers": [
-            "durable_evidence_writer_implementation",
-            "approval_token_issuance_contract",
-            "approval_token_verification_contract",
-            "verifier_result_ref_ingest_contract",
-            "supervisor_projection_ingest_contract",
-        ],
+        "unresolved_external_dependencies": [],
+        "runtime_implementation_blockers": list(RUNTIME_IMPLEMENTATION_BLOCKERS),
         "blocked_capabilities": [
             "approval_token_issuance",
             "approval_token_verification",
@@ -147,6 +153,7 @@ def build_arc_approval_evidence_dependency_projection() -> dict[str, Any]:
             "runtime_authority_acceptance",
             "durable_evidence_writer",
             "audit_spine_publication",
+            "operator_console_state_authority",
             "local_model_execution_approval",
             "connector_action_approval",
             "external_send_approval",
@@ -157,14 +164,15 @@ def build_arc_approval_evidence_dependency_projection() -> dict[str, Any]:
             "read_only_lima_office_adapter_projection",
             "blocked_queue_projection",
             "approval_required_queue_projection",
+            "recorded_owner_answer_refs",
         ],
         "unblock_acceptance_criteria": [
-            "operator-console server-state owner assigned",
-            "Guardian-owned local-model executor boundary assigned",
             "approval token issuance and verification contracts implemented",
             "verifier result ref ingest contract implemented",
             "supervisor projection ingest contract implemented",
             "durable evidence writer implementation approved",
+            "operator-console server-state runtime implemented by LIMA Office owner",
+            "Guardian-owned local-model executor contract explicitly approved and implemented",
             "tests added before any execution-adjacent behavior",
         ],
     }
@@ -178,9 +186,13 @@ def _assert_projection_safe(projection: dict[str, Any]) -> None:
         raise ArcApprovalEvidenceDependencyError("Phase-D dependency cannot grant authority")
     if projection.get("runtime_execution_blocked") is not True:
         raise ArcApprovalEvidenceDependencyError("Phase-D dependency cannot grant execution")
-    if projection.get("requires_external_owner_input") is not True:
+    if projection.get("requires_external_owner_input") is not False:
         raise ArcApprovalEvidenceDependencyError(
-            "Phase-D dependency must require external owner input"
+            "Phase-D dependency owner answers must be recorded"
+        )
+    if projection.get("requires_runtime_implementation_gate_approval") is not True:
+        raise ArcApprovalEvidenceDependencyError(
+            "Phase-D dependency must still require runtime implementation approval"
         )
     answers = projection.get("answered_external_dependencies", [])
     if not answers:
@@ -194,15 +206,17 @@ def _assert_projection_safe(projection: dict[str, Any]) -> None:
         "signature_replay_verification_owner",
         "runtime_state_snapshot_canonical_fields",
         "durable_evidence_writer_boundary",
+        "operator_console_server_state_owner",
+        "guardian_owned_local_model_executor_boundary",
     }
     if not required.issubset(dependency_ids):
         raise ArcApprovalEvidenceDependencyError("Phase-D external answers are incomplete")
-    unresolved = set(projection.get("unresolved_external_dependencies", []))
-    if {
-        "operator_console_server_state_owner",
-        "guardian_owned_local_model_executor_boundary",
-    } - unresolved:
-        raise ArcApprovalEvidenceDependencyError("remaining external blockers are incomplete")
+    if projection.get("unresolved_external_dependencies"):
+        raise ArcApprovalEvidenceDependencyError("external owner dependencies should be recorded")
+    if set(projection.get("runtime_implementation_blockers", [])) != set(
+        RUNTIME_IMPLEMENTATION_BLOCKERS
+    ):
+        raise ArcApprovalEvidenceDependencyError("runtime implementation blockers are incomplete")
 
 
 def run_arc_approval_evidence_dependency_preview(argv: list[str] | None = None) -> int:

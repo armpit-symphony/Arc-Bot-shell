@@ -41,7 +41,7 @@ from phase7_approval_evidence.readiness import (
     build_arc_approval_evidence_dependency_projection,
 )
 from phase7_approval_evidence.remaining_gate_response import (
-    build_remaining_implementation_gate_response_projection,
+    build_recorded_remaining_implementation_gate_response_projection,
 )
 from phase10_field_deployment.package import (
     build_arc_field_deployment_readiness_projection,
@@ -77,7 +77,7 @@ def build_arc_bot_artifact_pack(*, fixtures_dir: str | Path = "tests/fixtures") 
                 build_arc_approval_evidence_dependency_projection()
             ),
             "phase_d_remaining_gate_response_intake": (
-                build_remaining_implementation_gate_response_projection()
+                build_recorded_remaining_implementation_gate_response_projection()
             ),
             "phase_g_field_deployment_package": (
                 build_arc_field_deployment_readiness_projection()

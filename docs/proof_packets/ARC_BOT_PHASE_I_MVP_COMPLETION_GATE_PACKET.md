@@ -16,6 +16,8 @@ deployment dependencies remain unresolved.
 - Gate doc: `docs/readiness/ARC_BOT_MVP_COMPLETION_GATE.md`
 - Recorded Lima Office answers:
   `docs/interop/ARC_BOT_LIMA_OFFICE_EXTERNAL_ANSWERS.md`
+- Recorded remaining-gate response:
+  `docs/interop/ARC_BOT_REMAINING_IMPLEMENTATION_GATE_RESPONSE.json`
 - Remaining implementation gate request:
   `docs/requests/ARC_BOT_REMAINING_IMPLEMENTATION_GATE_REQUEST.md`
 - Tests: `tests/test_arc_mvp_completion_gate.py`
@@ -26,15 +28,25 @@ deployment dependencies remain unresolved.
 - `production_ready = false`
 - `runtime_authority_blocked = true`
 - `runtime_execution_blocked = true`
-- `requires_external_owner_input = true`
+- `requires_external_owner_input = false`
+- `requires_runtime_implementation_gate_approval = true`
 
 ## Answered Dependency Reference
 
-`docs/interop/ARC_BOT_LIMA_OFFICE_EXTERNAL_ANSWERS.md`
+- `docs/interop/ARC_BOT_LIMA_OFFICE_EXTERNAL_ANSWERS.md`
+- `docs/interop/ARC_BOT_REMAINING_IMPLEMENTATION_GATE_RESPONSE.json`
 
 ## Remaining Blocking Dependencies
 
-- Operator-console server-state owner.
-- Guardian-owned local-model executor boundary.
-- Seven runtime-dependent implementation gates remain blocked in
-  `phase12_mvp_completion.completion`.
+No immediate owner-answer dependency remains open in Arc Bot Shell.
+
+Seven runtime-dependent implementation gates remain blocked in
+`phase12_mvp_completion.completion`:
+
+- Live supervisor attachment.
+- Worker registration lifecycle.
+- Approval token issuance or verification.
+- Verifier result-ref ingest.
+- Durable evidence writer implementation.
+- Operator-console server-state implementation.
+- Local-model executor runtime contract.

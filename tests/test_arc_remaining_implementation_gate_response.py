@@ -8,10 +8,13 @@ from pathlib import Path
 from unittest.mock import patch
 
 from phase7_approval_evidence.remaining_gate_response import (
+    RECORDED_REMAINING_GATE_RESPONSE_REF,
     REMAINING_GATE_RESPONSE_REQUIRED_FIELDS,
     REMAINING_GATE_RESPONSE_SCHEMA_REF,
     REMAINING_GATE_RESPONSE_TEMPLATE_REF,
+    build_recorded_remaining_implementation_gate_response_projection,
     build_remaining_implementation_gate_response_projection,
+    load_recorded_remaining_gate_response,
     run_remaining_implementation_gate_response_preview,
 )
 
@@ -19,6 +22,7 @@ from phase7_approval_evidence.remaining_gate_response import (
 REPO_ROOT = Path(__file__).resolve().parents[1]
 SCHEMA_PATH = REPO_ROOT / REMAINING_GATE_RESPONSE_SCHEMA_REF
 TEMPLATE_PATH = REPO_ROOT / REMAINING_GATE_RESPONSE_TEMPLATE_REF
+RECORDED_RESPONSE_PATH = REPO_ROOT / RECORDED_REMAINING_GATE_RESPONSE_REF
 PROOF_PACKET_PATH = (
     REPO_ROOT
     / "docs"
@@ -53,6 +57,7 @@ def test_remaining_gate_response_projection_defaults_to_awaiting_response() -> N
     assert projection["response_shape_complete"] is False
     assert projection["response_schema_ref"] == REMAINING_GATE_RESPONSE_SCHEMA_REF
     assert projection["response_template_ref"] == REMAINING_GATE_RESPONSE_TEMPLATE_REF
+    assert projection["recorded_response_ref"] == RECORDED_REMAINING_GATE_RESPONSE_REF
     assert projection["source_access_mode"] == "read_only"
     assert projection["inspection_mode"] == "local_json_inspection_only"
     assert projection["runtime_authority_blocked"] is True
@@ -73,6 +78,18 @@ def test_remaining_gate_response_complete_shape_still_blocks_runtime() -> None:
     assert projection["unresolved_external_dependencies"] == []
     assert "local_model_invocation" in projection["must_not_implement_from_response_alone"]
     assert "operator_console_state_authority" in projection["must_not_implement_from_response_alone"]
+
+
+def test_recorded_remaining_gate_response_is_shape_complete_and_runtime_blocked() -> None:
+    response = load_recorded_remaining_gate_response()
+    projection = build_recorded_remaining_implementation_gate_response_projection()
+
+    assert set(response) == set(REMAINING_GATE_RESPONSE_REQUIRED_FIELDS)
+    assert projection["status"] == "response_shape_complete_runtime_still_blocked"
+    assert projection["response_shape_complete"] is True
+    assert projection["unresolved_external_dependencies"] == []
+    assert projection["runtime_authority_blocked"] is True
+    assert projection["runtime_execution_blocked"] is True
 
 
 def test_remaining_gate_response_reports_missing_fields() -> None:
@@ -118,6 +135,16 @@ def test_remaining_gate_response_template_is_blank_and_runtime_blocked() -> None
     )
 
 
+def test_recorded_remaining_gate_response_file_exists() -> None:
+    recorded = json.loads(RECORDED_RESPONSE_PATH.read_text(encoding="utf-8"))
+
+    assert recorded["operator_console_server_state_owner"]["owner"]
+    assert recorded["guardian_owned_local_model_executor_boundary"]["owner"]
+    assert "call_ollama_qwen" in recorded[
+        "guardian_owned_local_model_executor_boundary"
+    ]["arc_bot_must_not_do"]
+
+
 def test_remaining_gate_response_proof_packet_references_handoff_artifacts() -> None:
     packet = PROOF_PACKET_PATH.read_text(encoding="utf-8")
 
@@ -126,6 +153,7 @@ def test_remaining_gate_response_proof_packet_references_handoff_artifacts() -> 
         "docs/requests/ARC_BOT_REMAINING_IMPLEMENTATION_GATE_REQUEST.md",
         REMAINING_GATE_RESPONSE_SCHEMA_REF,
         REMAINING_GATE_RESPONSE_TEMPLATE_REF,
+        RECORDED_REMAINING_GATE_RESPONSE_REF,
         "tests/test_arc_remaining_implementation_gate_response.py",
     ):
         assert required_ref in packet
