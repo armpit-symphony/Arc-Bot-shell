@@ -224,8 +224,10 @@ templates. Runtime mutation and external action authority remain blocked.
   - approval cannot be reused across actions,
   - approval cannot bypass policy,
   - every consequential action has an evidence chain.
-  - remaining implementation-gate questions are tracked in
-    `docs/requests/ARC_BOT_REMAINING_IMPLEMENTATION_GATE_REQUEST.md`.
+  - remaining owner answers are recorded in
+    `docs/interop/ARC_BOT_REMAINING_IMPLEMENTATION_GATE_RESPONSE.json`;
+    runtime implementation approval is tracked in
+    `docs/requests/ARC_BOT_RUNTIME_IMPLEMENTATION_GATE_REQUEST.md`.
 
 ## Phase 8 - Controlled Local Model Execution
 
@@ -344,5 +346,5 @@ Status: completion-readiness gate added. MVP completion remains blocked.
     `mvp_complete = true` only when every criterion has direct runtime evidence,
   - no Phase-D/E/F/G/H blocker remains,
   - full tests, smoke, guardrails, and `git diff --check` pass.
-  - current open questions are tracked in
-    `docs/requests/ARC_BOT_REMAINING_IMPLEMENTATION_GATE_REQUEST.md`.
+  - runtime implementation approval is tracked in
+    `docs/requests/ARC_BOT_RUNTIME_IMPLEMENTATION_GATE_REQUEST.md`.

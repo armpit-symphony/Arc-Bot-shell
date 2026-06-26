@@ -256,10 +256,7 @@ Exit gate:
 
 Goal: make approval/evidence enforceable before any model execution.
 
-Status: blocked-readiness projection added on 2026-06-21. Implementation of
-approval token lineage, replay protection, signature verification, durable
-evidence writing, and execution-adjacent approvals is blocked pending
-Guardian/LIMA Office owner answers.
+Status: owner answers recorded; runtime implementation remains blocked. Implementation of approval token lineage, replay protection, signature verification, durable evidence writing, and execution-adjacent approvals is blocked pending explicit runtime implementation gate approval.
 
 Deliverables:
 
@@ -279,9 +276,8 @@ Exit gate:
 
 - Approval cannot be replayed, reused across actions, or used without matching
   policy/evidence lineage.
-- Guardian/LIMA Office has approved token format, binding fields,
-  signature/replay owner, RuntimeStateSnapshot fields, and durable evidence
-  writer boundary.
+- Guardian/LIMA Office has approved the runtime implementation gate in
+  `docs/requests/ARC_BOT_RUNTIME_IMPLEMENTATION_GATE_REQUEST.md`.
 
 ### Phase E: Controlled Local Model Preview
 
@@ -404,7 +400,9 @@ Exit gate:
 
 ## Recommended Immediate Next Step
 
-Keep Phase D blocked until Guardian/LIMA Office answers the approval/evidence
-questions, then begin Phase E controlled local-model preview design behind the
-Guardian syscall gate. Do not implement real model invocation, supervisor
-attachment, or durable evidence writing before those answers are approved.
+Send `docs/requests/ARC_BOT_RUNTIME_IMPLEMENTATION_GATE_REQUEST.md` to the
+LIMA Office Supervisor, Guardian/verifier, evidence-plane, operator-console,
+and model-route owners. Do not implement real model invocation, supervisor
+attachment, worker registration, approval issuance/verification, verifier
+ingest, operator-console state mutation, or durable evidence writing before the
+runtime implementation gate is explicitly approved.

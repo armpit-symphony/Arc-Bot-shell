@@ -249,6 +249,7 @@ def build_arc_mvp_completion_gate_projection() -> dict[str, Any]:
             "docs/audits/ARC_BOT_COMPLETION_AUDIT_AND_PHASE_PLAN.md",
             "docs/requests/GUARDIAN_LIMA_OFFICE_PHASE_D_APPROVAL_EVIDENCE_REQUEST.md",
             "docs/requests/ARC_BOT_REMAINING_IMPLEMENTATION_GATE_REQUEST.md",
+            "docs/requests/ARC_BOT_RUNTIME_IMPLEMENTATION_GATE_REQUEST.md",
             "docs/interop/ARC_BOT_LIMA_OFFICE_EXTERNAL_ANSWERS.md",
             "docs/interop/ARC_BOT_REMAINING_IMPLEMENTATION_GATE_RESPONSE.json",
         ],

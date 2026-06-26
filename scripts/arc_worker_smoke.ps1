@@ -21,10 +21,13 @@ python -m phase11_pilot_readiness.pilot --compact
 
 python -m phase12_mvp_completion.completion --compact
 
+python -m phase12_mvp_completion.runtime_implementation_gate --compact
+
 python -m pytest -q `
   tests/test_arc_field_deployment_package.py `
   tests/test_arc_pilot_readiness.py `
   tests/test_arc_mvp_completion_gate.py `
+  tests/test_arc_runtime_implementation_gate.py `
   tests/test_arc_lima_office_read_adapter.py `
   tests/test_arc_approval_evidence_dependency.py `
   tests/test_arc_remaining_implementation_gate_response.py `

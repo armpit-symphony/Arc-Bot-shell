@@ -48,6 +48,9 @@ from phase10_field_deployment.package import (
 )
 from phase11_pilot_readiness.pilot import build_arc_pilot_readiness_projection
 from phase12_mvp_completion.completion import build_arc_mvp_completion_gate_projection
+from phase12_mvp_completion.runtime_implementation_gate import (
+    build_arc_runtime_implementation_gate_request_projection,
+)
 
 
 def build_arc_bot_artifact_pack(*, fixtures_dir: str | Path = "tests/fixtures") -> dict[str, Any]:
@@ -84,6 +87,9 @@ def build_arc_bot_artifact_pack(*, fixtures_dir: str | Path = "tests/fixtures") 
             ),
             "phase_h_narrow_pilot_readiness": build_arc_pilot_readiness_projection(),
             "phase_i_mvp_completion_gate": build_arc_mvp_completion_gate_projection(),
+            "phase_i_runtime_implementation_gate_request": (
+                build_arc_runtime_implementation_gate_request_projection()
+            ),
             "phase2_runtime_control": build_phase2_runtime_control_projection(
                 feed_contract_path=contract_path,
                 feed_payload_path=payload_path,
