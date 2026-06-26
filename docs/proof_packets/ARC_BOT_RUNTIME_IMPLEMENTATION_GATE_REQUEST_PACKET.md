@@ -14,8 +14,14 @@ explicit without granting Arc Bot runtime authority.
 - Projection module: `phase12_mvp_completion/runtime_implementation_gate.py`
 - Preview command:
   `python -m phase12_mvp_completion.runtime_implementation_gate --compact`
+- Response-intake preview command:
+  `python -m phase12_mvp_completion.runtime_implementation_gate --response-path path\to\response.json --compact`
 - Request packet:
   `docs/requests/ARC_BOT_RUNTIME_IMPLEMENTATION_GATE_REQUEST.md`
+- Response schema:
+  `docs/contracts/schemas/arc_runtime_implementation_gate_response.schema.json`
+- Blank response template:
+  `docs/examples/arc_lima/runtime_implementation_gate_response.template.json`
 - MVP completion gate:
   `phase12_mvp_completion/completion.py`
 - Tests: `tests/test_arc_runtime_implementation_gate.py`
@@ -55,5 +61,6 @@ explicit without granting Arc Bot runtime authority.
 ## Acceptance
 
 The packet is valid only if the request projection lists every runtime blocker
-from `phase12_mvp_completion.completion.RUNTIME_DEPENDENCIES` and keeps Arc Bot
-runtime authority and runtime execution blocked.
+from `phase12_mvp_completion.completion.RUNTIME_DEPENDENCIES`, the response
+intake fails closed for the blank template, and both paths keep Arc Bot runtime
+authority and runtime execution blocked.

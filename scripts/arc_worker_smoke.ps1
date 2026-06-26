@@ -23,6 +23,10 @@ python -m phase12_mvp_completion.completion --compact
 
 python -m phase12_mvp_completion.runtime_implementation_gate --compact
 
+python -m phase12_mvp_completion.runtime_implementation_gate `
+  --response-path docs\examples\arc_lima\runtime_implementation_gate_response.template.json `
+  --compact
+
 python -m pytest -q `
   tests/test_arc_field_deployment_package.py `
   tests/test_arc_pilot_readiness.py `

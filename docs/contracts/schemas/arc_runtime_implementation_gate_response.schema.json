@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "schema://arc-bot/runtime-implementation-gate-response",
+  "title": "Arc Bot Runtime Implementation Gate Response",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["runtime_implementation_gate_decision"],
+  "properties": {
+    "runtime_implementation_gate_decision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "decision",
+        "approving_owner",
+        "approved_dependencies",
+        "rejected_or_deferred_dependencies",
+        "required_contract_refs",
+        "required_schema_refs",
+        "required_test_gates",
+        "explicit_runtime_limits",
+        "evidence_writer_authority",
+        "local_model_executor_authority",
+        "operator_console_state_authority",
+        "effective_after_commit_or_packet_ref"
+      ],
+      "properties": {
+        "decision": {
+          "type": "string",
+          "enum": ["approved", "rejected", "amend_requested"]
+        },
+        "approving_owner": { "type": "string", "minLength": 1 },
+        "approved_dependencies": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "rejected_or_deferred_dependencies": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "required_contract_refs": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "required_schema_refs": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "required_test_gates": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "explicit_runtime_limits": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "evidence_writer_authority": { "type": "string", "minLength": 1 },
+        "local_model_executor_authority": { "type": "string", "minLength": 1 },
+        "operator_console_state_authority": { "type": "string", "minLength": 1 },
+        "effective_after_commit_or_packet_ref": { "type": "string", "minLength": 1 }
+      }
+    }
+  }
+}

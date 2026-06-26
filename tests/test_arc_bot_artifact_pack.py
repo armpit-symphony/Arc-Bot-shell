@@ -30,3 +30,17 @@ def test_artifact_pack_includes_runtime_implementation_gate_request() -> None:
     assert request["runtime_authority_blocked"] is True
     assert request["runtime_execution_blocked"] is True
     assert request["mvp_complete"] is False
+
+
+def test_artifact_pack_includes_runtime_implementation_gate_response_intake() -> None:
+    pack = build_arc_bot_artifact_pack()
+    artifacts = pack["artifacts"]
+
+    response = artifacts["phase_i_runtime_implementation_gate_response_intake"]
+    assert response["artifact_type"] == "arc_runtime_implementation_gate_response_projection"
+    assert response["status"] == "awaiting_or_incomplete_runtime_implementation_gate_response"
+    assert response["response_shape_complete"] is False
+    assert set(response["blocking_runtime_dependencies"]) == set(RUNTIME_DEPENDENCIES)
+    assert response["runtime_authority_blocked"] is True
+    assert response["runtime_execution_blocked"] is True
+    assert response["mvp_complete"] is False

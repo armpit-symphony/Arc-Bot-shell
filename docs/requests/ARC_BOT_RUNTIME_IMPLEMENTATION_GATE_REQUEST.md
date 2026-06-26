@@ -102,6 +102,12 @@ until this approval exists as a recorded contract/handoff.
 
 ## Requested Response Shape
 
+Arc Bot can inspect a response using the schema/template below without granting runtime authority:
+
+- Schema: `docs/contracts/schemas/arc_runtime_implementation_gate_response.schema.json`
+- Template: `docs/examples/arc_lima/runtime_implementation_gate_response.template.json`
+- Preview command: `python -m phase12_mvp_completion.runtime_implementation_gate --response-path path\to\response.json --compact`
+
 ```text
 runtime_implementation_gate_decision:
   decision: approved | rejected | amend_requested

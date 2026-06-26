@@ -1,0 +1,16 @@
+{
+  "runtime_implementation_gate_decision": {
+    "decision": "",
+    "approving_owner": "",
+    "approved_dependencies": [],
+    "rejected_or_deferred_dependencies": [],
+    "required_contract_refs": [],
+    "required_schema_refs": [],
+    "required_test_gates": [],
+    "explicit_runtime_limits": [],
+    "evidence_writer_authority": "",
+    "local_model_executor_authority": "",
+    "operator_console_state_authority": "",
+    "effective_after_commit_or_packet_ref": ""
+  }
+}
