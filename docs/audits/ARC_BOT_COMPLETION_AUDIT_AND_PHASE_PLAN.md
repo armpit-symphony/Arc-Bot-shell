@@ -402,7 +402,11 @@ Exit gate:
 
 Send `docs/requests/ARC_BOT_RUNTIME_IMPLEMENTATION_GATE_REQUEST.md` to the
 LIMA Office Supervisor, Guardian/verifier, evidence-plane, operator-console,
-and model-route owners. Do not implement real model invocation, supervisor
-attachment, worker registration, approval issuance/verification, verifier
-ingest, operator-console state mutation, or durable evidence writing before the
-runtime implementation gate is explicitly approved.
+and model-route owners, with the response template
+`docs/examples/arc_lima/runtime_implementation_gate_response.template.json` and
+schema `docs/contracts/schemas/arc_runtime_implementation_gate_response.schema.json`.
+Do not implement real model invocation, supervisor attachment, worker
+registration, approval issuance/verification, verifier ingest, operator-console
+state mutation, or durable evidence writing before the runtime implementation
+gate is explicitly approved and a separate implementation patch is added and
+verified.

@@ -20,6 +20,16 @@ deployment dependencies remain unresolved.
   `docs/interop/ARC_BOT_REMAINING_IMPLEMENTATION_GATE_RESPONSE.json`
 - Remaining implementation gate request:
   `docs/requests/ARC_BOT_REMAINING_IMPLEMENTATION_GATE_REQUEST.md`
+- Runtime implementation gate request:
+  `docs/requests/ARC_BOT_RUNTIME_IMPLEMENTATION_GATE_REQUEST.md`
+- Runtime implementation gate packet:
+  `docs/proof_packets/ARC_BOT_RUNTIME_IMPLEMENTATION_GATE_REQUEST_PACKET.md`
+- Runtime implementation gate response schema:
+  `docs/contracts/schemas/arc_runtime_implementation_gate_response.schema.json`
+- Runtime implementation gate response template:
+  `docs/examples/arc_lima/runtime_implementation_gate_response.template.json`
+- Runtime implementation gate response-intake preview:
+  `python -m phase12_mvp_completion.runtime_implementation_gate --response-path path\to\response.json --compact`
 - Tests: `tests/test_arc_mvp_completion_gate.py`
 
 ## Required Posture
@@ -38,7 +48,9 @@ deployment dependencies remain unresolved.
 
 ## Remaining Blocking Dependencies
 
-No immediate owner-answer dependency remains open in Arc Bot Shell.
+No immediate owner-answer dependency remains open in Arc Bot Shell. Runtime
+implementation gate approval remains the next external decision, and Arc Bot now
+has a fail-closed response intake schema/template for that answer.
 
 Seven runtime-dependent implementation gates remain blocked in
 `phase12_mvp_completion.completion`:

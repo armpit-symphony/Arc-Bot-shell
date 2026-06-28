@@ -347,4 +347,7 @@ Status: completion-readiness gate added. MVP completion remains blocked.
   - no Phase-D/E/F/G/H blocker remains,
   - full tests, smoke, guardrails, and `git diff --check` pass.
   - runtime implementation approval is tracked in
-    `docs/requests/ARC_BOT_RUNTIME_IMPLEMENTATION_GATE_REQUEST.md`.
+    `docs/requests/ARC_BOT_RUNTIME_IMPLEMENTATION_GATE_REQUEST.md`,
+  - runtime implementation gate responses are inspected fail-closed with
+    `docs/contracts/schemas/arc_runtime_implementation_gate_response.schema.json` and
+    `docs/examples/arc_lima/runtime_implementation_gate_response.template.json`.

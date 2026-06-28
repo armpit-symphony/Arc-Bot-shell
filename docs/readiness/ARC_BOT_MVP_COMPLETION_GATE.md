@@ -53,6 +53,23 @@ No immediate owner-answer dependency remains open in Arc Bot Shell.
 The original request packet remains as history:
 `docs/requests/ARC_BOT_REMAINING_IMPLEMENTATION_GATE_REQUEST.md`.
 
+Runtime implementation approval is tracked by:
+
+- `docs/requests/ARC_BOT_RUNTIME_IMPLEMENTATION_GATE_REQUEST.md`
+- `docs/proof_packets/ARC_BOT_RUNTIME_IMPLEMENTATION_GATE_REQUEST_PACKET.md`
+- `docs/contracts/schemas/arc_runtime_implementation_gate_response.schema.json`
+- `docs/examples/arc_lima/runtime_implementation_gate_response.template.json`
+
+Response-intake preview command:
+
+```powershell
+python -m phase12_mvp_completion.runtime_implementation_gate --response-path path\to\response.json --compact
+```
+
+A shape-complete response still cannot grant runtime authority by itself;
+implementation remains blocked until separate approved implementation work is
+added and verified.
+
 ## Blocking Runtime Dependencies
 
 - Live supervisor attachment.

@@ -233,6 +233,7 @@ def build_arc_mvp_completion_gate_projection() -> dict[str, Any]:
             "field_deployment_planning_package",
             "smoke_and_guardrail_checks",
             "recorded_owner_answer_refs",
+            "runtime_gate_response_intake",
         ],
         "must_not_implement_until_unblocked": [
             "live_supervisor_attachment",
@@ -250,6 +251,9 @@ def build_arc_mvp_completion_gate_projection() -> dict[str, Any]:
             "docs/requests/GUARDIAN_LIMA_OFFICE_PHASE_D_APPROVAL_EVIDENCE_REQUEST.md",
             "docs/requests/ARC_BOT_REMAINING_IMPLEMENTATION_GATE_REQUEST.md",
             "docs/requests/ARC_BOT_RUNTIME_IMPLEMENTATION_GATE_REQUEST.md",
+            "docs/proof_packets/ARC_BOT_RUNTIME_IMPLEMENTATION_GATE_REQUEST_PACKET.md",
+            "docs/contracts/schemas/arc_runtime_implementation_gate_response.schema.json",
+            "docs/examples/arc_lima/runtime_implementation_gate_response.template.json",
             "docs/interop/ARC_BOT_LIMA_OFFICE_EXTERNAL_ANSWERS.md",
             "docs/interop/ARC_BOT_REMAINING_IMPLEMENTATION_GATE_RESPONSE.json",
         ],
