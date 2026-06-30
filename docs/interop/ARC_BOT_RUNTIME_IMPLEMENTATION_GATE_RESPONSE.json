@@ -1,0 +1,75 @@
+{
+  "runtime_implementation_gate_decision": {
+    "decision": "amend_requested",
+    "approving_owner": "LIMA Office runtime implementation gate owners",
+    "approved_dependencies": [],
+    "rejected_or_deferred_dependencies": [
+      "live_supervisor_attachment",
+      "worker_registration_lifecycle",
+      "approval_token_issuance_or_verification",
+      "verifier_result_ref_ingest",
+      "durable_evidence_writer_implementation",
+      "operator_console_server_state_implementation",
+      "local_model_executor_runtime_contract"
+    ],
+    "required_contract_refs": [
+      "docs/requests/ARC_BOT_RUNTIME_IMPLEMENTATION_GATE_REQUEST.md",
+      "docs/interop/ARC_BOT_LIMA_OFFICE_EXTERNAL_ANSWERS.md",
+      "docs/interop/ARC_BOT_REMAINING_IMPLEMENTATION_GATE_RESPONSE.json",
+      "Lima-Office/docs/CONTRACTS.md",
+      "Lima-Office/contracts/v1/worker.deployment.schema.json",
+      "Lima-Office/contracts/v1/worker.lifecycle.schema.json",
+      "Lima-Office/contracts/v1/worker.heartbeat.schema.json",
+      "Lima-Office/contracts/v1/approval.binding.schema.json",
+      "Lima-Office/contracts/v1/approval.token.schema.json",
+      "Lima-Office/contracts/v1/guardian.replay.schema.json",
+      "Lima-Office/contracts/v1/evidence.artifact.schema.json",
+      "Lima-Office/contracts/v1/console.view.schema.json",
+      "Lima-Office/contracts/v1/console.alert.schema.json",
+      "Lima-Office/contracts/v1/console.action.schema.json",
+      "Lima-Office/contracts/v1/supervisor.health.schema.json",
+      "Lima-Office/contracts/v1/model.route.schema.json"
+    ],
+    "required_schema_refs": [
+      "docs/contracts/schemas/arc_runtime_implementation_gate_response.schema.json",
+      "docs/contracts/schemas/arc_remaining_implementation_gate_response.schema.json",
+      "Lima-Office/contracts/v1/worker.deployment.schema.json",
+      "Lima-Office/contracts/v1/worker.lifecycle.schema.json",
+      "Lima-Office/contracts/v1/worker.heartbeat.schema.json",
+      "Lima-Office/contracts/v1/approval.binding.schema.json",
+      "Lima-Office/contracts/v1/guardian.replay.schema.json",
+      "Lima-Office/contracts/v1/approval.token.schema.json",
+      "Lima-Office/contracts/v1/evidence.artifact.schema.json",
+      "Lima-Office/contracts/v1/supervisor.health.schema.json",
+      "Lima-Office/contracts/v1/console.view.schema.json",
+      "Lima-Office/contracts/v1/model.route.schema.json"
+    ],
+    "required_test_gates": [
+      "python -m pytest -q tests/test_arc_runtime_implementation_gate.py",
+      "python -m pytest -q tests/test_arc_mvp_completion_gate.py",
+      "python -m pytest -q tests/test_arc_bot_artifact_pack.py",
+      "python -m pytest -q tests/test_arc_approval_evidence_dependency.py",
+      "python -m pytest -q tests/test_arc_bot_phase1_client_configuration_no_execution.py",
+      "python -m pytest -q tests/test_arc_bot_basic_guardian_console.py"
+    ],
+    "explicit_runtime_limits": [
+      "single-tenant operation only",
+      "no_live_supervisor_attachment",
+      "no_worker_registration_lifecycle_mutation",
+      "no_approval_token_issue_or_verify",
+      "no_verifier_result_ref_ingest",
+      "no_durable_evidence_writer",
+      "no_operator_console_state_mutation",
+      "no_local_model_inference_invocation",
+      "no_cloud_model_fallback",
+      "no_connector_read_or_write",
+      "no_customer_system_mutation",
+      "no_external_send",
+      "no_production_deployment"
+    ],
+    "evidence_writer_authority": "LIMA Office Supervisor evidence plane",
+    "local_model_executor_authority": "LIMA Office Guardian plane plus LIMA Office Supervisor model-route policy",
+    "operator_console_state_authority": "LIMA Office Supervisor and operator-console plane",
+    "effective_after_commit_or_packet_ref": "docs/proof_packets/ARC_BOT_RUNTIME_IMPLEMENTATION_GATE_RESPONSE_PACKET.md"
+  }
+}
