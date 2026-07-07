@@ -1,5 +1,6 @@
-__pycache__/
+﻿__pycache__/
 *.py[cod]
 .pytest*/
 tmp_pytest/
 tmp_*/
+artifacts/evidence/

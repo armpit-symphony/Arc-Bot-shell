@@ -1,0 +1,17 @@
+{
+  "action_id": "arc-action-external-email-send-001",
+  "task_ref": "task://samples/external-email-send",
+  "action_name": "arc.preview_operator_response",
+  "summary": "Prepare and send an external customer email response.",
+  "preview_only": true,
+  "operator_id": "operator-sample",
+  "worker_id": "arc-worker-sample-001",
+  "tenant_id": "sample-tenant",
+  "requested_capabilities": [
+    "external_send"
+  ],
+  "payload": {
+    "destination": "customer@example.invalid",
+    "subject": "Follow-up"
+  }
+}

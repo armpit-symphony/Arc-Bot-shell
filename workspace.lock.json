@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "dependencies": [
+    {
+      "name": "LIMA-AI-OS",
+      "url": "https://github.com/armpit-symphony/LIMA-AI-OS",
+      "path": "../LIMA-AI-OS",
+      "ref": "702b0554203f83002815362c7fce783e18ddbf03"
+    },
+    {
+      "name": "LIMA-Guardian-Suite",
+      "url": "https://github.com/armpit-symphony/LIMA-Guardian-Suite",
+      "path": "../LIMA-Guardian-Suite",
+      "ref": "0559d9a6ce7e3dc401185a6732a6c8fa123db477"
+    }
+  ]
+}

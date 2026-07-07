@@ -1,4 +1,4 @@
-name: Arc Bot Guardrails
+﻿name: Arc Bot Guardrails
 
 on:
   push:
@@ -12,7 +12,26 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+      - name: Install Arc Harness Shell
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e . pytest
+      - name: Bootstrap workspace dependencies
+        run: python scripts/bootstrap_workspace.py
+      - name: Compile Arc harness package
+        run: python -m compileall arc_bot_shell
       - name: Run tests
-        run: python -m pytest -q
+        run: pytest
+      - name: Smoke preview summary
+        run: python -m arc_bot_shell.harness run samples/tasks/preview_summary.json --runtime fake
+      - name: Smoke blocked external send
+        shell: bash
+        run: |
+          set +e
+          python -m arc_bot_shell.harness run samples/tasks/external_email_send.json --runtime fake
+          status=$?
+          test "$status" -eq 2
+      - name: Health check
+        run: python -m arc_bot_shell.health
       - name: Check whitespace
         run: git diff --check

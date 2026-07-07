@@ -1,0 +1,16 @@
+{
+  "action_id": "arc-action-file-write-attempt-001",
+  "task_ref": "task://samples/file-write-attempt",
+  "action_name": "arc.generate_evidence_packet",
+  "summary": "Write an office-system file as part of task handling.",
+  "preview_only": true,
+  "operator_id": "operator-sample",
+  "worker_id": "arc-worker-sample-001",
+  "tenant_id": "sample-tenant",
+  "requested_capabilities": [
+    "file_write"
+  ],
+  "payload": {
+    "target_path": "C:/sensitive/customer-records/example.txt"
+  }
+}

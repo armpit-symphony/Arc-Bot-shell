@@ -1,0 +1,18 @@
+{
+  "action_id": "arc-action-preview-summary-001",
+  "task_ref": "task://samples/preview-summary",
+  "action_name": "arc.preview_operator_response",
+  "summary": "Preview an operator-safe summary for a customer intake packet.",
+  "preview_only": true,
+  "operator_id": "operator-sample",
+  "worker_id": "arc-worker-sample-001",
+  "tenant_id": "sample-tenant",
+  "requested_capabilities": [],
+  "payload": {
+    "task_packet": {
+      "title": "Customer intake summary",
+      "source": "local sample",
+      "notes": "Preview only. No outbound message."
+    }
+  }
+}
