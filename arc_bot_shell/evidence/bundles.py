@@ -6,7 +6,7 @@ from datetime import datetime, timezone
 import json
 from pathlib import Path
 
-from arc_bot_shell.contracts import EvidenceBundle, GuardianDecision
+from arc_bot_shell.contracts import EvidenceBundle, GuardianDecision, ModelPreviewResult
 
 
 def _utc_now() -> str:
@@ -26,6 +26,7 @@ def build_evidence_bundle(
     runtime_adapter: str,
     result_status: str,
     blocked_reason: str | None,
+    model_preview: ModelPreviewResult | None = None,
 ) -> EvidenceBundle:
     timestamp = _utc_now()
     return EvidenceBundle(
@@ -44,6 +45,7 @@ def build_evidence_bundle(
             "policy_ref": "redaction://arc-harness-shell/v0.1",
             "contains_secrets": False,
         },
+        model_preview=(None if model_preview is None else model_preview.to_dict()),
     )
 
 

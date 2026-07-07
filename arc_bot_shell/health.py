@@ -1,4 +1,4 @@
-"""Health report for Arc Harness Shell v0.1."""
+"""Health report for Arc Harness Shell v0.3."""
 
 from __future__ import annotations
 
@@ -9,6 +9,11 @@ from arc_bot_shell.console import render_json
 from arc_bot_shell.evidence import default_evidence_dir
 from arc_bot_shell.guardian import GuardianSuiteAdapter
 from arc_bot_shell.lima import LimaRuntimeUnavailableError, LocalLimaImportRuntimePort, load_workspace_lock
+from arc_bot_shell.model import (
+    deterministic_model_adapter_available,
+    model_preview_available,
+    ollama_configured,
+)
 from arc_bot_shell.state import JsonlStateStore, default_state_path
 
 
@@ -38,7 +43,7 @@ def build_health_report(repo_root: Path | None = None) -> dict[str, object]:
     samples_dir = root / "samples" / "tasks"
     return {
         "status": "ok",
-        "artifact": "arc_harness_shell_v0_1",
+        "artifact": "arc_harness_shell_v0_3",
         "guardian": {
             "public_entrypoint": guardian_adapter.public_entrypoint,
             "available": guardian_adapter.is_available(),
@@ -49,14 +54,19 @@ def build_health_report(repo_root: Path | None = None) -> dict[str, object]:
         "state_store_present": state_path.exists(),
         "evidence_dir_present": evidence_dir.exists(),
         "recent_run_count": len(state_store.list_runs()) if state_path.exists() else 0,
+        "model_preview_available": model_preview_available(),
+        "deterministic_model_adapter_available": deterministic_model_adapter_available(),
+        "ollama_configured": ollama_configured(),
         "samples": {
             "preview_summary": (samples_dir / "preview_summary.json").exists(),
             "external_email_send": (samples_dir / "external_email_send.json").exists(),
             "file_write_attempt": (samples_dir / "file_write_attempt.json").exists(),
+            "local_model_preview": (samples_dir / "local_model_preview.json").exists(),
         },
         "smoke_commands": [
             "python -m arc_bot_shell.harness run samples/tasks/preview_summary.json --runtime fake",
             "python -m arc_bot_shell.harness run samples/tasks/external_email_send.json --runtime fake",
+            "python -m arc_bot_shell.harness run samples/tasks/local_model_preview.json --runtime fake --model-adapter deterministic",
             "python -m arc_bot_shell.console history",
             "python -m arc_bot_shell.console evidence",
             "python -m arc_bot_shell.console inbox",

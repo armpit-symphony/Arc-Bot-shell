@@ -11,6 +11,7 @@ ARC_SAFE_HARNESS_ACTIONS = (
     "arc.noop",
     "arc.classify_task_packet",
     "arc.preview_operator_response",
+    "arc.local_model_preview",
     "arc.generate_evidence_packet",
     "arc.mark_task_blocked",
 )
@@ -35,6 +36,7 @@ ArcHarnessAction = Literal[
     "arc.noop",
     "arc.classify_task_packet",
     "arc.preview_operator_response",
+    "arc.local_model_preview",
     "arc.generate_evidence_packet",
     "arc.mark_task_blocked",
 ]
@@ -145,6 +147,23 @@ class LimaRuntimeResult:
 
 
 @dataclass(frozen=True)
+class ModelPreviewResult:
+    """Result from a local model preview adapter call."""
+
+    adapter_name: str
+    model_name: str
+    prompt_summary: str
+    draft_text: str
+    used_network: bool
+    used_credentials: bool
+    status: str
+    error_message: str | None = None
+
+    def to_dict(self) -> dict[str, Any]:
+        return asdict(self)
+
+
+@dataclass(frozen=True)
 class EvidenceBundle:
     """Local evidence record for one harness run."""
 
@@ -159,6 +178,7 @@ class EvidenceBundle:
     created_at: str
     updated_at: str
     redaction_metadata: dict[str, Any]
+    model_preview: dict[str, Any] | None = None
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
@@ -178,6 +198,8 @@ class HarnessRunResult:
     blocked_reason: str | None
     evidence_path: Path
     exit_code: int
+    model_preview_called: bool = False
+    model_preview: dict[str, Any] | None = None
     runtime_output: dict[str, Any] = field(default_factory=dict)
 
     def to_dict(self) -> dict[str, Any]:

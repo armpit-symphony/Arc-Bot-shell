@@ -1,0 +1,19 @@
+{
+  "action_id": "arc-action-local-model-preview-001",
+  "task_ref": "task://samples/local-model-preview",
+  "action_name": "arc.local_model_preview",
+  "summary": "Draft an operator-safe local response preview for a customer request packet.",
+  "preview_only": true,
+  "operator_id": "operator-sample",
+  "worker_id": "arc-worker-sample-001",
+  "tenant_id": "sample-tenant",
+  "requested_capabilities": [],
+  "payload": {
+    "task_packet": {
+      "title": "Customer billing follow-up",
+      "source": "local sample",
+      "notes": "Customer asked whether the invoice can be reissued with a corrected mailing address."
+    },
+    "payload_summary": "Draft a response preview only. Do not send anything externally."
+  }
+}

@@ -1,17 +1,21 @@
-# Arc Harness Shell v0.1
+# Arc Harness Shell v0.3
 
-Arc Harness Shell v0.1 is a minimal, local, Guardian-gated harness path for the Arc/LIMA stack:
+Arc Harness Shell v0.3 is a minimal, local, Guardian-gated harness path for the Arc/LIMA stack.
 
-`ArcActionRequest -> GuardianFacade -> GuardianDecision -> LimaRuntimePort -> EvidenceBundle -> CLI result`
+It supports two preview-safe paths from a clean clone:
 
-It is built to run from a clean clone with a fake runtime by default. It is a harness shell, not a full office bot.
+- `ArcActionRequest -> GuardianFacade -> GuardianDecision -> LimaRuntimePort -> EvidenceBundle -> CLI result`
+- `ArcActionRequest -> GuardianFacade -> GuardianDecision -> LocalModelPreviewAdapter -> EvidenceBundle -> CLI result`
+
+It is a harness shell, not a full office bot.
 
 ## What It Is
 
 - A narrow Arc request runner with explicit contracts.
 - A Guardian-first decision path for every consequential request.
 - A deterministic fake LIMA runtime for tests and smoke runs.
-- A local evidence bundle writer for every CLI run.
+- A deterministic local model preview adapter for clean-clone drafting.
+- A local evidence bundle writer and JSONL state record for every CLI run.
 - A config-driven path for future LIMA imports through `ARC_LIMA_PATH`, `workspace.lock.json`, or an installed `lima` package.
 
 ## What It Is Not
@@ -27,6 +31,7 @@ It is built to run from a clean clone with a fake runtime by default. It is a ha
 ```bash
 python -m arc_bot_shell.harness run samples/tasks/preview_summary.json --runtime fake
 python -m arc_bot_shell.harness run samples/tasks/external_email_send.json --runtime fake
+python -m arc_bot_shell.harness run samples/tasks/local_model_preview.json --runtime fake --model-adapter deterministic
 python -m arc_bot_shell.health
 ```
 
@@ -34,6 +39,7 @@ Expected behavior:
 
 - `preview_summary.json`: Guardian returns `allowed_preview_only`, fake runtime runs, evidence bundle is written, exit code `0`.
 - `external_email_send.json`: Guardian returns `blocked`, runtime is not called, evidence bundle is written, exit code `2`.
+- `local_model_preview.json`: Guardian returns `allowed_preview_only`, deterministic preview runs, evidence and state are written, exit code `0`.
 
 ## Guardian And LIMA Behavior
 
@@ -41,11 +47,13 @@ Expected behavior:
 - `GuardianSuiteAdapter` only attempts `LIMA-Guardian-Suite` through the public `app.services.guardian` entrypoint.
 - If Guardian Suite is missing or unusable, the facade falls back to `FailClosedGuardian`.
 - `FakeLimaRuntimePort` is deterministic and side-effect free.
+- `DeterministicPreviewAdapter` is deterministic and side-effect free.
 - `LocalLimaImportRuntimePort` only loads `lima.adapters` from:
   1. `ARC_LIMA_PATH`
   2. `workspace.lock.json`
   3. an installed `lima` package
 - Missing or unusable LIMA fails closed through `DisabledLimaRuntimePort` or a controlled runtime-unavailable result.
+- Optional Ollama preview use remains explicit and controlled through `--model-adapter ollama` or `ARC_MODEL_ADAPTER=ollama`.
 
 ## Blocked Categories
 

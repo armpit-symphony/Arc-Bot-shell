@@ -22,6 +22,9 @@ class StateRunRecord:
     result_status: str
     evidence_path: str
     created_at: str
+    model_preview_called: bool = False
+    model_preview_adapter: str | None = None
+    model_name: str | None = None
 
     @classmethod
     def from_dict(cls, payload: dict[str, Any]) -> "StateRunRecord":
@@ -40,6 +43,13 @@ class StateRunRecord:
             result_status=str(payload["result_status"]),
             evidence_path=str(payload["evidence_path"]),
             created_at=str(payload["created_at"]),
+            model_preview_called=bool(payload.get("model_preview_called", False)),
+            model_preview_adapter=(
+                None
+                if payload.get("model_preview_adapter") is None
+                else str(payload["model_preview_adapter"])
+            ),
+            model_name=None if payload.get("model_name") is None else str(payload["model_name"]),
         )
 
     def to_dict(self) -> dict[str, Any]:

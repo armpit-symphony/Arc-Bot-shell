@@ -38,10 +38,16 @@ def build_show_run_payload(run_id: str, state_path: Path | None = None) -> tuple
             "run_id": run_id,
             "state_path": str(store.path),
         }, 1
-    return {
+    payload: dict[str, Any] = {
         "run": record.to_dict(),
         "state_path": str(store.path),
-    }, 0
+    }
+    evidence_path = Path(record.evidence_path)
+    if evidence_path.exists():
+        evidence = json.loads(evidence_path.read_text(encoding="utf-8"))
+        if isinstance(evidence, dict) and isinstance(evidence.get("model_preview"), dict):
+            payload["model_preview"] = evidence["model_preview"]
+    return payload, 0
 
 
 def build_evidence_payload(state_path: Path | None = None) -> dict[str, Any]:
@@ -63,6 +69,11 @@ def build_evidence_payload(state_path: Path | None = None) -> dict[str, Any]:
             if isinstance(payload, dict):
                 metadata["evidence_guardian_status"] = payload.get("guardian_status")
                 metadata["evidence_result_status"] = payload.get("result_status")
+                model_preview = payload.get("model_preview")
+                if isinstance(model_preview, dict):
+                    metadata["model_preview_adapter"] = model_preview.get("adapter_name")
+                    metadata["model_preview_model"] = model_preview.get("model_name")
+                    metadata["model_preview_status"] = model_preview.get("status")
         evidence.append(metadata)
     return {
         "evidence": evidence,

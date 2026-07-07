@@ -10,6 +10,7 @@ from .models import (
     GuardianDecision,
     HarnessRunResult,
     LimaRuntimeResult,
+    ModelPreviewResult,
 )
 
 __all__ = [
@@ -22,4 +23,5 @@ __all__ = [
     "GuardianDecision",
     "HarnessRunResult",
     "LimaRuntimeResult",
+    "ModelPreviewResult",
 ]
