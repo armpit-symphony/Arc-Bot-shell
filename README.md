@@ -66,3 +66,12 @@ Expected behavior:
 - Phase-0 runtime UI scaffold is locked in the legacy scaffold docs; this branch adds the runnable harness path beside that older material.
 - Legacy preview command reference: `python -m phase0_runtime_ui_scaffold.preview`.
 - Legacy Guardian reference: `LIMA-Guardian-Suite`.
+
+## Console/State Commands
+
+```bash
+python -m arc_bot_shell.console history
+python -m arc_bot_shell.console show-run <run_id>
+python -m arc_bot_shell.console evidence
+python -m arc_bot_shell.console inbox
+```

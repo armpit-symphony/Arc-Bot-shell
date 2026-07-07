@@ -11,6 +11,7 @@ from arc_bot_shell.contracts import ArcActionRequest, HarnessRunResult
 from arc_bot_shell.evidence import build_evidence_bundle, default_evidence_dir, write_evidence_bundle
 from arc_bot_shell.guardian import GuardianFacade
 from arc_bot_shell.lima import LimaRuntimePort, LimaRuntimeUnavailableError, build_runtime_port
+from arc_bot_shell.state import JsonlStateStore, StateRunRecord, default_state_path
 
 
 def load_task_packet(task_path: Path) -> ArcActionRequest:
@@ -23,6 +24,7 @@ def run_task_packet(
     *,
     runtime_name: str,
     evidence_dir: Path | None = None,
+    state_path: Path | None = None,
     repo_root: Path | None = None,
     guardian_facade: GuardianFacade | None = None,
     runtime_port: LimaRuntimePort | None = None,
@@ -76,6 +78,22 @@ def run_task_packet(
         bundle,
         evidence_dir or default_evidence_dir(root),
     )
+
+    state_record = StateRunRecord(
+        run_id=run_id,
+        action_id=request.action_id,
+        task_ref=request.task_ref,
+        requested_action=request.action_name,
+        guardian_decision_id=decision.decision_id,
+        guardian_status=decision.status,
+        blocked_reason=blocked_reason,
+        runtime_adapter=runtime_adapter,
+        runtime_called=runtime_called,
+        result_status=result_status,
+        evidence_path=str(evidence_path),
+        created_at=bundle.created_at,
+    )
+    JsonlStateStore(state_path or default_state_path(root)).append(state_record)
 
     return HarnessRunResult(
         run_id=run_id,
