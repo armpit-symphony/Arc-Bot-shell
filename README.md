@@ -6,6 +6,14 @@ Arc Bot Shell is the starting point for building role-specific AI worker bots fo
 
 Arc Bot Shell is proprietary/customizable business infrastructure. It is not Sparkbot, not Sparkbot Lite, not the public open-source hobbyist workstation, and not LIMA AI OS itself.
 
+## LIMA Governed Preflight Alpha
+
+Arc Bot has a private LIMA governed dry-run preflight proof:
+
+`ArcActionRequest -> normalize_for_lima -> run_governed_request -> GovernedDecision`
+
+This path is non-executing. It does not perform model calls, tool calls, connector calls, external sends, file mutation, scheduling, credential access, robotics, IoT, or physical-world action.
+
 ## System Relationship
 
 - LIMA AI OS = universal reasoning/runtime operating system and safety substrate

@@ -78,11 +78,11 @@ class ArcActionRequest:
     """Guardian input envelope for an Arc office-worker action."""
 
     action_id: str
-    action_kind: ActionKind
+    action_kind: str
     tenant_id: str = "single_tenant_local"
     worker_id: str = "arc-worker-001"
     operator_id: str = "operator-local"
-    task_ref: str = "task://arc/local/document-intake-preview"
+    task_ref: str | None = None
     data_sensitivity: str = "office_internal"
     requested_tool_pack: str = "office_docs"
     evidence_refs: tuple[str, ...] = (
@@ -146,7 +146,7 @@ class ArcSpineEvent:
     event_id: str
     event_type: str
     action_id: str
-    task_ref: str
+    task_ref: str | None
     worker_id: str
     tenant_id: str
     source_shell: str = "arc_bot_shell"
