@@ -1,4 +1,4 @@
-"""Health report for Arc Harness Shell v0.3."""
+"""Health report for Arc Harness Shell v0.4."""
 
 from __future__ import annotations
 
@@ -15,6 +15,7 @@ from arc_bot_shell.model import (
     ollama_configured,
 )
 from arc_bot_shell.state import JsonlStateStore, default_state_path
+from arc_bot_shell.tasks import JsonlTaskQueue, default_task_queue_path
 
 
 def build_health_report(repo_root: Path | None = None) -> dict[str, object]:
@@ -25,6 +26,8 @@ def build_health_report(repo_root: Path | None = None) -> dict[str, object]:
     state_path = default_state_path(root)
     evidence_dir = default_evidence_dir(root)
     state_store = JsonlStateStore(state_path)
+    task_queue = JsonlTaskQueue(default_task_queue_path(root))
+    task_counts = task_queue.counts_by_status()
     try:
         resolved = local_runtime.resolve_lima_import()
     except LimaRuntimeUnavailableError as exc:
@@ -43,7 +46,7 @@ def build_health_report(repo_root: Path | None = None) -> dict[str, object]:
     samples_dir = root / "samples" / "tasks"
     return {
         "status": "ok",
-        "artifact": "arc_harness_shell_v0_3",
+        "artifact": "arc_harness_shell_v0_4",
         "guardian": {
             "public_entrypoint": guardian_adapter.public_entrypoint,
             "available": guardian_adapter.is_available(),
@@ -54,6 +57,10 @@ def build_health_report(repo_root: Path | None = None) -> dict[str, object]:
         "state_store_present": state_path.exists(),
         "evidence_dir_present": evidence_dir.exists(),
         "recent_run_count": len(state_store.list_runs()) if state_path.exists() else 0,
+        "task_queue_present": task_queue.exists(),
+        "queued_task_count": task_counts.get("queued", 0),
+        "blocked_task_count": task_counts.get("blocked", 0),
+        "completed_task_count": task_counts.get("completed", 0),
         "model_preview_available": model_preview_available(),
         "deterministic_model_adapter_available": deterministic_model_adapter_available(),
         "ollama_configured": ollama_configured(),
@@ -64,12 +71,11 @@ def build_health_report(repo_root: Path | None = None) -> dict[str, object]:
             "local_model_preview": (samples_dir / "local_model_preview.json").exists(),
         },
         "smoke_commands": [
-            "python -m arc_bot_shell.harness run samples/tasks/preview_summary.json --runtime fake",
-            "python -m arc_bot_shell.harness run samples/tasks/external_email_send.json --runtime fake",
-            "python -m arc_bot_shell.harness run samples/tasks/local_model_preview.json --runtime fake --model-adapter deterministic",
+            "python -m arc_bot_shell.console intake samples/tasks/local_model_preview.json",
+            "python -m arc_bot_shell.console tasks",
+            "python -m arc_bot_shell.console run-task <task_id> --runtime fake --model-adapter deterministic",
             "python -m arc_bot_shell.console history",
             "python -m arc_bot_shell.console evidence",
-            "python -m arc_bot_shell.console inbox",
             "python -m arc_bot_shell.health",
         ],
     }

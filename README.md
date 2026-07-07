@@ -1,11 +1,12 @@
-# Arc Harness Shell v0.3
+# Arc Harness Shell v0.4
 
-Arc Harness Shell v0.3 is a minimal, local, Guardian-gated harness path for the Arc/LIMA stack.
+Arc Harness Shell v0.4 is a minimal, local, Guardian-gated harness path for the Arc/LIMA stack.
 
-It supports two preview-safe paths from a clean clone:
+It supports three preview-safe paths from a clean clone:
 
 - `ArcActionRequest -> GuardianFacade -> GuardianDecision -> LimaRuntimePort -> EvidenceBundle -> CLI result`
 - `ArcActionRequest -> GuardianFacade -> GuardianDecision -> LocalModelPreviewAdapter -> EvidenceBundle -> CLI result`
+- `Task intake -> local task queue -> Guardian-gated harness run -> EvidenceBundle -> state/history`
 
 It is a harness shell, not a full office bot.
 
@@ -15,7 +16,7 @@ It is a harness shell, not a full office bot.
 - A Guardian-first decision path for every consequential request.
 - A deterministic fake LIMA runtime for tests and smoke runs.
 - A deterministic local model preview adapter for clean-clone drafting.
-- A local evidence bundle writer and JSONL state record for every CLI run.
+- A local evidence bundle writer, JSONL state record, and JSONL task queue for every CLI run.
 - A config-driven path for future LIMA imports through `ARC_LIMA_PATH`, `workspace.lock.json`, or an installed `lima` package.
 
 ## What It Is Not
@@ -32,6 +33,8 @@ It is a harness shell, not a full office bot.
 python -m arc_bot_shell.harness run samples/tasks/preview_summary.json --runtime fake
 python -m arc_bot_shell.harness run samples/tasks/external_email_send.json --runtime fake
 python -m arc_bot_shell.harness run samples/tasks/local_model_preview.json --runtime fake --model-adapter deterministic
+python -m arc_bot_shell.console intake samples/tasks/local_model_preview.json
+python -m arc_bot_shell.console tasks
 python -m arc_bot_shell.health
 ```
 
@@ -40,6 +43,7 @@ Expected behavior:
 - `preview_summary.json`: Guardian returns `allowed_preview_only`, fake runtime runs, evidence bundle is written, exit code `0`.
 - `external_email_send.json`: Guardian returns `blocked`, runtime is not called, evidence bundle is written, exit code `2`.
 - `local_model_preview.json`: Guardian returns `allowed_preview_only`, deterministic preview runs, evidence and state are written, exit code `0`.
+- `console intake`: queues a task record without executing it.
 
 ## Guardian And LIMA Behavior
 
@@ -82,4 +86,13 @@ python -m arc_bot_shell.console history
 python -m arc_bot_shell.console show-run <run_id>
 python -m arc_bot_shell.console evidence
 python -m arc_bot_shell.console inbox
+```
+
+## Task Queue Commands
+
+```bash
+python -m arc_bot_shell.console intake samples/tasks/local_model_preview.json
+python -m arc_bot_shell.console tasks
+python -m arc_bot_shell.console task <task_id>
+python -m arc_bot_shell.console run-task <task_id> --runtime fake --model-adapter deterministic
 ```
