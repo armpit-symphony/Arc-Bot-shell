@@ -16,6 +16,8 @@ import sys
 from pathlib import Path
 from typing import Any
 
+from conftest import load_lima_module_or_skip
+
 import pytest
 
 
@@ -36,9 +38,12 @@ def _load_fixture() -> dict[str, Any]:
 
 
 def _load_lima_harness() -> Any:
-    if str(LIMA_REPO_ROOT) not in sys.path:
-        sys.path.insert(0, str(LIMA_REPO_ROOT))
-    return importlib.import_module("lima.harness")
+    return load_lima_module_or_skip(
+        "lima.harness",
+        "lima",
+        "harness",
+        "__init__.py",
+    )
 
 
 def _clear_lima_modules() -> None:

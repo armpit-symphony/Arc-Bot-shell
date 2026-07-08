@@ -15,6 +15,8 @@ import sys
 from pathlib import Path
 from typing import Any
 
+from conftest import load_lima_module_or_skip
+
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 FIXTURE_PATH = (
@@ -31,19 +33,14 @@ def _load_fixture() -> dict[str, Any]:
     return fixture
 
 
-def _lima_repo_root() -> Path:
-    configured = os.environ.get("LIMA_AI_OS_REPO")
-    if configured:
-        return Path(configured)
-    return REPO_ROOT.parent / "LIMA-AI-OS"
-
 
 def _import_lima_adapters_module() -> Any:
-    lima_root = _lima_repo_root()
-    assert (lima_root / "lima" / "adapters" / "__init__.py").exists(), lima_root
-    if str(lima_root) not in sys.path:
-        sys.path.insert(0, str(lima_root))
-    return importlib.import_module("lima.adapters")
+    return load_lima_module_or_skip(
+        "lima.adapters",
+        "lima",
+        "adapters",
+        "__init__.py",
+    )
 
 
 def _compatibility_metadata() -> dict[str, Any]:

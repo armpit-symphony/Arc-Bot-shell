@@ -20,6 +20,8 @@ from typing import Any
 
 import pytest
 
+from conftest import load_lima_module_or_skip, require_lima_checkout_path
+
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 LIMA_REPO_ROOT = REPO_ROOT.parent / "LIMA-AI-OS"
@@ -79,9 +81,21 @@ def _load_json(path: Path) -> dict[str, Any]:
 
 
 def _load_lima_harness() -> Any:
-    if str(LIMA_REPO_ROOT) not in sys.path:
-        sys.path.insert(0, str(LIMA_REPO_ROOT))
-    return importlib.import_module("lima.harness")
+    return load_lima_module_or_skip(
+        "lima.harness",
+        "lima",
+        "harness",
+        "__init__.py",
+    )
+
+
+def _runtime_extraction_fixture_path(name: str) -> Path:
+    return require_lima_checkout_path(
+        "tests",
+        "fixtures",
+        "runtime_extraction",
+        name,
+    )
 
 
 def _clear_lima_modules() -> None:
@@ -97,11 +111,11 @@ def _cleanup_lima_modules() -> None:
 
 
 def _egress_request(**overrides: Any) -> dict[str, Any]:
-    g50 = _load_json(G50_FIXTURE_PATH)
-    g51 = _load_json(G51_FIXTURE_PATH)
-    g53 = _load_json(G53_FIXTURE_PATH)
-    g54 = _load_json(G54_FIXTURE_PATH)
-    g55 = _load_json(G55_FIXTURE_PATH)
+    g50 = _load_json(_runtime_extraction_fixture_path("v1_g50_real_provider_executor_invocation.json"))
+    g51 = _load_json(_runtime_extraction_fixture_path("v1_g51_executable_real_provider_executor_invocation.json"))
+    g53 = _load_json(_runtime_extraction_fixture_path("v1_g53_provider_sdk_network_credential_authority.json"))
+    g54 = _load_json(_runtime_extraction_fixture_path("v1_g54_fake_sdk_egress_harness.json"))
+    g55 = _load_json(_runtime_extraction_fixture_path("v1_g55_real_provider_sdk_network_egress.json"))
     refs = g55["egress_request_policy_refs"]
     request = {
         "egress_request_id": "egress-request:v1-g56:arc-bot-shell:001",

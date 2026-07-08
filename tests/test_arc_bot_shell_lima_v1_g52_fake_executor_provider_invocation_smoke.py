@@ -19,6 +19,8 @@ from typing import Any
 
 import pytest
 
+from conftest import load_lima_module_or_skip, require_lima_checkout_path
+
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 LIMA_REPO_ROOT = REPO_ROOT.parent / "LIMA-AI-OS"
@@ -44,15 +46,25 @@ def _load_fixture() -> dict[str, Any]:
 
 
 def _load_g50_fixture() -> dict[str, Any]:
-    fixture = json.loads(G50_FIXTURE_PATH.read_text(encoding="utf-8"))
+    fixture = json.loads(
+        require_lima_checkout_path(
+            "tests",
+            "fixtures",
+            "runtime_extraction",
+            "v1_g50_real_provider_executor_invocation.json",
+        ).read_text(encoding="utf-8")
+    )
     assert isinstance(fixture, dict)
     return fixture
 
 
 def _load_lima_harness() -> Any:
-    if str(LIMA_REPO_ROOT) not in sys.path:
-        sys.path.insert(0, str(LIMA_REPO_ROOT))
-    return importlib.import_module("lima.harness")
+    return load_lima_module_or_skip(
+        "lima.harness",
+        "lima",
+        "harness",
+        "__init__.py",
+    )
 
 
 def _clear_lima_modules() -> None:
