@@ -1,65 +1,20 @@
-# Arc Harness Shell v0.4
+# Arc Harness Shell Release Candidate
 
-Arc Harness Shell v0.4 is a minimal, local, Guardian-gated harness path for the Arc/LIMA stack.
+Arc Harness Shell is a minimal, local, Guardian-gated worker shell for the Arc/LIMA stack. It is the first credible public baseline for guarded task intake, preview-safe execution, evidence capture, and local operator visibility.
 
-It supports three preview-safe paths from a clean clone:
+## What Works Now
 
-- `ArcActionRequest -> GuardianFacade -> GuardianDecision -> LimaRuntimePort -> EvidenceBundle -> CLI result`
-- `ArcActionRequest -> GuardianFacade -> GuardianDecision -> LocalModelPreviewAdapter -> EvidenceBundle -> CLI result`
-- `Task intake -> local task queue -> Guardian-gated harness run -> EvidenceBundle -> state/history`
+- Guardian-gated task packet execution through `ArcActionRequest -> GuardianDecision -> harness result`
+- Fake runtime preview path for deterministic harness runs
+- Deterministic local model preview path for operator-safe draft generation
+- Local JSONL task queue with `intake`, `tasks`, `task`, and `run-task`
+- Local JSONL run history plus evidence bundle listing
+- Health output for Guardian, LIMA import readiness, queue/state presence, and sample availability
+- Release smoke path that proves intake -> guarded run -> evidence/state -> blocked external send
 
-It is a harness shell, not a full office bot.
+## Intentionally Blocked
 
-## What It Is
-
-- A narrow Arc request runner with explicit contracts.
-- A Guardian-first decision path for every consequential request.
-- A deterministic fake LIMA runtime for tests and smoke runs.
-- A deterministic local model preview adapter for clean-clone drafting.
-- A local evidence bundle writer, JSONL state record, and JSONL task queue for every CLI run.
-- A config-driven path for future LIMA imports through `ARC_LIMA_PATH`, `workspace.lock.json`, or an installed `lima` package.
-
-## What It Is Not
-
-- Not a live office automation worker.
-- Not a browser, email, calendar, network, device, robotics, or file-mutation executor.
-- Not a credential handler.
-- Not a hidden background service.
-- Not a sibling-folder auto-import hack.
-
-## Smoke Commands
-
-```bash
-python -m arc_bot_shell.harness run samples/tasks/preview_summary.json --runtime fake
-python -m arc_bot_shell.harness run samples/tasks/external_email_send.json --runtime fake
-python -m arc_bot_shell.harness run samples/tasks/local_model_preview.json --runtime fake --model-adapter deterministic
-python -m arc_bot_shell.console intake samples/tasks/local_model_preview.json
-python -m arc_bot_shell.console tasks
-python -m arc_bot_shell.health
-```
-
-Expected behavior:
-
-- `preview_summary.json`: Guardian returns `allowed_preview_only`, fake runtime runs, evidence bundle is written, exit code `0`.
-- `external_email_send.json`: Guardian returns `blocked`, runtime is not called, evidence bundle is written, exit code `2`.
-- `local_model_preview.json`: Guardian returns `allowed_preview_only`, deterministic preview runs, evidence and state are written, exit code `0`.
-- `console intake`: queues a task record without executing it.
-
-## Guardian And LIMA Behavior
-
-- `GuardianFacade.evaluate(request)` always returns a `GuardianDecision`.
-- `GuardianSuiteAdapter` only attempts `LIMA-Guardian-Suite` through the public `app.services.guardian` entrypoint.
-- If Guardian Suite is missing or unusable, the facade falls back to `FailClosedGuardian`.
-- `FakeLimaRuntimePort` is deterministic and side-effect free.
-- `DeterministicPreviewAdapter` is deterministic and side-effect free.
-- `LocalLimaImportRuntimePort` only loads `lima.adapters` from:
-  1. `ARC_LIMA_PATH`
-  2. `workspace.lock.json`
-  3. an installed `lima` package
-- Missing or unusable LIMA fails closed through `DisabledLimaRuntimePort` or a controlled runtime-unavailable result.
-- Optional Ollama preview use remains explicit and controlled through `--model-adapter ollama` or `ARC_MODEL_ADAPTER=ollama`.
-
-## Blocked Categories
+Arc Harness Shell does not execute live email, calendar, browser, network, device, robotics, credential, or office-system mutation actions. The blocked categories are:
 
 - `external_send`
 - `file_write`
@@ -69,23 +24,12 @@ Expected behavior:
 - `credential_access`
 - `office_system_mutation`
 
-## Reproducibility
-
-- Lock file: `workspace.lock.json`
-- Bootstrap script: `python scripts/bootstrap_workspace.py`
-- CI workflow: `.github/workflows/guardrails.yml`
-- Legacy scope-lock context remains in `docs/ROADMAP.md`.
-- Phase-0 runtime UI scaffold is locked in the legacy scaffold docs; this branch adds the runnable harness path beside that older material.
-- Legacy preview command reference: `python -m phase0_runtime_ui_scaffold.preview`.
-- Legacy Guardian reference: `LIMA-Guardian-Suite`.
-
-## Console/State Commands
+## Quickstart
 
 ```bash
-python -m arc_bot_shell.console history
-python -m arc_bot_shell.console show-run <run_id>
-python -m arc_bot_shell.console evidence
-python -m arc_bot_shell.console inbox
+python -m pip install -e .
+python -m compileall arc_bot_shell
+python -m arc_bot_shell.health
 ```
 
 ## Task Queue Commands
@@ -96,3 +40,60 @@ python -m arc_bot_shell.console tasks
 python -m arc_bot_shell.console task <task_id>
 python -m arc_bot_shell.console run-task <task_id> --runtime fake --model-adapter deterministic
 ```
+
+## Local Model Preview
+
+```bash
+python -m arc_bot_shell.harness run samples/tasks/local_model_preview.json --runtime fake --model-adapter deterministic
+```
+
+Optional explicit Ollama preview remains opt-in only:
+
+```bash
+python -m arc_bot_shell.harness run samples/tasks/local_model_preview.json --runtime fake --model-adapter ollama --model llama3.1
+```
+
+## Release Smoke
+
+```bash
+python scripts/smoke_arc_harness_release.py
+./scripts/smoke_arc_harness_release.sh
+./scripts/smoke_arc_harness_release.ps1
+```
+
+## Console And Evidence
+
+```bash
+python -m arc_bot_shell.console history
+python -m arc_bot_shell.console show-run <run_id>
+python -m arc_bot_shell.console evidence
+python -m arc_bot_shell.console inbox
+python -m arc_bot_shell.health
+```
+
+## Guardian And LIMA Dependency Behavior
+
+- `GuardianFacade.evaluate(request)` always returns a `GuardianDecision`.
+- `GuardianSuiteAdapter` only attempts `LIMA-Guardian-Suite` through the public `app.services.guardian` entrypoint.
+- If Guardian Suite is missing or unusable, the shell falls back to `FailClosedGuardian`.
+- `FakeLimaRuntimePort` and `DeterministicPreviewAdapter` require no network or credentials.
+- `LocalLimaImportRuntimePort` only resolves from `ARC_LIMA_PATH`, `workspace.lock.json`, or an installed `lima` package.
+- Missing Guardian or missing LIMA import support fails closed; CI does not require sibling checkouts, Ollama, or network access.
+
+## Safety Boundary
+
+Arc Harness Shell is a preview-safe worker shell. Every consequential path passes through a Guardian decision object before runtime or model execution, and every run writes evidence plus state. There are no hidden background actions.
+
+## Release Guardrails
+
+- Release smoke script: [scripts/smoke_arc_harness_release.py](scripts/smoke_arc_harness_release.py)
+- CI workflow: [.github/workflows/guardrails.yml](.github/workflows/guardrails.yml)
+- Lock file: [workspace.lock.json](workspace.lock.json)
+- Bootstrap script: [scripts/bootstrap_workspace.py](scripts/bootstrap_workspace.py)
+
+## Legacy Context
+
+- Legacy scope-lock context remains in `docs/ROADMAP.md`.
+- Phase-0 runtime UI scaffold is locked in the legacy scaffold docs; this branch adds the runnable harness path beside that older material.
+- Legacy preview command reference: `python -m phase0_runtime_ui_scaffold.preview`.
+- Legacy Guardian reference: `LIMA-Guardian-Suite`.

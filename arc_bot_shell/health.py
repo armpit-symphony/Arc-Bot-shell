@@ -1,4 +1,4 @@
-"""Health report for Arc Harness Shell v0.4."""
+"""Health report for Arc Harness Shell release candidate."""
 
 from __future__ import annotations
 
@@ -46,7 +46,7 @@ def build_health_report(repo_root: Path | None = None) -> dict[str, object]:
     samples_dir = root / "samples" / "tasks"
     return {
         "status": "ok",
-        "artifact": "arc_harness_shell_v0_4",
+        "artifact": "arc_harness_shell_v0_5_rc",
         "guardian": {
             "public_entrypoint": guardian_adapter.public_entrypoint,
             "available": guardian_adapter.is_available(),
@@ -71,11 +71,7 @@ def build_health_report(repo_root: Path | None = None) -> dict[str, object]:
             "local_model_preview": (samples_dir / "local_model_preview.json").exists(),
         },
         "smoke_commands": [
-            "python -m arc_bot_shell.console intake samples/tasks/local_model_preview.json",
-            "python -m arc_bot_shell.console tasks",
-            "python -m arc_bot_shell.console run-task <task_id> --runtime fake --model-adapter deterministic",
-            "python -m arc_bot_shell.console history",
-            "python -m arc_bot_shell.console evidence",
+            "python scripts/smoke_arc_harness_release.py",
             "python -m arc_bot_shell.health",
         ],
     }

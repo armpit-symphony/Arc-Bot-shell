@@ -10,7 +10,7 @@ from .service import render_run_result, run_task_packet
 
 
 def _build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="Run the Arc Harness Shell v0.3 CLI.")
+    parser = argparse.ArgumentParser(description="Run the Arc Harness Shell release-candidate CLI.")
     subparsers = parser.add_subparsers(dest="command", required=True)
 
     run_parser = subparsers.add_parser("run", help="Run one task packet through the harness")
@@ -39,6 +39,12 @@ def _build_parser() -> argparse.ArgumentParser:
         help="Directory for evidence bundle output",
     )
     run_parser.add_argument(
+        "--state-path",
+        type=Path,
+        default=None,
+        help="Optional path to a JSONL state store",
+    )
+    run_parser.add_argument(
         "--compact",
         action="store_true",
         help="Emit compact JSON output",
@@ -57,6 +63,7 @@ def main(argv: list[str] | None = None) -> int:
         model_adapter_name=args.model_adapter,
         model_name=args.model,
         evidence_dir=args.evidence_dir,
+        state_path=args.state_path,
     )
     print(render_run_result(result, compact=args.compact))
     return result.exit_code
