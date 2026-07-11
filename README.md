@@ -1,4 +1,4 @@
-# Arc Harness Shell Release Candidate
+﻿# Arc Harness Shell Release Candidate
 
 Arc Harness Shell is a minimal, local, Guardian-gated worker shell for the Arc/LIMA stack. It is the first credible public baseline for guarded task intake, preview-safe execution, evidence capture, and local operator visibility.
 
@@ -71,6 +71,16 @@ python -m arc_bot_shell.console inbox
 python -m arc_bot_shell.health
 ```
 
+## Operator Approval Queue
+
+```bash
+python -m arc_bot_shell.console approvals
+python -m arc_bot_shell.console approval <approval_id>
+python -m arc_bot_shell.console approve <approval_id> --reason "reviewed locally"
+python -m arc_bot_shell.console deny <approval_id> --reason "not approved"
+```
+
+Approvals and denials are durable local records only. In v0.6, approving a blocked task does not enable external execution.
 ## Guardian And LIMA Dependency Behavior
 
 - `GuardianFacade.evaluate(request)` always returns a `GuardianDecision`.

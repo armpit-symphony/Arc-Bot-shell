@@ -8,6 +8,11 @@ import json
 from pathlib import Path
 import uuid
 
+from arc_bot_shell.approvals import (
+    JsonlApprovalStore,
+    create_approval_for_guarded_task,
+    default_approval_path,
+)
 from arc_bot_shell.contracts import ArcActionRequest, ArcActionRequestError, HarnessRunResult
 
 from .models import TaskRecord
@@ -75,6 +80,7 @@ def run_queued_task(
     model_name: str | None = None,
     evidence_dir: Path | None = None,
     state_path: Path | None = None,
+    approval_path: Path | None = None,
     repo_root: Path | None = None,
 ) -> tuple[TaskRecord, HarnessRunResult | None, int]:
     from arc_bot_shell.harness.service import run_task_packet
@@ -126,6 +132,15 @@ def run_queued_task(
         store.upsert(failed_record)
         return failed_record, None, 1
 
+    approval_store = JsonlApprovalStore(
+        approval_path or default_approval_path(repo_root or Path(__file__).resolve().parents[2])
+    )
+    approval_record = create_approval_for_guarded_task(
+        running_record,
+        harness_result,
+        store=approval_store,
+    )
+
     final_record = replace(
         running_record,
         status=_map_harness_status(harness_result.result_status),  # type: ignore[arg-type]
@@ -139,6 +154,8 @@ def run_queued_task(
             if harness_result.result_status not in {"preview_completed", "blocked"}
             else None
         ),
+        latest_approval_id=None if approval_record is None else approval_record.approval_id,
+        latest_approval_status=None if approval_record is None else approval_record.status,
     )
     store.upsert(final_record)
     return final_record, harness_result, harness_result.exit_code

@@ -41,6 +41,8 @@ class TaskRecord:
     latest_result_status: str | None = None
     latest_evidence_path: str | None = None
     latest_error_message: str | None = None
+    latest_approval_id: str | None = None
+    latest_approval_status: str | None = None
 
     @classmethod
     def from_dict(cls, payload: dict[str, Any]) -> "TaskRecord":
@@ -74,6 +76,16 @@ class TaskRecord:
                 None
                 if payload.get("latest_error_message") is None
                 else str(payload["latest_error_message"])
+            ),
+            latest_approval_id=(
+                None
+                if payload.get("latest_approval_id") is None
+                else str(payload["latest_approval_id"])
+            ),
+            latest_approval_status=(
+                None
+                if payload.get("latest_approval_status") is None
+                else str(payload["latest_approval_status"])
             ),
         )
 
