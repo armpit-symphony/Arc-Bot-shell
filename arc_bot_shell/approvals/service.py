@@ -32,7 +32,10 @@ def create_approval_for_guarded_task(
 ) -> ApprovalRecord | None:
     """Create a pending local approval for blocked/approval-required runs."""
 
-    if harness_result.guardian_decision.status not in {"blocked", "requires_operator_approval"}:
+    if harness_result.guardian_decision.status not in {
+        "blocked",
+        "requires_operator_approval",
+    }:
         return None
 
     timestamp = _utc_now()
@@ -70,9 +73,7 @@ def decide_approval(
     if record is None:
         raise ApprovalQueueError(f"approval {approval_id!r} was not found")
     if record.status != "pending":
-        raise ApprovalQueueError(
-            f"approval {approval_id!r} is already {record.status}"
-        )
+        raise ApprovalQueueError(f"approval {approval_id!r} is already {record.status}")
 
     timestamp = _utc_now()
     updated = replace(
@@ -83,11 +84,11 @@ def decide_approval(
         decided_at=timestamp,
         updated_at=timestamp,
         execution_allowed=False,
-        execution_status="approved_but_not_executable_in_v0_6"
-        if decision == "approved"
-        else "denied_not_executable",
+        execution_status=(
+            "approved_but_not_executable_in_v0_6"
+            if decision == "approved"
+            else "denied_not_executable"
+        ),
     )
     store.upsert(updated)
     return updated
-
-

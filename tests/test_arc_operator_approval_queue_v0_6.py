@@ -12,7 +12,6 @@ from arc_bot_shell.health import build_health_report
 from arc_bot_shell.state import JsonlStateStore
 from arc_bot_shell.tasks import JsonlTaskQueue
 
-
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
 
@@ -59,7 +58,9 @@ def _queue_blocked_email(
 
 
 def test_blocked_run_task_creates_pending_approval_record(tmp_path: Path) -> None:
-    queue_path, approval_path, state_path, _, task_id, run = _queue_blocked_email(tmp_path)
+    queue_path, approval_path, state_path, _, task_id, run = _queue_blocked_email(
+        tmp_path
+    )
     payload = json.loads(run.stdout)
     approvals = JsonlApprovalStore(approval_path).list_approvals()
     task = JsonlTaskQueue(queue_path).get_task(task_id)
@@ -105,8 +106,12 @@ def test_console_approvals_and_show_approval_read_real_records(tmp_path: Path) -
     assert json.loads(shown.stdout)["approval"]["approval_id"] == approval_id
 
 
-def test_approve_records_local_decision_without_enabling_execution(tmp_path: Path) -> None:
-    queue_path, approval_path, state_path, _, task_id, _ = _queue_blocked_email(tmp_path)
+def test_approve_records_local_decision_without_enabling_execution(
+    tmp_path: Path,
+) -> None:
+    queue_path, approval_path, state_path, _, task_id, _ = _queue_blocked_email(
+        tmp_path
+    )
     approval_id = JsonlApprovalStore(approval_path).list_approvals()[0].approval_id
     initial_run_count = len(JsonlStateStore(state_path).list_runs())
 
@@ -139,7 +144,9 @@ def test_approve_records_local_decision_without_enabling_execution(tmp_path: Pat
 
 
 def test_deny_records_local_decision_without_execution(tmp_path: Path) -> None:
-    queue_path, approval_path, state_path, _, task_id, _ = _queue_blocked_email(tmp_path)
+    queue_path, approval_path, state_path, _, task_id, _ = _queue_blocked_email(
+        tmp_path
+    )
     approval_id = JsonlApprovalStore(approval_path).list_approvals()[0].approval_id
     initial_run_count = len(JsonlStateStore(state_path).list_runs())
 
@@ -168,7 +175,9 @@ def test_deny_records_local_decision_without_execution(tmp_path: Path) -> None:
     assert len(JsonlStateStore(state_path).list_runs()) == initial_run_count
 
 
-def test_requires_operator_approval_task_creates_pending_approval(tmp_path: Path) -> None:
+def test_requires_operator_approval_task_creates_pending_approval(
+    tmp_path: Path,
+) -> None:
     task_packet = tmp_path / "approval_required.json"
     task_packet.write_text(
         json.dumps(
@@ -269,5 +278,3 @@ def test_health_reports_approval_queue_counts(tmp_path: Path) -> None:
     assert payload["pending_approval_count"] == 0
     assert payload["approved_approval_count"] == 1
     assert payload["denied_approval_count"] == 0
-
-
