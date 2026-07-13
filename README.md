@@ -53,6 +53,16 @@ Optional explicit Ollama preview remains opt-in only:
 python -m arc_bot_shell.harness run samples/tasks/local_model_preview.json --runtime fake --model-adapter ollama --model llama3.1
 ```
 
+## Local Integration Doctor
+
+Set ARC_GUARDIAN_PATH, ARC_LIMA_PATH, ARC_OLLAMA_URL, and ARC_OLLAMA_MODEL,
+then run:
+
+    python -m arc_bot_shell.integrations doctor
+
+The JSON report verifies imports and loopback Ollama reachability. It does not
+execute a model or grant runtime authority.
+
 ## Release Smoke
 
 ```bash
