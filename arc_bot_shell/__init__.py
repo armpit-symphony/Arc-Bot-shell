@@ -1,5 +1,15 @@
 """Arc Harness Shell v0.1 public package surface."""
 
+from .approvals import (
+    APPROVAL_STATUSES,
+    ApprovalQueueError,
+    ApprovalRecord,
+    ApprovalStatus,
+    JsonlApprovalStore,
+    create_approval_for_guarded_task,
+    decide_approval,
+    default_approval_path,
+)
 from .contracts import (
     ARC_BLOCK_CATEGORIES,
     ARC_GUARDIAN_STATUSES,
@@ -31,10 +41,14 @@ from .lima import (
 )
 
 __all__ = [
+    "APPROVAL_STATUSES",
     "ARC_BLOCK_CATEGORIES",
     "ARC_GUARDIAN_STATUSES",
     "ARC_SAFE_HARNESS_ACTIONS",
     "ArcActionRequest",
+    "ApprovalQueueError",
+    "ApprovalRecord",
+    "ApprovalStatus",
     "ArcActionRequestError",
     "DisabledLimaRuntimePort",
     "EvidenceBundle",
@@ -45,6 +59,7 @@ __all__ = [
     "GuardianSuiteAdapter",
     "GuardianUnavailableError",
     "HarnessRunResult",
+    "JsonlApprovalStore",
     "LimaRuntimePort",
     "LimaRuntimeResult",
     "LimaRuntimeUnavailableError",
@@ -52,6 +67,9 @@ __all__ = [
     "TestFakeGuardian",
     "build_evidence_bundle",
     "build_runtime_port",
+    "create_approval_for_guarded_task",
+    "decide_approval",
+    "default_approval_path",
     "default_evidence_dir",
     "load_workspace_lock",
     "run_task_packet",

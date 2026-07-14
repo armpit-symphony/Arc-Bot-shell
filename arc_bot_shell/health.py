@@ -5,6 +5,7 @@ from __future__ import annotations
 from pathlib import Path
 import sys
 
+from arc_bot_shell.approvals import JsonlApprovalStore, default_approval_path
 from arc_bot_shell.console import render_json
 from arc_bot_shell.evidence import default_evidence_dir
 from arc_bot_shell.guardian import GuardianSuiteAdapter
@@ -28,6 +29,8 @@ def build_health_report(repo_root: Path | None = None) -> dict[str, object]:
     state_store = JsonlStateStore(state_path)
     task_queue = JsonlTaskQueue(default_task_queue_path(root))
     task_counts = task_queue.counts_by_status()
+    approval_store = JsonlApprovalStore(default_approval_path(root))
+    approval_counts = approval_store.counts_by_status()
     try:
         resolved = local_runtime.resolve_lima_import()
     except LimaRuntimeUnavailableError as exc:
@@ -61,6 +64,10 @@ def build_health_report(repo_root: Path | None = None) -> dict[str, object]:
         "queued_task_count": task_counts.get("queued", 0),
         "blocked_task_count": task_counts.get("blocked", 0),
         "completed_task_count": task_counts.get("completed", 0),
+        "approval_queue_present": approval_store.exists(),
+        "pending_approval_count": approval_counts.get("pending", 0),
+        "approved_approval_count": approval_counts.get("approved", 0),
+        "denied_approval_count": approval_counts.get("denied", 0),
         "model_preview_available": model_preview_available(),
         "deterministic_model_adapter_available": deterministic_model_adapter_available(),
         "ollama_configured": ollama_configured(),

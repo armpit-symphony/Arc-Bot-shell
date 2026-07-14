@@ -1,13 +1,21 @@
-"""Console/state commands for Arc Harness Shell."""
+﻿"""Console/state commands for Arc Harness Shell."""
 
 from __future__ import annotations
 
 import argparse
+from dataclasses import replace
 import json
 from pathlib import Path
 import sys
 from typing import Any
 
+from arc_bot_shell.approvals import (
+    APPROVAL_STATUSES,
+    ApprovalQueueError,
+    JsonlApprovalStore,
+    decide_approval,
+    default_approval_path,
+)
 from arc_bot_shell.console.presenter import render_json
 from arc_bot_shell.evidence import default_evidence_dir
 from arc_bot_shell.state import JsonlStateStore, default_state_path
@@ -31,6 +39,10 @@ def _state_store(path: Path | None = None) -> JsonlStateStore:
 
 def _task_queue(path: Path | None = None) -> JsonlTaskQueue:
     return JsonlTaskQueue(path or default_task_queue_path(_repo_root()))
+
+
+def _approval_store(path: Path | None = None) -> JsonlApprovalStore:
+    return JsonlApprovalStore(path or default_approval_path(_repo_root()))
 
 
 def build_history_payload(state_path: Path | None = None) -> dict[str, Any]:
@@ -146,6 +158,93 @@ def build_task_payload(task_id: str, queue_path: Path | None = None) -> tuple[di
     }, 0
 
 
+def build_approvals_payload(
+    approval_path: Path | None = None,
+    status: str | None = None,
+) -> dict[str, Any]:
+    store = _approval_store(approval_path)
+    return {
+        "approvals": [record.to_dict() for record in store.list_approvals(status=status)],
+        "approval_path": str(store.path),
+    }
+
+
+def build_approval_payload(
+    approval_id: str,
+    approval_path: Path | None = None,
+) -> tuple[dict[str, Any], int]:
+    store = _approval_store(approval_path)
+    record = store.get_approval(approval_id)
+    if record is None:
+        return {
+            "error": "approval_not_found",
+            "approval_id": approval_id,
+            "approval_path": str(store.path),
+        }, 1
+    return {
+        "approval": record.to_dict(),
+        "approval_path": str(store.path),
+    }, 0
+
+
+def _sync_task_approval_status(
+    approval_id: str,
+    approval_status: str,
+    task_id: str,
+    queue_path: Path | None,
+) -> dict[str, Any] | None:
+    queue = _task_queue(queue_path)
+    task = queue.get_task(task_id)
+    if task is None:
+        return None
+    updated = replace(
+        task,
+        latest_approval_id=approval_id,
+        latest_approval_status=approval_status,
+    )
+    queue.upsert(updated)
+    return updated.to_dict()
+
+
+def build_decide_approval_payload(
+    approval_id: str,
+    *,
+    decision: str,
+    approval_path: Path | None = None,
+    queue_path: Path | None = None,
+    operator_id: str = "operator-local",
+    reason: str | None = None,
+) -> tuple[dict[str, Any], int]:
+    store = _approval_store(approval_path)
+    try:
+        record = decide_approval(
+            approval_id,
+            decision=decision,
+            store=store,
+            operator_id=operator_id,
+            reason=reason,
+        )
+    except ApprovalQueueError as exc:
+        return {
+            "error": str(exc),
+            "approval_id": approval_id,
+            "approval_path": str(store.path),
+        }, 1
+
+    task = _sync_task_approval_status(
+        record.approval_id,
+        record.status,
+        record.task_id,
+        queue_path,
+    )
+    return {
+        "approval": record.to_dict(),
+        "task": task,
+        "approval_path": str(store.path),
+        "execution_allowed": False,
+        "execution_status": record.execution_status,
+    }, 0
+
 def build_run_task_payload(
     task_id: str,
     *,
@@ -155,6 +254,7 @@ def build_run_task_payload(
     model_name: str | None = None,
     evidence_dir: Path | None = None,
     state_path: Path | None = None,
+    approval_path: Path | None = None,
 ) -> tuple[dict[str, Any], int]:
     resolved_queue_path = queue_path or default_task_queue_path(_repo_root())
     try:
@@ -166,6 +266,7 @@ def build_run_task_payload(
             model_name=model_name,
             evidence_dir=evidence_dir,
             state_path=state_path,
+            approval_path=approval_path,
             repo_root=_repo_root(),
         )
     except TaskQueueError as exc:
@@ -201,6 +302,12 @@ def _build_parser() -> argparse.ArgumentParser:
         default=None,
         help="Optional path to a JSONL task queue",
     )
+    parser.add_argument(
+        "--approval-path",
+        type=Path,
+        default=None,
+        help="Optional path to a JSONL approval queue",
+    )
     subparsers = parser.add_subparsers(dest="command", required=True)
 
     subparsers.add_parser("history", help="List recorded harness runs")
@@ -225,6 +332,23 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     task = subparsers.add_parser("task", help="Show one queued task")
     task.add_argument("task_id", help="Task identifier")
+    approvals = subparsers.add_parser("approvals", help="List local approval records")
+    approvals.add_argument(
+        "--status",
+        choices=APPROVAL_STATUSES,
+        default=None,
+        help="Optional approval status filter",
+    )
+    approval = subparsers.add_parser("approval", help="Show one approval record")
+    approval.add_argument("approval_id", help="Approval identifier")
+    approve = subparsers.add_parser("approve", help="Record a local approval decision")
+    approve.add_argument("approval_id", help="Approval identifier")
+    approve.add_argument("--operator-id", default="operator-local")
+    approve.add_argument("--reason", default=None)
+    deny = subparsers.add_parser("deny", help="Record a local denial decision")
+    deny.add_argument("approval_id", help="Approval identifier")
+    deny.add_argument("--operator-id", default="operator-local")
+    deny.add_argument("--reason", default=None)
     run_task = subparsers.add_parser("run-task", help="Run one queued task through the harness")
     run_task.add_argument("task_id", help="Task identifier")
     run_task.add_argument(
@@ -284,6 +408,36 @@ def main(argv: list[str] | None = None) -> int:
         payload, exit_code = build_task_payload(args.task_id, args.task_queue_path)
         print(render_json(payload, compact=args.compact))
         return exit_code
+    if args.command == "approvals":
+        payload = build_approvals_payload(args.approval_path, args.status)
+        print(render_json(payload, compact=args.compact))
+        return 0
+    if args.command == "approval":
+        payload, exit_code = build_approval_payload(args.approval_id, args.approval_path)
+        print(render_json(payload, compact=args.compact))
+        return exit_code
+    if args.command == "approve":
+        payload, exit_code = build_decide_approval_payload(
+            args.approval_id,
+            decision="approved",
+            approval_path=args.approval_path,
+            queue_path=args.task_queue_path,
+            operator_id=args.operator_id,
+            reason=args.reason,
+        )
+        print(render_json(payload, compact=args.compact))
+        return exit_code
+    if args.command == "deny":
+        payload, exit_code = build_decide_approval_payload(
+            args.approval_id,
+            decision="denied",
+            approval_path=args.approval_path,
+            queue_path=args.task_queue_path,
+            operator_id=args.operator_id,
+            reason=args.reason,
+        )
+        print(render_json(payload, compact=args.compact))
+        return exit_code
     if args.command == "run-task":
         payload, exit_code = build_run_task_payload(
             args.task_id,
@@ -293,6 +447,7 @@ def main(argv: list[str] | None = None) -> int:
             model_name=args.model,
             evidence_dir=args.evidence_dir,
             state_path=args.state_path,
+            approval_path=args.approval_path,
         )
         print(render_json(payload, compact=args.compact))
         return exit_code
