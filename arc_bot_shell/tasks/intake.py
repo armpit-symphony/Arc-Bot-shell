@@ -13,7 +13,11 @@ from arc_bot_shell.approvals import (
     create_approval_for_guarded_task,
     default_approval_path,
 )
-from arc_bot_shell.contracts import ArcActionRequest, ArcActionRequestError, HarnessRunResult
+from arc_bot_shell.contracts import (
+    ArcActionRequest,
+    ArcActionRequestError,
+    HarnessRunResult,
+)
 
 from .models import TaskRecord
 from .queue import JsonlTaskQueue, default_task_queue_path
@@ -59,12 +63,14 @@ def intake_task(task_path: Path, *, queue_path: Path | None = None) -> TaskRecor
         created_at=timestamp,
         updated_at=timestamp,
     )
-    JsonlTaskQueue(queue_path or default_task_queue_path(resolved_path.parents[2])).append(record)
+    JsonlTaskQueue(
+        queue_path or default_task_queue_path(resolved_path.parents[2])
+    ).append(record)
     return record
 
 
 def _map_harness_status(result_status: str) -> str:
-    if result_status == "preview_completed":
+    if result_status in {"preview_completed", "guardian_approved_for_lima"}:
         return "completed"
     if result_status in {"blocked", "requires_operator_approval"}:
         return "blocked"
@@ -82,6 +88,12 @@ def run_queued_task(
     state_path: Path | None = None,
     approval_path: Path | None = None,
     repo_root: Path | None = None,
+    guardian_mode: str | None = None,
+    guardian_path: Path | None = None,
+    guardian_contract_reference: str | None = None,
+    ollama_url: str | None = None,
+    stop_after_guardian: bool = False,
+    guardian_facade: object | None = None,
 ) -> tuple[TaskRecord, HarnessRunResult | None, int]:
     from arc_bot_shell.harness.service import run_task_packet
 
@@ -110,8 +122,20 @@ def run_queued_task(
             evidence_dir=evidence_dir,
             state_path=state_path,
             repo_root=repo_root,
+            guardian_mode=guardian_mode,
+            guardian_path=guardian_path,
+            guardian_contract_reference=guardian_contract_reference,
+            ollama_url=ollama_url,
+            stop_after_guardian=stop_after_guardian,
+            guardian_facade=guardian_facade,  # type: ignore[arg-type]
         )
-    except (FileNotFoundError, ArcActionRequestError, json.JSONDecodeError, ValueError, OSError) as exc:
+    except (
+        FileNotFoundError,
+        ArcActionRequestError,
+        json.JSONDecodeError,
+        ValueError,
+        OSError,
+    ) as exc:
         failed_record = replace(
             running_record,
             status="failed",
@@ -133,7 +157,8 @@ def run_queued_task(
         return failed_record, None, 1
 
     approval_store = JsonlApprovalStore(
-        approval_path or default_approval_path(repo_root or Path(__file__).resolve().parents[2])
+        approval_path
+        or default_approval_path(repo_root or Path(__file__).resolve().parents[2])
     )
     approval_record = create_approval_for_guarded_task(
         running_record,
@@ -154,8 +179,12 @@ def run_queued_task(
             if harness_result.result_status not in {"preview_completed", "blocked"}
             else None
         ),
-        latest_approval_id=None if approval_record is None else approval_record.approval_id,
-        latest_approval_status=None if approval_record is None else approval_record.status,
+        latest_approval_id=(
+            None if approval_record is None else approval_record.approval_id
+        ),
+        latest_approval_status=(
+            None if approval_record is None else approval_record.status
+        ),
     )
     store.upsert(final_record)
     return final_record, harness_result, harness_result.exit_code

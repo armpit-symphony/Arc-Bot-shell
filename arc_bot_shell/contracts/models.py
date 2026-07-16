@@ -6,7 +6,6 @@ from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any, Literal
 
-
 ARC_SAFE_HARNESS_ACTIONS = (
     "arc.noop",
     "arc.classify_task_packet",
@@ -106,7 +105,9 @@ class ArcActionRequest:
             action_name=action_name,  # type: ignore[arg-type]
             summary=str(raw["summary"]),
             preview_only=bool(raw.get("preview_only", True)),
-            requires_operator_approval=bool(raw.get("requires_operator_approval", False)),
+            requires_operator_approval=bool(
+                raw.get("requires_operator_approval", False)
+            ),
             operator_id=str(raw.get("operator_id", "operator-local")),
             worker_id=str(raw.get("worker_id", "arc-worker-001")),
             tenant_id=str(raw.get("tenant_id", "single-tenant-local")),
@@ -129,6 +130,12 @@ class GuardianDecision:
     reason: str
     block_category: BlockCategory | None = None
     metadata: dict[str, Any] = field(default_factory=dict)
+    allowed: bool | None = None
+    requires_approval: bool | None = None
+    requested_action: str | None = None
+    risk_level: str | None = None
+    policy_name: str | None = None
+    created_at: str | None = None
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
@@ -179,6 +186,9 @@ class EvidenceBundle:
     updated_at: str
     redaction_metadata: dict[str, Any]
     model_preview: dict[str, Any] | None = None
+    guardian: dict[str, Any] = field(default_factory=dict)
+    lima_called: bool = False
+    ollama_called: bool = False
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
@@ -201,6 +211,12 @@ class HarnessRunResult:
     model_preview_called: bool = False
     model_preview: dict[str, Any] | None = None
     runtime_output: dict[str, Any] = field(default_factory=dict)
+    guardian_mode: str = "fail_closed"
+    guardian_status: str | None = None
+    guardian_decision_id: str = ""
+    eligible_for_lima: bool = False
+    lima_called: bool = False
+    ollama_called: bool = False
 
     def to_dict(self) -> dict[str, Any]:
         payload = asdict(self)

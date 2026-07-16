@@ -4,7 +4,8 @@ from __future__ import annotations
 
 import importlib
 from dataclasses import dataclass
-from typing import Callable
+from pathlib import Path
+from typing import Callable, Mapping
 
 from arc_bot_shell.contracts import (
     ARC_BLOCK_CATEGORIES,
@@ -25,7 +26,9 @@ def _first_block_category(request: ArcActionRequest) -> str | None:
     return None
 
 
-def _evaluate_local_policy(request: ArcActionRequest, evaluator: str) -> GuardianDecision:
+def _evaluate_local_policy(
+    request: ArcActionRequest, evaluator: str
+) -> GuardianDecision:
     block_category = _first_block_category(request)
     if block_category is not None:
         return GuardianDecision(
@@ -81,14 +84,18 @@ class GuardianSuiteAdapter:
             module = self.import_module(self.public_entrypoint)
         except Exception:
             return False
-        return hasattr(module, "get_guardian_suite") or hasattr(module, "guardian_suite_inventory")
+        return hasattr(module, "get_guardian_suite") or hasattr(
+            module, "guardian_suite_inventory"
+        )
 
     def evaluate(self, request: ArcActionRequest) -> GuardianDecision:
         try:
             module = self.import_module(self.public_entrypoint)
         except Exception as exc:
             raise GuardianUnavailableError(str(exc)) from exc
-        if not hasattr(module, "get_guardian_suite") and not hasattr(module, "guardian_suite_inventory"):
+        if not hasattr(module, "get_guardian_suite") and not hasattr(
+            module, "guardian_suite_inventory"
+        ):
             raise GuardianUnavailableError(
                 f"Guardian Suite entrypoint {self.public_entrypoint!r} is missing expected public symbols"
             )
@@ -104,6 +111,31 @@ class FailClosedGuardian:
 
     def evaluate(self, request: ArcActionRequest) -> GuardianDecision:
         return _evaluate_local_policy(request, evaluator="fail_closed_guardian")
+
+
+@dataclass
+class StrictUnavailableGuardian:
+    """Fail closed without fabricating a Guardian-owned decision identifier."""
+
+    reason: str = "configured Guardian is unavailable or incompatible"
+
+    def evaluate(self, request: ArcActionRequest) -> GuardianDecision:
+        return GuardianDecision(
+            decision_id="",
+            action_id=request.action_id,
+            status="blocked",
+            evaluator="guardian_core",
+            reason=self.reason,
+            allowed=False,
+            requires_approval=False,
+            requested_action=request.action_name,
+            metadata={
+                "guardian_adapter": "guardian_core",
+                "guardian_status": "unavailable",
+                "guardian_allowed": False,
+                "guardian_requires_approval": False,
+            },
+        )
 
 
 @dataclass
@@ -131,8 +163,8 @@ class TestFakeGuardian:
 class GuardianFacade:
     """Arc-facing Guardian facade with a fail-closed fallback."""
 
-    primary: GuardianSuiteAdapter | None = None
-    fallback: FailClosedGuardian | None = None
+    primary: object | None = None
+    fallback: object | None = None
 
     def __post_init__(self) -> None:
         if self.primary is None:
@@ -140,10 +172,58 @@ class GuardianFacade:
         if self.fallback is None:
             self.fallback = FailClosedGuardian()
 
-    def evaluate(self, request: ArcActionRequest) -> GuardianDecision:
+    def evaluate(
+        self,
+        request: ArcActionRequest,
+        *,
+        policy_context: Mapping[str, object] | None = None,
+    ) -> GuardianDecision:
         assert self.primary is not None
         assert self.fallback is not None
         try:
-            return self.primary.evaluate(request)
-        except GuardianUnavailableError:
-            return self.fallback.evaluate(request)
+            if getattr(self.primary, "adapter_name", None) == "guardian_core":
+                return self.primary.evaluate(  # type: ignore[union-attr]
+                    request,
+                    policy_context=policy_context or {},
+                )
+            return self.primary.evaluate(request)  # type: ignore[union-attr]
+        except Exception as exc:
+            if getattr(self.primary, "adapter_name", None) != "guardian_core":
+                if not isinstance(exc, GuardianUnavailableError):
+                    raise
+            if isinstance(self.fallback, StrictUnavailableGuardian):
+                self.fallback.reason = str(exc)
+            return self.fallback.evaluate(request)  # type: ignore[union-attr]
+
+
+def build_guardian_facade(
+    mode: str,
+    *,
+    guardian_path: Path | None = None,
+    ollama_url: str | None = None,
+    contract_reference: str | None = None,
+) -> GuardianFacade:
+    """Build an explicit Guardian mode without real-to-fake allow fallback."""
+
+    if mode == "guardian_core":
+        from .guardian_core_adapter import (
+            DEFAULT_GUARDIAN_CONTRACT_REFERENCE,
+            DEFAULT_OLLAMA_URL,
+            GuardianCoreAdapter,
+        )
+
+        return GuardianFacade(
+            primary=GuardianCoreAdapter(
+                guardian_path=guardian_path,
+                endpoint=ollama_url or DEFAULT_OLLAMA_URL,
+                contract_reference=(
+                    contract_reference or DEFAULT_GUARDIAN_CONTRACT_REFERENCE
+                ),
+            ),
+            fallback=StrictUnavailableGuardian(),
+        )
+    if mode == "test_fake":
+        return GuardianFacade(primary=TestFakeGuardian(), fallback=FailClosedGuardian())
+    if mode == "fail_closed":
+        return GuardianFacade()
+    raise ValueError(f"unsupported Guardian mode: {mode}")

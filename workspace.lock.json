@@ -11,7 +11,8 @@
       "name": "LIMA-Guardian-Suite",
       "url": "https://github.com/armpit-symphony/LIMA-Guardian-Suite",
       "path": "../LIMA-Guardian-Suite",
-      "ref": "0559d9a6ce7e3dc401185a6732a6c8fa123db477"
+      "ref": "guardian-core-v1.1-local-model-preview-policy",
+      "commit": "69e843218c521b913edcec404dea6b7be8c64f06"
     }
   ]
 }
