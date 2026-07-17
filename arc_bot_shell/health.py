@@ -10,6 +10,9 @@ from arc_bot_shell.approvals import JsonlApprovalStore, default_approval_path
 from arc_bot_shell.console import render_json
 from arc_bot_shell.evidence import default_evidence_dir
 from arc_bot_shell.lima import (
+    LIMA_ENTRYPOINT,
+    LIMA_PINNED_COMMIT,
+    LIMA_PINNED_REFERENCE,
     LimaRuntimeUnavailableError,
     LocalLimaImportRuntimePort,
     load_workspace_lock,
@@ -61,6 +64,11 @@ def build_health_report(repo_root: Path | None = None) -> dict[str, object]:
             "fallback": "fail_closed_guardian",
         },
         "lima": lima_status,
+        "lima_public_entrypoint": LIMA_ENTRYPOINT,
+        "lima_pinned_reference": LIMA_PINNED_REFERENCE,
+        "lima_pinned_commit": LIMA_PINNED_COMMIT,
+        "lima_fake_executor_smoke_ready": bool(lima_status.get("configured")),
+        "ollama_integration_ready": False,
         "workspace_lock_present": lock_payload is not None,
         "state_store_present": state_path.exists(),
         "evidence_dir_present": evidence_dir.exists(),

@@ -25,6 +25,7 @@ from arc_bot_shell.guardian import (
     DEFAULT_GUARDIAN_CONTRACT_REFERENCE,
     DEFAULT_OLLAMA_URL,
 )
+from arc_bot_shell.lima import LIMA_PINNED_REFERENCE
 
 DEFAULT_OLLAMA_TIMEOUT_SECONDS = 0.75
 
@@ -62,7 +63,7 @@ class DoctorProbes:
     """Injectable probe functions for clean-clone tests."""
 
     guardian: Callable[[Path | None], GuardianContractProbe]
-    lima: Callable[[Path], LimaContractProbe]
+    lima: Callable[[Path | None], LimaContractProbe]
     ollama: Callable[[str, str, float], "OllamaProbeResult"]
 
 
@@ -256,10 +257,10 @@ def probe_guardian_contract(path: Path | None) -> GuardianContractProbe:
     )
 
 
-def probe_lima_contract(path: Path) -> LimaContractProbe:
+def probe_lima_contract(path: Path | None) -> LimaContractProbe:
     """Inspect the narrow public LIMA injected-executor harness contract."""
 
-    if not path.is_dir():
+    if path is not None and not path.is_dir():
         return LimaContractProbe(
             available=False,
             import_path=None,
@@ -301,7 +302,64 @@ def probe_lima_contract(path: Path) -> LimaContractProbe:
     provider_executor = signature.parameters.get("provider_executor")
     decision_fields = getattr(decision_type, "__dataclass_fields__", {})
     decision_id_field = "decision_id" if "decision_id" in decision_fields else None
-    blockers = () if decision_id_field else ("lima_contract_missing_decision_id",)
+    decision_id_propagation_supported = False
+    fake_executor_smoke_ready = False
+    smoke_decision_id = "guardian-decision:doctor-v0-9"
+    try:
+        smoke_result = entrypoint(
+            {
+                "request_id": "arc-action:doctor-v0-9",
+                "runtime_consumer": "arc_bot_shell",
+                "requested_action": "arc.local_model_preview",
+                "guardian_decision": {
+                    "decision_id": smoke_decision_id,
+                    "status": "allow",
+                    "allowed": True,
+                    "requires_approval": False,
+                },
+                "executor_ref": "in_process_fake_executor",
+                "normalized_request": {"summary": "doctor fake smoke"},
+            },
+            lambda payload: {
+                "provider": "fake_local_model",
+                "model": "fake-preview-model",
+                "output_text": "Deterministic LIMA runtime preview.",
+                "network_called": False,
+                "credentials_used": False,
+                "ollama_called": False,
+            },
+        )
+        smoke_evidence = smoke_result.get("evidence", {})
+        decision_id_propagation_supported = all(
+            (
+                smoke_result.get("guardian_decision_id") == smoke_decision_id,
+                isinstance(smoke_evidence, Mapping),
+                smoke_evidence.get("guardian_decision_id") == smoke_decision_id,
+            )
+        )
+        fake_executor_smoke_ready = all(
+            (
+                smoke_result.get("executor_called") is True,
+                smoke_result.get("network_called") is False,
+                smoke_result.get("credentials_used") is False,
+                smoke_result.get("ollama_called") is False,
+            )
+        )
+    except Exception:
+        decision_id_propagation_supported = False
+        fake_executor_smoke_ready = False
+    blockers_list: list[str] = []
+    if decision_id_field is None:
+        blockers_list.append("lima_contract_missing_decision_id")
+    if not decision_id_propagation_supported:
+        blockers_list.append("lima_decision_id_propagation_failed")
+    if not fake_executor_smoke_ready:
+        blockers_list.append("lima_fake_executor_smoke_failed")
+    lima_source_root = (
+        path / "lima"
+        if path is not None
+        else Path(str(getattr(harness, "__file__"))).resolve().parents[1]
+    )
 
     return LimaContractProbe(
         available=True,
@@ -321,9 +379,17 @@ def probe_lima_contract(path: Path) -> LimaContractProbe:
         guardian_request_type=_type_name(request_type),
         guardian_decision_type=_type_name(decision_type),
         decision_id_field=decision_id_field,
-        requires_sparkbot_imports=_source_requires_sparkbot_imports(path / "lima"),
-        integration_compatible=decision_id_field is not None,
-        blockers=blockers,
+        requires_sparkbot_imports=_source_requires_sparkbot_imports(lima_source_root),
+        integration_compatible=all(
+            (
+                decision_id_field is not None,
+                decision_id_propagation_supported,
+                fake_executor_smoke_ready,
+            )
+        ),
+        blockers=tuple(blockers_list),
+        decision_id_propagation_supported=decision_id_propagation_supported,
+        fake_executor_smoke_ready=fake_executor_smoke_ready,
     )
 
 
@@ -438,9 +504,7 @@ def run_doctor(
         if config.guardian_path is not None or config.guardian_mode == "guardian_core"
         else _missing_guardian()
     )
-    lima = (
-        _missing_lima() if config.lima_path is None else probes.lima(config.lima_path)
-    )
+    lima = probes.lima(config.lima_path)
 
     blockers = [*guardian.blockers, *lima.blockers]
     ollama_url: str | None = None
@@ -490,6 +554,15 @@ def run_doctor(
             guardian.local_preview_policy_supported is True,
         )
     )
+    guardian_to_lima_ready = all(
+        (
+            real_guardian_ready,
+            lima.available,
+            lima.integration_compatible,
+            lima.decision_id_propagation_supported is True,
+            lima.fake_executor_smoke_ready is True,
+        )
+    )
 
     return {
         "arc_available": True,
@@ -514,6 +587,16 @@ def run_doctor(
         "lima_available": lima.available,
         "lima_import_path": lima.import_path,
         "lima_runtime_entrypoint": lima.runtime_entrypoint,
+        "lima_installed_available": lima.available,
+        "lima_public_import_path": lima.import_path,
+        "lima_pinned_reference": LIMA_PINNED_REFERENCE,
+        "lima_entrypoint_available": lima.runtime_entrypoint is not None,
+        "guardian_to_lima_contract_compatible": guardian_to_lima_ready,
+        "decision_id_propagation_supported": (
+            lima.decision_id_propagation_supported is True
+        ),
+        "fake_executor_smoke_ready": lima.fake_executor_smoke_ready is True,
+        "ollama_integration_ready": False,
         "ollama_configured": ollama_configured,
         "ollama_reachable": ollama_reachable,
         "ollama_model": config.ollama_model,

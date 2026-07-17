@@ -24,9 +24,23 @@ def _build_parser() -> argparse.ArgumentParser:
     run_parser.add_argument(
         "--runtime",
         default="disabled",
-        choices=("fake", "local_import", "disabled"),
+        choices=("lima", "fake", "local_import", "disabled"),
         help="Runtime adapter to use for non-model-preview actions",
     )
+    run_parser.add_argument(
+        "--executor",
+        default=None,
+        choices=("fake",),
+        help="Injected executor for the LIMA v0.9 runtime path",
+    )
+    run_parser.add_argument(
+        "--guardian",
+        default=None,
+        choices=("fail_closed", "guardian_core", "test_fake"),
+        help="Guardian implementation to evaluate the request",
+    )
+    run_parser.add_argument("--guardian-path", type=Path, default=None)
+    run_parser.add_argument("--guardian-reference", default=None)
     run_parser.add_argument(
         "--model-adapter",
         default=None,
@@ -95,6 +109,10 @@ def main(argv: list[str] | None = None) -> int:
         model_name=args.model,
         evidence_dir=args.evidence_dir,
         state_path=args.state_path,
+        guardian_mode=args.guardian,
+        guardian_path=args.guardian_path,
+        guardian_contract_reference=args.guardian_reference,
+        executor_name=args.executor,
     )
     print(render_run_result(result, compact=args.compact))
     return result.exit_code

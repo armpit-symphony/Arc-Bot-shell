@@ -2,6 +2,15 @@
 
 Arc Harness Shell is a minimal, local, Guardian-gated worker shell for the Arc/LIMA stack. It is the first credible public baseline for guarded task intake, preview-safe execution, evidence capture, and local operator visibility.
 
+## Arc v0.9 runtime baseline
+
+The current integration milestone connects real Guardian-approved local model
+preview requests to the installed public LIMA harness through an in-process
+fake executor. Guardian `decision_id` lineage is preserved across LIMA input,
+result, evidence, and state. Network, credentials, and Ollama remain disabled.
+
+See [docs/ARC_V0_9_REAL_LIMA_RUNTIME_ADAPTER.md](docs/ARC_V0_9_REAL_LIMA_RUNTIME_ADAPTER.md).
+
 ## What Works Now
 
 - Guardian-gated task packet execution through `ArcActionRequest -> GuardianDecision -> harness result`

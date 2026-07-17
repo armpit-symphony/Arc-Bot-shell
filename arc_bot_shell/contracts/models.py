@@ -189,6 +189,10 @@ class EvidenceBundle:
     guardian: dict[str, Any] = field(default_factory=dict)
     lima_called: bool = False
     ollama_called: bool = False
+    runtime_metadata: dict[str, Any] = field(default_factory=dict)
+    executor_called: bool = False
+    network_called: bool = False
+    credentials_used: bool = False
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
@@ -217,6 +221,11 @@ class HarnessRunResult:
     eligible_for_lima: bool = False
     lima_called: bool = False
     ollama_called: bool = False
+    lima_entrypoint: str | None = None
+    lima_result_status: str | None = None
+    executor_called: bool = False
+    network_called: bool = False
+    credentials_used: bool = False
 
     def to_dict(self) -> dict[str, Any]:
         payload = asdict(self)

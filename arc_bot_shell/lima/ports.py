@@ -243,6 +243,10 @@ def build_runtime_port(
     runtime_name: str,
     repo_root: Path,
 ) -> LimaRuntimePort:
+    if runtime_name == "lima":
+        from .lima_runtime_adapter import LimaRuntimeAdapter
+
+        return LimaRuntimeAdapter()
     if runtime_name == "fake":
         return FakeLimaRuntimePort()
     if runtime_name == "local_import":
@@ -250,5 +254,5 @@ def build_runtime_port(
     if runtime_name == "disabled":
         return DisabledLimaRuntimePort()
     raise LimaRuntimeUnavailableError(
-        f"unsupported runtime {runtime_name!r}; expected fake, local_import, or disabled"
+        f"unsupported runtime {runtime_name!r}; expected lima, fake, local_import, or disabled"
     )

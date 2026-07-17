@@ -5,6 +5,7 @@ from __future__ import annotations
 from datetime import datetime, timezone
 import json
 from pathlib import Path
+from typing import Any
 
 from arc_bot_shell.contracts import EvidenceBundle, GuardianDecision, ModelPreviewResult
 
@@ -29,8 +30,10 @@ def build_evidence_bundle(
     model_preview: ModelPreviewResult | None = None,
     lima_called: bool = False,
     ollama_called: bool = False,
+    runtime_output: dict[str, Any] | None = None,
 ) -> EvidenceBundle:
     timestamp = _utc_now()
+    runtime_metadata = dict(runtime_output or {})
     return EvidenceBundle(
         run_id=run_id,
         action_id=action_id,
@@ -70,6 +73,10 @@ def build_evidence_bundle(
         },
         lima_called=lima_called,
         ollama_called=ollama_called,
+        runtime_metadata=runtime_metadata,
+        executor_called=runtime_metadata.get("executor_called") is True,
+        network_called=runtime_metadata.get("network_called") is True,
+        credentials_used=runtime_metadata.get("credentials_used") is True,
     )
 
 

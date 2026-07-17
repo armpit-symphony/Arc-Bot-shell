@@ -51,6 +51,8 @@ def _lima(*, compatible: bool = True) -> LimaContractProbe:
         requires_sparkbot_imports=False,
         integration_compatible=compatible,
         blockers=() if compatible else ("lima_contract_missing_decision_id",),
+        decision_id_propagation_supported=compatible,
+        fake_executor_smoke_ready=compatible,
     )
 
 
@@ -69,7 +71,7 @@ def _configured(
     )
 
 
-def test_missing_configuration_fails_closed_without_probing() -> None:
+def test_missing_configuration_uses_installed_lima_without_network() -> None:
     def unexpected_path_probe(_path: Path) -> object:
         raise AssertionError(
             "dependency probe must not run without explicit configuration"
@@ -86,20 +88,19 @@ def test_missing_configuration_fails_closed_without_probing() -> None:
         DoctorConfig(None, None, None, None),
         DoctorProbes(
             guardian=unexpected_path_probe,  # type: ignore[arg-type]
-            lima=unexpected_path_probe,  # type: ignore[arg-type]
+            lima=lambda _path: _lima(),
             ollama=unexpected_ollama_probe,
         ),
     )
 
     assert report["guardian_available"] is False
-    assert report["lima_available"] is False
+    assert report["lima_available"] is True
     assert report["ollama_configured"] is False
     assert report["ollama_reachable"] is False
     assert report["ollama_model_available"] is False
     assert report["local_integration_ready"] is False
     assert report["blockers"] == [
         "ARC_GUARDIAN_PATH_not_configured",
-        "ARC_LIMA_PATH_not_configured",
         "ARC_OLLAMA_URL_not_configured",
         "ARC_OLLAMA_MODEL_not_configured",
     ]
@@ -228,7 +229,7 @@ def test_contract_report_is_generated_from_probe_results() -> None:
     assert report["editable_install_audit"]["guardian_suite"]["result"] == "pass"
 
 
-def test_cli_reports_absent_dependencies_without_importing_them(
+def test_cli_reports_installed_lima_without_ollama_probe(
     monkeypatch: pytest.MonkeyPatch,
     capsys: pytest.CaptureFixture[str],
 ) -> None:
@@ -244,4 +245,8 @@ def test_cli_reports_absent_dependencies_without_importing_them(
     payload = json.loads(capsys.readouterr().out)
     assert payload["local_integration_ready"] is False
     assert payload["guardian_available"] is False
-    assert payload["lima_available"] is False
+    assert payload["lima_available"] is True
+    assert payload["lima_public_import_path"] == "lima.harness"
+    assert payload["decision_id_propagation_supported"] is True
+    assert payload["fake_executor_smoke_ready"] is True
+    assert payload["ollama_integration_ready"] is False

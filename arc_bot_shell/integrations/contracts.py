@@ -44,6 +44,8 @@ class LimaContractProbe:
     requires_sparkbot_imports: bool | None
     integration_compatible: bool
     blockers: tuple[str, ...] = ()
+    decision_id_propagation_supported: bool | None = None
+    fake_executor_smoke_ready: bool | None = None
 
 
 def build_contract_report(

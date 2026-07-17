@@ -56,6 +56,7 @@ def run_task_packet(
     guardian_contract_reference: str | None = None,
     ollama_url: str | None = None,
     stop_after_guardian: bool = False,
+    executor_name: str | None = None,
 ) -> HarnessRunResult:
     root = repo_root or Path(__file__).resolve().parents[2]
     request = load_task_packet(task_path)
@@ -100,13 +101,37 @@ def run_task_packet(
     exit_code = 0
     runtime_adapter = selected_model_adapter_name or runtime_name
     result_status = "preview_completed"
-    guardian_only = stop_after_guardian or decision.evaluator == "guardian_core"
+    guardian_only = stop_after_guardian or (
+        decision.evaluator == "guardian_core" and runtime_name != "lima"
+    )
 
     if decision.status == "allowed_preview_only":
         if guardian_only:
             eligible_for_lima = True
             runtime_adapter = "guardian_only"
             result_status = "guardian_approved_for_lima"
+        elif is_model_preview and runtime_name == "lima":
+            eligible_for_lima = True
+            if executor_name not in {None, "fake"}:
+                blocked_reason = "unsupported LIMA executor"
+                runtime_adapter = "lima_runtime"
+                result_status = "runtime_unavailable"
+                exit_code = 4
+            else:
+                resolved_runtime = runtime_port or build_runtime_port(runtime_name, root)
+                runtime_adapter = resolved_runtime.adapter_name
+                try:
+                    runtime_result = resolved_runtime.invoke(request, decision)
+                except LimaRuntimeUnavailableError as exc:
+                    blocked_reason = str(exc)
+                    runtime_adapter = resolved_runtime.adapter_name
+                    result_status = "runtime_unavailable"
+                    exit_code = 4
+                else:
+                    runtime_called = True
+                    runtime_adapter = runtime_result.runtime_adapter
+                    runtime_output = runtime_result.output
+                    result_status = runtime_result.result_status
         elif is_model_preview:
             resolved_model_adapter = (
                 model_preview_adapter
@@ -162,6 +187,7 @@ def run_task_packet(
         model_preview=model_preview_result,
         lima_called=runtime_called,
         ollama_called=ollama_called,
+        runtime_output=runtime_output,
     )
     evidence_path = write_evidence_bundle(
         bundle,
@@ -198,6 +224,15 @@ def run_task_packet(
         eligible_for_lima=eligible_for_lima,
         lima_called=runtime_called,
         ollama_called=ollama_called,
+        lima_entrypoint=(
+            None if not runtime_output else str(runtime_output.get("lima_entrypoint"))
+        ),
+        lima_result_status=(
+            None if not runtime_output else str(runtime_output.get("status"))
+        ),
+        executor_called=runtime_output.get("executor_called") is True,
+        network_called=runtime_output.get("network_called") is True,
+        credentials_used=runtime_output.get("credentials_used") is True,
     )
     JsonlStateStore(state_path or default_state_path(root)).append(state_record)
 
@@ -223,6 +258,15 @@ def run_task_packet(
         eligible_for_lima=eligible_for_lima,
         lima_called=runtime_called,
         ollama_called=ollama_called,
+        lima_entrypoint=(
+            None if not runtime_output else str(runtime_output.get("lima_entrypoint"))
+        ),
+        lima_result_status=(
+            None if not runtime_output else str(runtime_output.get("status"))
+        ),
+        executor_called=runtime_output.get("executor_called") is True,
+        network_called=runtime_output.get("network_called") is True,
+        credentials_used=runtime_output.get("credentials_used") is True,
     )
 
 

@@ -33,6 +33,11 @@ class StateRunRecord:
     eligible_for_lima: bool = False
     lima_called: bool = False
     ollama_called: bool = False
+    lima_entrypoint: str | None = None
+    lima_result_status: str | None = None
+    executor_called: bool = False
+    network_called: bool = False
+    credentials_used: bool = False
 
     @classmethod
     def from_dict(cls, payload: dict[str, Any]) -> "StateRunRecord":
@@ -90,6 +95,19 @@ class StateRunRecord:
                 payload.get("lima_called", payload.get("runtime_called", False))
             ),
             ollama_called=bool(payload.get("ollama_called", False)),
+            lima_entrypoint=(
+                None
+                if payload.get("lima_entrypoint") is None
+                else str(payload["lima_entrypoint"])
+            ),
+            lima_result_status=(
+                None
+                if payload.get("lima_result_status") is None
+                else str(payload["lima_result_status"])
+            ),
+            executor_called=bool(payload.get("executor_called", False)),
+            network_called=bool(payload.get("network_called", False)),
+            credentials_used=bool(payload.get("credentials_used", False)),
         )
 
     def to_dict(self) -> dict[str, Any]:
