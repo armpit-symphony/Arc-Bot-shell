@@ -26,3 +26,16 @@ Status: Phase-0 decision log
 - **Decision:** Missing policy/evidence/authority fields default to blocked or rejected seam projection.
 - **Rationale:** Prevent silent privilege escalation through malformed input.
 - **Implication:** Strict validation in all seam builders.
+
+## ADR-05: Ollama executes only through Guardian and LIMA
+
+- **Decision:** Permit one local-model preview path through a real Guardian
+  allow decision, the installed LIMA v1.1 `loopback_ollama` contract, and an
+  Arc-supplied HTTP-loopback executor callable.
+- **Rationale:** Preserves Guardian syscall-gate authority and LIMA runtime
+  validation while completing the local-PC model milestone without creating a
+  generic network/provider framework.
+- **Implication:** Direct Arc console/queue/harness Ollama adapters are blocked;
+  only HTTP `127.0.0.1` or `localhost` endpoints with no credentials, side
+  effects, redirects, or fallback are permitted. Exact Guardian `decision_id`
+  lineage and sanitized evidence/state are mandatory.

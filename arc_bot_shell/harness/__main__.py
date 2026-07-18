@@ -30,8 +30,8 @@ def _build_parser() -> argparse.ArgumentParser:
     run_parser.add_argument(
         "--executor",
         default=None,
-        choices=("fake",),
-        help="Injected executor for the LIMA v0.9 runtime path",
+        choices=("fake", "ollama"),
+        help="Injected executor kind for the Guardian-gated LIMA runtime path",
     )
     run_parser.add_argument(
         "--guardian",
@@ -44,13 +44,13 @@ def _build_parser() -> argparse.ArgumentParser:
     run_parser.add_argument(
         "--model-adapter",
         default=None,
-        choices=("deterministic", "ollama"),
-        help="Local model preview adapter for arc.local_model_preview actions",
+        choices=("deterministic",),
+        help="Legacy non-network preview adapter; Ollama requires LIMA",
     )
     run_parser.add_argument(
         "--model",
         default=None,
-        help="Optional local model name override for model preview adapters",
+        help="Optional model override for the LIMA Ollama executor",
     )
     run_parser.add_argument(
         "--evidence-dir",

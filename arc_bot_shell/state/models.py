@@ -38,6 +38,19 @@ class StateRunRecord:
     executor_called: bool = False
     network_called: bool = False
     credentials_used: bool = False
+    guardian_called: bool = True
+    executor_kind: str | None = None
+    executor_name: str | None = None
+    executor_call_count: int = 0
+    endpoint: str | None = None
+    network_scope: str | None = None
+    external_side_effects: bool = False
+    duration_ms: int | None = None
+    output_reference: str | None = None
+    error_category: str | None = None
+    lima_input_guardian_decision_id: str | None = None
+    executor_input_guardian_decision_id: str | None = None
+    execution_allowed: bool = False
 
     @classmethod
     def from_dict(cls, payload: dict[str, Any]) -> "StateRunRecord":
@@ -108,6 +121,57 @@ class StateRunRecord:
             executor_called=bool(payload.get("executor_called", False)),
             network_called=bool(payload.get("network_called", False)),
             credentials_used=bool(payload.get("credentials_used", False)),
+            guardian_called=bool(payload.get("guardian_called", True)),
+            executor_kind=(
+                None
+                if payload.get("executor_kind") is None
+                else str(payload["executor_kind"])
+            ),
+            executor_name=(
+                None
+                if payload.get("executor_name") is None
+                else str(payload["executor_name"])
+            ),
+            executor_call_count=int(payload.get("executor_call_count", 0)),
+            endpoint=(
+                None
+                if payload.get("endpoint") is None
+                else str(payload["endpoint"])
+            ),
+            network_scope=(
+                None
+                if payload.get("network_scope") is None
+                else str(payload["network_scope"])
+            ),
+            external_side_effects=bool(
+                payload.get("external_side_effects", False)
+            ),
+            duration_ms=(
+                None
+                if payload.get("duration_ms") is None
+                else int(payload["duration_ms"])
+            ),
+            output_reference=(
+                None
+                if payload.get("output_reference") is None
+                else str(payload["output_reference"])
+            ),
+            error_category=(
+                None
+                if payload.get("error_category") is None
+                else str(payload["error_category"])
+            ),
+            lima_input_guardian_decision_id=(
+                None
+                if payload.get("lima_input_guardian_decision_id") is None
+                else str(payload["lima_input_guardian_decision_id"])
+            ),
+            executor_input_guardian_decision_id=(
+                None
+                if payload.get("executor_input_guardian_decision_id") is None
+                else str(payload["executor_input_guardian_decision_id"])
+            ),
+            execution_allowed=bool(payload.get("execution_allowed", False)),
         )
 
     def to_dict(self) -> dict[str, Any]:

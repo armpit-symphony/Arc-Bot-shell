@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from datetime import datetime, timezone
+import hashlib
 import json
 from pathlib import Path
 from typing import Any
@@ -16,6 +17,21 @@ def _utc_now() -> str:
 
 def default_evidence_dir(repo_root: Path) -> Path:
     return repo_root / "artifacts" / "evidence"
+
+
+def _sanitized_runtime_metadata(runtime_output: dict[str, Any]) -> dict[str, Any]:
+    metadata = dict(runtime_output)
+    output_text = metadata.pop("output_text", None)
+    if isinstance(output_text, str) and output_text:
+        metadata.setdefault(
+            "normalized_output_summary",
+            {
+                "present": True,
+                "character_count": len(output_text),
+                "sha256": hashlib.sha256(output_text.encode("utf-8")).hexdigest(),
+            },
+        )
+    return metadata
 
 
 def build_evidence_bundle(
@@ -33,7 +49,7 @@ def build_evidence_bundle(
     runtime_output: dict[str, Any] | None = None,
 ) -> EvidenceBundle:
     timestamp = _utc_now()
-    runtime_metadata = dict(runtime_output or {})
+    runtime_metadata = _sanitized_runtime_metadata(runtime_output or {})
     return EvidenceBundle(
         run_id=run_id,
         action_id=action_id,
@@ -77,6 +93,60 @@ def build_evidence_bundle(
         executor_called=runtime_metadata.get("executor_called") is True,
         network_called=runtime_metadata.get("network_called") is True,
         credentials_used=runtime_metadata.get("credentials_used") is True,
+        guardian_called=True,
+        executor_kind=(
+            None
+            if runtime_metadata.get("executor_kind") is None
+            else str(runtime_metadata["executor_kind"])
+        ),
+        executor_name=(
+            None
+            if runtime_metadata.get("executor_name") is None
+            else str(runtime_metadata["executor_name"])
+        ),
+        endpoint=(
+            None
+            if runtime_metadata.get("endpoint") is None
+            else str(runtime_metadata["endpoint"])
+        ),
+        model=(
+            None
+            if runtime_metadata.get("model") is None
+            else str(runtime_metadata["model"])
+        ),
+        network_scope=(
+            None
+            if runtime_metadata.get("network_scope") is None
+            else str(runtime_metadata["network_scope"])
+        ),
+        external_side_effects=(
+            runtime_metadata.get("external_side_effects") is True
+        ),
+        duration_ms=(
+            None
+            if runtime_metadata.get("duration_ms") is None
+            else int(runtime_metadata["duration_ms"])
+        ),
+        normalized_status=(
+            None
+            if runtime_metadata.get("status") is None
+            else str(runtime_metadata["status"])
+        ),
+        output_reference=(
+            None
+            if runtime_metadata.get("output_reference") is None
+            else str(runtime_metadata["output_reference"])
+        ),
+        error_category=(
+            None
+            if runtime_metadata.get("error_category") is None
+            else str(runtime_metadata["error_category"])
+        ),
+        error_message=(
+            None
+            if runtime_metadata.get("error_message") is None
+            else str(runtime_metadata["error_message"])
+        ),
     )
 
 

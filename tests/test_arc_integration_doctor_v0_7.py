@@ -198,7 +198,6 @@ def test_missing_ollama_model_is_controlled_unavailable(tmp_path: Path) -> None:
     (
         ("http://127.0.0.1:11434", "http://127.0.0.1:11434"),
         ("http://localhost:11434/", "http://localhost:11434"),
-        ("http://[::1]:11434", "http://[::1]:11434"),
     ),
 )
 def test_normalize_ollama_url_accepts_loopback(value: str, expected: str) -> None:
@@ -210,6 +209,9 @@ def test_normalize_ollama_url_accepts_loopback(value: str, expected: str) -> Non
     (
         "https://127.0.0.1:11434",
         "http://example.com:11434",
+        "http://[::1]:11434",
+        "http://0.0.0.0:11434",
+        "http://192.168.1.20:11434",
         "http://user:password@127.0.0.1:11434",
         "http://127.0.0.1:11434/api/generate",
     ),

@@ -46,6 +46,7 @@ class LimaContractProbe:
     blockers: tuple[str, ...] = ()
     decision_id_propagation_supported: bool | None = None
     fake_executor_smoke_ready: bool | None = None
+    loopback_ollama_supported: bool | None = None
 
 
 def build_contract_report(

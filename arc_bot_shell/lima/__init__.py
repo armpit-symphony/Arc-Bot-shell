@@ -10,12 +10,28 @@ from .ports import (
     load_workspace_lock,
 )
 from .lima_runtime_adapter import (
+    FAKE_EXECUTOR_KIND,
     FAKE_EXECUTOR_NAME,
     LIMA_ENTRYPOINT,
     LIMA_PINNED_COMMIT,
     LIMA_PINNED_REFERENCE,
+    LIMA_PINNED_TAG_OBJECT,
     LimaRuntimeAdapter,
+    build_lima_runtime_adapter,
     deterministic_fake_executor,
+)
+from .ollama_executor import (
+    DEFAULT_OLLAMA_MODEL,
+    DEFAULT_OLLAMA_TIMEOUT_SECONDS,
+    DEFAULT_OLLAMA_URL,
+    LOOPBACK_OLLAMA_EXECUTOR_KIND,
+    LOOPBACK_OLLAMA_EXECUTOR_NAME,
+    OllamaExecutorValidationError,
+    build_local_preview_prompt,
+    execute_loopback_ollama,
+    normalize_loopback_ollama_url,
+    resolve_ollama_model,
+    resolve_ollama_timeout_seconds,
 )
 
 __all__ = [
@@ -26,10 +42,24 @@ __all__ = [
     "LocalLimaImportRuntimePort",
     "build_runtime_port",
     "load_workspace_lock",
+    "FAKE_EXECUTOR_KIND",
     "FAKE_EXECUTOR_NAME",
     "LIMA_ENTRYPOINT",
     "LIMA_PINNED_COMMIT",
     "LIMA_PINNED_REFERENCE",
+    "LIMA_PINNED_TAG_OBJECT",
     "LimaRuntimeAdapter",
+    "build_lima_runtime_adapter",
     "deterministic_fake_executor",
+    "DEFAULT_OLLAMA_MODEL",
+    "DEFAULT_OLLAMA_TIMEOUT_SECONDS",
+    "DEFAULT_OLLAMA_URL",
+    "LOOPBACK_OLLAMA_EXECUTOR_KIND",
+    "LOOPBACK_OLLAMA_EXECUTOR_NAME",
+    "OllamaExecutorValidationError",
+    "build_local_preview_prompt",
+    "execute_loopback_ollama",
+    "normalize_loopback_ollama_url",
+    "resolve_ollama_model",
+    "resolve_ollama_timeout_seconds",
 ]

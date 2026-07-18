@@ -3,6 +3,19 @@
 Date: 2026-06-18
 Status: Foundation architecture only
 
+## Current runnable milestone
+
+The legacy Phase-0 projection modules below remain read-only. The separately
+approved Arc Harness Shell v0.10 runtime path is narrowly executable for
+`arc.local_model_preview` only:
+
+`Arc -> real Guardian -> installed LIMA v1.1 -> injected loopback_ollama executor -> localhost Ollama -> evidence/state`
+
+Arc does not call Ollama from its console, queue, or harness service. LIMA is
+the runtime validation boundary; the only network-capable component is the
+consumer-supplied executor callable after LIMA validates Guardian lineage and
+loopback-only scope.
+
 ## 1) Purpose
 
 Arc Bot Shell is the operator-facing surface for small-business deployment around LIMA Office.

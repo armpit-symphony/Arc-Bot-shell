@@ -173,6 +173,7 @@ def _execution_request(**overrides: Any) -> dict[str, Any]:
         "execution_id": "execution:v1-g47:arc-bot-shell:001",
         "authority_record": _authority_record(),
         "provider_executor_ref": "provider-executor:v1-g47:arc-bot-shell:fake-only",
+        "executor_kind": "fake",
         "provider_request_ref": "provider-request:v1-g47:arc-bot-shell:redacted:001",
         "redacted_prompt_ref": "prompt-ref:v1-g47:arc-bot-shell:redacted-summary",
         "redacted_input_summary_ref": "input-summary:v1-g47:arc-bot-shell:redacted",
