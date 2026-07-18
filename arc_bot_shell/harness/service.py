@@ -24,6 +24,7 @@ from arc_bot_shell.guardian import (
 from arc_bot_shell.lima import (
     LimaRuntimePort,
     LimaRuntimeUnavailableError,
+    build_lima_runtime_adapter,
     build_runtime_port,
 )
 from arc_bot_shell.model import (
@@ -112,19 +113,23 @@ def run_task_packet(
             result_status = "guardian_approved_for_lima"
         elif is_model_preview and runtime_name == "lima":
             eligible_for_lima = True
-            if executor_name not in {None, "fake"}:
+            if executor_name not in {None, "fake", "ollama"}:
                 blocked_reason = "unsupported LIMA executor"
                 runtime_adapter = "lima_runtime"
                 result_status = "runtime_unavailable"
                 exit_code = 4
             else:
-                resolved_runtime = runtime_port or build_runtime_port(runtime_name, root)
-                runtime_adapter = resolved_runtime.adapter_name
                 try:
+                    resolved_runtime = runtime_port or build_lima_runtime_adapter(
+                        executor_name,
+                        endpoint=resolved_ollama_url,
+                        model=model_name,
+                    )
+                    runtime_adapter = resolved_runtime.adapter_name
                     runtime_result = resolved_runtime.invoke(request, decision)
                 except LimaRuntimeUnavailableError as exc:
                     blocked_reason = str(exc)
-                    runtime_adapter = resolved_runtime.adapter_name
+                    runtime_adapter = "lima_runtime"
                     result_status = "runtime_unavailable"
                     exit_code = 4
                 else:
@@ -132,26 +137,41 @@ def run_task_packet(
                     runtime_adapter = runtime_result.runtime_adapter
                     runtime_output = runtime_result.output
                     result_status = runtime_result.result_status
+                    ollama_called = runtime_output.get("ollama_called") is True
+                    if result_status == "lima_ollama_preview_unavailable":
+                        blocked_reason = str(
+                            runtime_output.get("error_message")
+                            or "Ollama preview unavailable"
+                        )
+                        exit_code = 4
         elif is_model_preview:
-            resolved_model_adapter = (
-                model_preview_adapter
-                or build_model_preview_adapter(
-                    selected_model_adapter_name,
-                    model_name=model_name,
+            if selected_model_adapter_name == "ollama":
+                blocked_reason = (
+                    "direct Ollama model adapters are disabled; use "
+                    "--runtime lima --executor ollama"
                 )
-            )
-            model_preview_result = resolved_model_adapter.preview(
-                request.payload,
-                request,
-                decision,
-            )
-            model_preview_called = True
-            ollama_called = model_preview_result.adapter_name == "ollama"
-            runtime_adapter = model_preview_result.adapter_name
-            result_status = model_preview_result.status
-            if result_status != "preview_completed":
-                blocked_reason = model_preview_result.error_message
+                runtime_adapter = "lima_runtime_required"
+                result_status = "runtime_unavailable"
                 exit_code = 4
+            else:
+                resolved_model_adapter = (
+                    model_preview_adapter
+                    or build_model_preview_adapter(
+                        selected_model_adapter_name,
+                        model_name=model_name,
+                    )
+                )
+                model_preview_result = resolved_model_adapter.preview(
+                    request.payload,
+                    request,
+                    decision,
+                )
+                model_preview_called = True
+                runtime_adapter = model_preview_result.adapter_name
+                result_status = model_preview_result.status
+                if result_status != "preview_completed":
+                    blocked_reason = model_preview_result.error_message
+                    exit_code = 4
         else:
             resolved_runtime = runtime_port or build_runtime_port(runtime_name, root)
             runtime_adapter = resolved_runtime.adapter_name
@@ -194,6 +214,15 @@ def run_task_packet(
         evidence_dir or default_evidence_dir(root),
     )
 
+    runtime_model = (
+        str(runtime_output["model"])
+        if runtime_output.get("model") is not None
+        else (
+            None if model_preview_result is None else model_preview_result.model_name
+        )
+    )
+    resolved_state_path = state_path or default_state_path(root)
+
     state_record = StateRunRecord(
         run_id=run_id,
         action_id=request.action_id,
@@ -211,9 +240,7 @@ def run_task_packet(
         model_preview_adapter=(
             None if model_preview_result is None else model_preview_result.adapter_name
         ),
-        model_name=(
-            None if model_preview_result is None else model_preview_result.model_name
-        ),
+        model_name=runtime_model,
         guardian_mode=decision.evaluator,
         guardian_reason=decision.reason,
         guardian_allowed=decision.allowed,
@@ -233,8 +260,59 @@ def run_task_packet(
         executor_called=runtime_output.get("executor_called") is True,
         network_called=runtime_output.get("network_called") is True,
         credentials_used=runtime_output.get("credentials_used") is True,
+        guardian_called=True,
+        executor_kind=(
+            None
+            if runtime_output.get("executor_kind") is None
+            else str(runtime_output["executor_kind"])
+        ),
+        executor_name=(
+            None
+            if runtime_output.get("executor_name") is None
+            else str(runtime_output["executor_name"])
+        ),
+        executor_call_count=int(runtime_output.get("executor_call_count", 0)),
+        endpoint=(
+            None
+            if runtime_output.get("endpoint") is None
+            else str(runtime_output["endpoint"])
+        ),
+        network_scope=(
+            None
+            if runtime_output.get("network_scope") is None
+            else str(runtime_output["network_scope"])
+        ),
+        external_side_effects=(
+            runtime_output.get("external_side_effects") is True
+        ),
+        duration_ms=(
+            None
+            if runtime_output.get("duration_ms") is None
+            else int(runtime_output["duration_ms"])
+        ),
+        output_reference=(
+            None
+            if runtime_output.get("output_reference") is None
+            else str(runtime_output["output_reference"])
+        ),
+        error_category=(
+            None
+            if runtime_output.get("error_category") is None
+            else str(runtime_output["error_category"])
+        ),
+        lima_input_guardian_decision_id=(
+            None
+            if runtime_output.get("lima_input_guardian_decision_id") is None
+            else str(runtime_output["lima_input_guardian_decision_id"])
+        ),
+        executor_input_guardian_decision_id=(
+            None
+            if runtime_output.get("executor_input_guardian_decision_id") is None
+            else str(runtime_output["executor_input_guardian_decision_id"])
+        ),
+        execution_allowed=False,
     )
-    JsonlStateStore(state_path or default_state_path(root)).append(state_record)
+    written_state_path = JsonlStateStore(resolved_state_path).append(state_record)
 
     return HarnessRunResult(
         run_id=run_id,
@@ -267,6 +345,71 @@ def run_task_packet(
         executor_called=runtime_output.get("executor_called") is True,
         network_called=runtime_output.get("network_called") is True,
         credentials_used=runtime_output.get("credentials_used") is True,
+        guardian_called=True,
+        executor_kind=(
+            None
+            if runtime_output.get("executor_kind") is None
+            else str(runtime_output["executor_kind"])
+        ),
+        executor_name=(
+            None
+            if runtime_output.get("executor_name") is None
+            else str(runtime_output["executor_name"])
+        ),
+        executor_call_count=int(runtime_output.get("executor_call_count", 0)),
+        endpoint=(
+            None
+            if runtime_output.get("endpoint") is None
+            else str(runtime_output["endpoint"])
+        ),
+        model=runtime_model,
+        network_scope=(
+            None
+            if runtime_output.get("network_scope") is None
+            else str(runtime_output["network_scope"])
+        ),
+        external_side_effects=(
+            runtime_output.get("external_side_effects") is True
+        ),
+        duration_ms=(
+            None
+            if runtime_output.get("duration_ms") is None
+            else int(runtime_output["duration_ms"])
+        ),
+        output_text=(
+            str(runtime_output["output_text"])
+            if runtime_output.get("output_text") is not None
+            else ""
+        ),
+        output_reference=(
+            None
+            if runtime_output.get("output_reference") is None
+            else str(runtime_output["output_reference"])
+        ),
+        error_category=(
+            None
+            if runtime_output.get("error_category") is None
+            else str(runtime_output["error_category"])
+        ),
+        error_message=(
+            None
+            if runtime_output.get("error_message") is None
+            else str(runtime_output["error_message"])
+        ),
+        lima_input_guardian_decision_id=(
+            None
+            if runtime_output.get("lima_input_guardian_decision_id") is None
+            else str(runtime_output["lima_input_guardian_decision_id"])
+        ),
+        executor_input_guardian_decision_id=(
+            None
+            if runtime_output.get("executor_input_guardian_decision_id") is None
+            else str(runtime_output["executor_input_guardian_decision_id"])
+        ),
+        evidence_written=evidence_path.is_file(),
+        state_written=written_state_path.is_file(),
+        state_path=str(written_state_path),
+        execution_allowed=False,
     )
 
 

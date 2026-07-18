@@ -9,7 +9,7 @@ description = "Arc Harness Shell release candidate"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
-  "lima-runtime @ git+https://github.com/armpit-symphony/LIMA-AI-OS.git@lima-runtime-v1-arc-consumer-baseline",
+  "lima-runtime @ git+https://github.com/armpit-symphony/LIMA-AI-OS.git@lima-runtime-v1.1-loopback-ollama-executor",
 ]
 
 [project.scripts]

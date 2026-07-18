@@ -70,7 +70,12 @@ def intake_task(task_path: Path, *, queue_path: Path | None = None) -> TaskRecor
 
 
 def _map_harness_status(result_status: str) -> str:
-    if result_status in {"preview_completed", "guardian_approved_for_lima"}:
+    if result_status in {
+        "preview_completed",
+        "guardian_approved_for_lima",
+        "lima_preview_completed",
+        "lima_ollama_preview_completed",
+    }:
         return "completed"
     if result_status in {"blocked", "requires_operator_approval"}:
         return "blocked"

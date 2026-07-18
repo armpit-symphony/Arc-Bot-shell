@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from importlib.util import find_spec
+import os
 from pathlib import Path
 import sys
 
@@ -13,10 +14,13 @@ from arc_bot_shell.lima import (
     LIMA_ENTRYPOINT,
     LIMA_PINNED_COMMIT,
     LIMA_PINNED_REFERENCE,
+    LIMA_PINNED_TAG_OBJECT,
+    DEFAULT_OLLAMA_MODEL,
     LimaRuntimeUnavailableError,
     LocalLimaImportRuntimePort,
     load_workspace_lock,
 )
+from arc_bot_shell.integrations import DoctorConfig, run_doctor
 from arc_bot_shell.model import (
     deterministic_model_adapter_available,
     model_preview_available,
@@ -37,6 +41,8 @@ def build_health_report(repo_root: Path | None = None) -> dict[str, object]:
     task_counts = task_queue.counts_by_status()
     approval_store = JsonlApprovalStore(default_approval_path(root))
     approval_counts = approval_store.counts_by_status()
+    doctor_config = DoctorConfig.from_environ(os.environ)
+    doctor_report = run_doctor(doctor_config)
     try:
         resolved = local_runtime.resolve_lima_import()
     except LimaRuntimeUnavailableError as exc:
@@ -67,8 +73,30 @@ def build_health_report(repo_root: Path | None = None) -> dict[str, object]:
         "lima_public_entrypoint": LIMA_ENTRYPOINT,
         "lima_pinned_reference": LIMA_PINNED_REFERENCE,
         "lima_pinned_commit": LIMA_PINNED_COMMIT,
+        "lima_pinned_tag_object": LIMA_PINNED_TAG_OBJECT,
         "lima_fake_executor_smoke_ready": bool(lima_status.get("configured")),
-        "ollama_integration_ready": False,
+        "lima_loopback_ollama_supported": bool(
+            doctor_report.get("lima_loopback_ollama_supported")
+        ),
+        "ollama_integration_ready": bool(
+            doctor_report.get("full_local_integration_ready")
+        ),
+        "local_model_runtime": "ollama",
+        "ollama_available": bool(doctor_report.get("ollama_reachable")),
+        "configured_model": doctor_config.ollama_model or DEFAULT_OLLAMA_MODEL,
+        "configured_model_available": bool(
+            doctor_report.get("ollama_model_available")
+        ),
+        "guardian_ready": bool(doctor_report.get("real_guardian_ready")),
+        "lima_ready": all(
+            (
+                doctor_report.get("lima_available") is True,
+                doctor_report.get("lima_loopback_ollama_supported") is True,
+            )
+        ),
+        "integrated_runtime_ready": bool(
+            doctor_report.get("full_local_integration_ready")
+        ),
         "workspace_lock_present": lock_payload is not None,
         "state_store_present": state_path.exists(),
         "evidence_dir_present": evidence_dir.exists(),
@@ -92,6 +120,7 @@ def build_health_report(repo_root: Path | None = None) -> dict[str, object]:
         },
         "smoke_commands": [
             "python scripts/smoke_arc_harness_release.py",
+            "python scripts/smoke_arc_lima_guardian_ollama.py",
             "python -m arc_bot_shell.health",
         ],
     }

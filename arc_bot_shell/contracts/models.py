@@ -193,6 +193,18 @@ class EvidenceBundle:
     executor_called: bool = False
     network_called: bool = False
     credentials_used: bool = False
+    guardian_called: bool = True
+    executor_kind: str | None = None
+    executor_name: str | None = None
+    endpoint: str | None = None
+    model: str | None = None
+    network_scope: str | None = None
+    external_side_effects: bool = False
+    duration_ms: int | None = None
+    normalized_status: str | None = None
+    output_reference: str | None = None
+    error_category: str | None = None
+    error_message: str | None = None
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
@@ -226,6 +238,25 @@ class HarnessRunResult:
     executor_called: bool = False
     network_called: bool = False
     credentials_used: bool = False
+    guardian_called: bool = True
+    executor_kind: str | None = None
+    executor_name: str | None = None
+    executor_call_count: int = 0
+    endpoint: str | None = None
+    model: str | None = None
+    network_scope: str | None = None
+    external_side_effects: bool = False
+    duration_ms: int | None = None
+    output_text: str = ""
+    output_reference: str | None = None
+    error_category: str | None = None
+    error_message: str | None = None
+    lima_input_guardian_decision_id: str | None = None
+    executor_input_guardian_decision_id: str | None = None
+    evidence_written: bool = False
+    state_written: bool = False
+    state_path: str | None = None
+    execution_allowed: bool = False
 
     def to_dict(self) -> dict[str, Any]:
         payload = asdict(self)

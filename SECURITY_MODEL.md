@@ -3,6 +3,19 @@
 Date: 2026-06-18
 Status: Phase-0 draft
 
+## Current v0.10 runtime exception
+
+The Phase-0 scaffold controls below remain unchanged. The runnable harness has
+one separately approved local execution boundary: a real Guardian-allowed
+`arc.local_model_preview` may reach local Ollama only through the installed
+LIMA v1.1 `loopback_ollama` injected-executor contract.
+
+The executor accepts only HTTP `127.0.0.1` or `localhost` with an explicit
+port, never follows redirects, never uses credentials, and never falls back to
+another model, endpoint, or cloud provider. Full model output is returned to
+the local operator but is excluded from durable evidence metadata, which keeps
+only a length, SHA-256 digest, and record reference.
+
 ## Core Security Principle
 
 All high-risk actions are blocked by design in this branch. Preview UI artifacts are governance surfaces only.

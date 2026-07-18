@@ -1,7 +1,5 @@
 __pycache__/
 **/__pycache__/
 .pytest_cache/
-artifacts/evidence/
-artifacts/approvals/
-artifacts/state/
-artifacts/tasks/
+*.egg-info/
+artifacts/

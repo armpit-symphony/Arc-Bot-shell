@@ -3,6 +3,22 @@
 Date: 2026-06-18
 Status: Foundation contracts and invariants
 
+## Approved Arc Harness Runtime Contract
+
+Legacy Phase-0/readiness projections remain non-executing. Arc Harness Shell
+v0.10 adds one approved runtime contract for `arc.local_model_preview`:
+
+- real Guardian allow with a non-empty unchanged `decision_id` is mandatory;
+- the installed public LIMA entrypoint validates
+  `executor_kind=loopback_ollama` before invoking the executor;
+- only HTTP `127.0.0.1` or `localhost` with an explicit port is allowed;
+- credentials, external side effects, redirects, cloud fallback, and alternate
+  model fallback are forbidden;
+- evidence and state are written for success, controlled unavailability, and
+  denied actions;
+- external email and every non-preview action remain blocked before LIMA and
+  Ollama.
+
 ## Contract Families
 
 - `arc_bot_console_state_envelope.schema.json`

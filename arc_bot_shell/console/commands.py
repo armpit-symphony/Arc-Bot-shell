@@ -402,8 +402,8 @@ def _build_parser() -> argparse.ArgumentParser:
     run_task.add_argument(
         "--model-adapter",
         default=None,
-        choices=("deterministic", "ollama"),
-        help="Local model preview adapter for arc.local_model_preview tasks",
+        choices=("deterministic",),
+        help="Deterministic preview only; Ollama is not callable from the console",
     )
     run_task.add_argument(
         "--model",

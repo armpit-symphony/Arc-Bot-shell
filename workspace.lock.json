@@ -4,8 +4,9 @@
     {
       "name": "LIMA-AI-OS",
       "url": "https://github.com/armpit-symphony/LIMA-AI-OS",
-      "ref": "lima-runtime-v1-arc-consumer-baseline",
-      "commit": "cd40f486be19e01026d293b374b99d213ca275d9"
+      "ref": "lima-runtime-v1.1-loopback-ollama-executor",
+      "commit": "deea1c4f5b6d3455a7e97e4b621e22b8d22a6244",
+      "tag_object": "23470f3341fe6f70ebf3595efb9aef07791beed8"
     },
     {
       "name": "LIMA-Guardian-Suite",

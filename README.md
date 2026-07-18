@@ -2,14 +2,18 @@
 
 Arc Harness Shell is a minimal, local, Guardian-gated worker shell for the Arc/LIMA stack. It is the first credible public baseline for guarded task intake, preview-safe execution, evidence capture, and local operator visibility.
 
-## Arc v0.9 runtime baseline
+## Arc v0.10 local Ollama milestone
 
 The current integration milestone connects real Guardian-approved local model
-preview requests to the installed public LIMA harness through an in-process
-fake executor. Guardian `decision_id` lineage is preserved across LIMA input,
-result, evidence, and state. Network, credentials, and Ollama remain disabled.
+preview requests to the installed public LIMA v1.1 harness and its explicit
+`loopback_ollama` executor contract. Arc supplies a bounded executor callable;
+LIMA validates the Guardian decision and loopback scope before the callable
+may issue one non-streaming request to local Ollama. Guardian `decision_id`
+lineage is preserved across LIMA input, executor input, result, evidence, and
+state. Credentials, cloud fallback, remote endpoints, and external actions
+remain disabled.
 
-See [docs/ARC_V0_9_REAL_LIMA_RUNTIME_ADAPTER.md](docs/ARC_V0_9_REAL_LIMA_RUNTIME_ADAPTER.md).
+See [docs/ARC_V0_10_GUARDIAN_LIMA_OLLAMA.md](docs/ARC_V0_10_GUARDIAN_LIMA_OLLAMA.md).
 
 ## What Works Now
 
@@ -56,11 +60,19 @@ python -m arc_bot_shell.console run-task <task_id> --runtime fake --model-adapte
 python -m arc_bot_shell.harness run samples/tasks/local_model_preview.json --runtime fake --model-adapter deterministic
 ```
 
-Optional explicit Ollama preview remains opt-in only:
+Explicit local Ollama preview is available only through Guardian and LIMA:
 
-```bash
-python -m arc_bot_shell.harness run samples/tasks/local_model_preview.json --runtime fake --model-adapter ollama --model llama3.1
+```powershell
+$env:ARC_OLLAMA_URL = "http://127.0.0.1:11434"
+$env:ARC_OLLAMA_MODEL = "qwen2.5:7b"
+python -m arc_bot_shell.harness run `
+  samples/tasks/local_model_preview.json `
+  --guardian guardian_core `
+  --runtime lima `
+  --executor ollama
 ```
+
+The harness and console reject the legacy direct Ollama model-adapter route.
 
 ## Local Integration Doctor
 
@@ -69,8 +81,9 @@ then run:
 
     python -m arc_bot_shell.integrations doctor
 
-The JSON report verifies imports and loopback Ollama reachability. It does not
-execute a model or grant runtime authority.
+The JSON report verifies imports, the LIMA `loopback_ollama` contract, and
+loopback Ollama/model reachability. It does not generate model output or grant
+runtime authority.
 
 Guardian-only v0.8 proof, stopped before LIMA and Ollama:
 
@@ -119,6 +132,12 @@ Approvals and denials are durable local records only. In v0.6, approving a block
 - Explicit `guardian_core` mode fails closed without falling back to a fake allow decision.
 - Guardian allow in v0.8 only records eligibility for later LIMA routing; no LIMA or Ollama call occurs.
 - `FakeLimaRuntimePort` and `DeterministicPreviewAdapter` require no network or credentials.
+- The Ollama HTTP request exists only in the callable injected into
+  `execute_v1_live_provider_model_call`; Arc console/queue/harness services do
+  not call Ollama directly.
+- Ollama endpoints are restricted to HTTP `127.0.0.1` or `localhost` with an
+  explicit port. No redirects, credentials, retry endpoint, or cloud fallback
+  are allowed.
 - `LocalLimaImportRuntimePort` only resolves from `ARC_LIMA_PATH`, `workspace.lock.json`, or an installed `lima` package.
 - Missing Guardian or missing LIMA import support fails closed; CI does not require sibling checkouts, Ollama, or network access.
 
