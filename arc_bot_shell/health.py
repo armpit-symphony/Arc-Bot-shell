@@ -2,14 +2,21 @@
 
 from __future__ import annotations
 
+from importlib.util import find_spec
 from pathlib import Path
 import sys
 
 from arc_bot_shell.approvals import JsonlApprovalStore, default_approval_path
 from arc_bot_shell.console import render_json
 from arc_bot_shell.evidence import default_evidence_dir
-from arc_bot_shell.guardian import GuardianSuiteAdapter
-from arc_bot_shell.lima import LimaRuntimeUnavailableError, LocalLimaImportRuntimePort, load_workspace_lock
+from arc_bot_shell.lima import (
+    LIMA_ENTRYPOINT,
+    LIMA_PINNED_COMMIT,
+    LIMA_PINNED_REFERENCE,
+    LimaRuntimeUnavailableError,
+    LocalLimaImportRuntimePort,
+    load_workspace_lock,
+)
 from arc_bot_shell.model import (
     deterministic_model_adapter_available,
     model_preview_available,
@@ -22,7 +29,6 @@ from arc_bot_shell.tasks import JsonlTaskQueue, default_task_queue_path
 def build_health_report(repo_root: Path | None = None) -> dict[str, object]:
     root = repo_root or Path(__file__).resolve().parents[1]
     lock_payload = load_workspace_lock(root)
-    guardian_adapter = GuardianSuiteAdapter()
     local_runtime = LocalLimaImportRuntimePort(repo_root=root)
     state_path = default_state_path(root)
     evidence_dir = default_evidence_dir(root)
@@ -44,18 +50,25 @@ def build_health_report(repo_root: Path | None = None) -> dict[str, object]:
             "configured": True,
             "runtime": "local_import",
             "source": resolved.source,
-            "checkout_path": str(resolved.checkout_path) if resolved.checkout_path else None,
+            "checkout_path": (
+                str(resolved.checkout_path) if resolved.checkout_path else None
+            ),
         }
     samples_dir = root / "samples" / "tasks"
     return {
         "status": "ok",
         "artifact": "arc_harness_shell_v0_5_rc",
         "guardian": {
-            "public_entrypoint": guardian_adapter.public_entrypoint,
-            "available": guardian_adapter.is_available(),
+            "public_entrypoint": "guardian_core",
+            "available": find_spec("guardian_core") is not None,
             "fallback": "fail_closed_guardian",
         },
         "lima": lima_status,
+        "lima_public_entrypoint": LIMA_ENTRYPOINT,
+        "lima_pinned_reference": LIMA_PINNED_REFERENCE,
+        "lima_pinned_commit": LIMA_PINNED_COMMIT,
+        "lima_fake_executor_smoke_ready": bool(lima_status.get("configured")),
+        "ollama_integration_ready": False,
         "workspace_lock_present": lock_payload is not None,
         "state_store_present": state_path.exists(),
         "evidence_dir_present": evidence_dir.exists(),

@@ -5,6 +5,7 @@ from __future__ import annotations
 from datetime import datetime, timezone
 import json
 from pathlib import Path
+from typing import Any
 
 from arc_bot_shell.contracts import EvidenceBundle, GuardianDecision, ModelPreviewResult
 
@@ -27,8 +28,12 @@ def build_evidence_bundle(
     result_status: str,
     blocked_reason: str | None,
     model_preview: ModelPreviewResult | None = None,
+    lima_called: bool = False,
+    ollama_called: bool = False,
+    runtime_output: dict[str, Any] | None = None,
 ) -> EvidenceBundle:
     timestamp = _utc_now()
+    runtime_metadata = dict(runtime_output or {})
     return EvidenceBundle(
         run_id=run_id,
         action_id=action_id,
@@ -46,6 +51,32 @@ def build_evidence_bundle(
             "contains_secrets": False,
         },
         model_preview=(None if model_preview is None else model_preview.to_dict()),
+        guardian={
+            "adapter": guardian_decision.metadata.get(
+                "guardian_adapter", guardian_decision.evaluator
+            ),
+            "import_path": guardian_decision.metadata.get("guardian_import_path"),
+            "decision_id": guardian_decision.decision_id,
+            "status": guardian_decision.metadata.get(
+                "guardian_status", guardian_decision.status
+            ),
+            "allowed": guardian_decision.allowed,
+            "requires_approval": guardian_decision.requires_approval,
+            "reason": guardian_decision.reason,
+            "requested_action": guardian_decision.requested_action,
+            "risk_level": guardian_decision.risk_level,
+            "policy_name": guardian_decision.policy_name,
+            "created_at": guardian_decision.created_at,
+            "guardian_contract_reference": guardian_decision.metadata.get(
+                "guardian_contract_reference"
+            ),
+        },
+        lima_called=lima_called,
+        ollama_called=ollama_called,
+        runtime_metadata=runtime_metadata,
+        executor_called=runtime_metadata.get("executor_called") is True,
+        network_called=runtime_metadata.get("network_called") is True,
+        credentials_used=runtime_metadata.get("credentials_used") is True,
     )
 
 

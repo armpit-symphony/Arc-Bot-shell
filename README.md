@@ -2,6 +2,15 @@
 
 Arc Harness Shell is a minimal, local, Guardian-gated worker shell for the Arc/LIMA stack. It is the first credible public baseline for guarded task intake, preview-safe execution, evidence capture, and local operator visibility.
 
+## Arc v0.9 runtime baseline
+
+The current integration milestone connects real Guardian-approved local model
+preview requests to the installed public LIMA harness through an in-process
+fake executor. Guardian `decision_id` lineage is preserved across LIMA input,
+result, evidence, and state. Network, credentials, and Ollama remain disabled.
+
+See [docs/ARC_V0_9_REAL_LIMA_RUNTIME_ADAPTER.md](docs/ARC_V0_9_REAL_LIMA_RUNTIME_ADAPTER.md).
+
 ## What Works Now
 
 - Guardian-gated task packet execution through `ArcActionRequest -> GuardianDecision -> harness result`
@@ -63,6 +72,17 @@ then run:
 The JSON report verifies imports and loopback Ollama reachability. It does not
 execute a model or grant runtime authority.
 
+Guardian-only v0.8 proof, stopped before LIMA and Ollama:
+
+```powershell
+$env:ARC_GUARDIAN_MODE = "guardian_core"
+$env:ARC_GUARDIAN_PATH = "C:\path\to\LIMA-Guardian-Suite"
+python -m arc_bot_shell.harness guardian-check samples/tasks/local_model_preview.json
+```
+
+The durable Guardian baseline is
+`guardian-core-v1.1-local-model-preview-policy`.
+
 ## Release Smoke
 
 ```bash
@@ -91,11 +111,13 @@ python -m arc_bot_shell.console deny <approval_id> --reason "not approved"
 ```
 
 Approvals and denials are durable local records only. In v0.6, approving a blocked task does not enable external execution.
+
 ## Guardian And LIMA Dependency Behavior
 
 - `GuardianFacade.evaluate(request)` always returns a `GuardianDecision`.
-- `GuardianSuiteAdapter` only attempts `LIMA-Guardian-Suite` through the public `app.services.guardian` entrypoint.
-- If Guardian Suite is missing or unusable, the shell falls back to `FailClosedGuardian`.
+- `GuardianCoreAdapter` imports only the public `guardian_core` request, decision, and evaluator contract.
+- Explicit `guardian_core` mode fails closed without falling back to a fake allow decision.
+- Guardian allow in v0.8 only records eligibility for later LIMA routing; no LIMA or Ollama call occurs.
 - `FakeLimaRuntimePort` and `DeterministicPreviewAdapter` require no network or credentials.
 - `LocalLimaImportRuntimePort` only resolves from `ARC_LIMA_PATH`, `workspace.lock.json`, or an installed `lima` package.
 - Missing Guardian or missing LIMA import support fails closed; CI does not require sibling checkouts, Ollama, or network access.

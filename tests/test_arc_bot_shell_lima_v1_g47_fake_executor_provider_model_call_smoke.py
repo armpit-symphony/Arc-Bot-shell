@@ -164,6 +164,12 @@ def _authority_record() -> dict[str, Any]:
 
 def _execution_request(**overrides: Any) -> dict[str, Any]:
     request = {
+        "guardian_decision": {
+            "decision_id": "decision:v1-g47:arc-bot-shell:001",
+            "status": "allow",
+            "allowed": True,
+            "requires_approval": False,
+        },
         "execution_id": "execution:v1-g47:arc-bot-shell:001",
         "authority_record": _authority_record(),
         "provider_executor_ref": "provider-executor:v1-g47:arc-bot-shell:fake-only",

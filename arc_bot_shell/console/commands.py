@@ -53,7 +53,9 @@ def build_history_payload(state_path: Path | None = None) -> dict[str, Any]:
     }
 
 
-def build_show_run_payload(run_id: str, state_path: Path | None = None) -> tuple[dict[str, Any], int]:
+def build_show_run_payload(
+    run_id: str, state_path: Path | None = None
+) -> tuple[dict[str, Any], int]:
     store = _state_store(state_path)
     record = store.get_run(run_id)
     if record is None:
@@ -69,7 +71,9 @@ def build_show_run_payload(run_id: str, state_path: Path | None = None) -> tuple
     evidence_path = Path(record.evidence_path)
     if evidence_path.exists():
         evidence = json.loads(evidence_path.read_text(encoding="utf-8"))
-        if isinstance(evidence, dict) and isinstance(evidence.get("model_preview"), dict):
+        if isinstance(evidence, dict) and isinstance(
+            evidence.get("model_preview"), dict
+        ):
             payload["model_preview"] = evidence["model_preview"]
     return payload, 0
 
@@ -95,7 +99,9 @@ def build_evidence_payload(state_path: Path | None = None) -> dict[str, Any]:
                 metadata["evidence_result_status"] = payload.get("result_status")
                 model_preview = payload.get("model_preview")
                 if isinstance(model_preview, dict):
-                    metadata["model_preview_adapter"] = model_preview.get("adapter_name")
+                    metadata["model_preview_adapter"] = model_preview.get(
+                        "adapter_name"
+                    )
                     metadata["model_preview_model"] = model_preview.get("model_name")
                     metadata["model_preview_status"] = model_preview.get("status")
         evidence.append(metadata)
@@ -127,7 +133,9 @@ def build_inbox_payload(task_dir: Path | None = None) -> dict[str, Any]:
     }
 
 
-def build_intake_payload(task_path: Path, queue_path: Path | None = None) -> tuple[dict[str, Any], int]:
+def build_intake_payload(
+    task_path: Path, queue_path: Path | None = None
+) -> tuple[dict[str, Any], int]:
     record = intake_task(task_path, queue_path=queue_path)
     return {
         "task": record.to_dict(),
@@ -135,7 +143,9 @@ def build_intake_payload(task_path: Path, queue_path: Path | None = None) -> tup
     }, 0
 
 
-def build_tasks_payload(queue_path: Path | None = None, status: str | None = None) -> dict[str, Any]:
+def build_tasks_payload(
+    queue_path: Path | None = None, status: str | None = None
+) -> dict[str, Any]:
     queue = _task_queue(queue_path)
     return {
         "tasks": [record.to_dict() for record in queue.list_tasks(status=status)],
@@ -143,7 +153,9 @@ def build_tasks_payload(queue_path: Path | None = None, status: str | None = Non
     }
 
 
-def build_task_payload(task_id: str, queue_path: Path | None = None) -> tuple[dict[str, Any], int]:
+def build_task_payload(
+    task_id: str, queue_path: Path | None = None
+) -> tuple[dict[str, Any], int]:
     queue = _task_queue(queue_path)
     record = queue.get_task(task_id)
     if record is None:
@@ -164,7 +176,9 @@ def build_approvals_payload(
 ) -> dict[str, Any]:
     store = _approval_store(approval_path)
     return {
-        "approvals": [record.to_dict() for record in store.list_approvals(status=status)],
+        "approvals": [
+            record.to_dict() for record in store.list_approvals(status=status)
+        ],
         "approval_path": str(store.path),
     }
 
@@ -245,6 +259,7 @@ def build_decide_approval_payload(
         "execution_status": record.execution_status,
     }, 0
 
+
 def build_run_task_payload(
     task_id: str,
     *,
@@ -255,6 +270,11 @@ def build_run_task_payload(
     evidence_dir: Path | None = None,
     state_path: Path | None = None,
     approval_path: Path | None = None,
+    guardian_mode: str | None = None,
+    guardian_path: Path | None = None,
+    guardian_contract_reference: str | None = None,
+    ollama_url: str | None = None,
+    stop_after_guardian: bool = False,
 ) -> tuple[dict[str, Any], int]:
     resolved_queue_path = queue_path or default_task_queue_path(_repo_root())
     try:
@@ -268,6 +288,11 @@ def build_run_task_payload(
             state_path=state_path,
             approval_path=approval_path,
             repo_root=_repo_root(),
+            guardian_mode=guardian_mode,
+            guardian_path=guardian_path,
+            guardian_contract_reference=guardian_contract_reference,
+            ollama_url=ollama_url,
+            stop_after_guardian=stop_after_guardian,
         )
     except TaskQueueError as exc:
         return {
@@ -288,8 +313,12 @@ def build_run_task_payload(
 
 
 def _build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="Read Arc Harness Shell console/state data.")
-    parser.add_argument("--compact", action="store_true", help="Emit compact JSON output")
+    parser = argparse.ArgumentParser(
+        description="Read Arc Harness Shell console/state data."
+    )
+    parser.add_argument(
+        "--compact", action="store_true", help="Emit compact JSON output"
+    )
     parser.add_argument(
         "--state-path",
         type=Path,
@@ -321,7 +350,9 @@ def _build_parser() -> argparse.ArgumentParser:
         default=None,
         help="Optional task directory",
     )
-    intake = subparsers.add_parser("intake", help="Queue one task packet without running it")
+    intake = subparsers.add_parser(
+        "intake", help="Queue one task packet without running it"
+    )
     intake.add_argument("task_path", type=Path, help="Path to a task packet JSON file")
     tasks = subparsers.add_parser("tasks", help="List queued and completed tasks")
     tasks.add_argument(
@@ -349,7 +380,9 @@ def _build_parser() -> argparse.ArgumentParser:
     deny.add_argument("approval_id", help="Approval identifier")
     deny.add_argument("--operator-id", default="operator-local")
     deny.add_argument("--reason", default=None)
-    run_task = subparsers.add_parser("run-task", help="Run one queued task through the harness")
+    run_task = subparsers.add_parser(
+        "run-task", help="Run one queued task through the harness"
+    )
     run_task.add_argument("task_id", help="Task identifier")
     run_task.add_argument(
         "--runtime",
@@ -357,6 +390,15 @@ def _build_parser() -> argparse.ArgumentParser:
         choices=("fake", "local_import", "disabled"),
         help="Runtime adapter to use for non-model-preview tasks",
     )
+    run_task.add_argument(
+        "--guardian",
+        default="fail_closed",
+        choices=("guardian_core", "fail_closed", "test_fake"),
+    )
+    run_task.add_argument("--guardian-path", type=Path, default=None)
+    run_task.add_argument("--guardian-reference", default=None)
+    run_task.add_argument("--ollama-url", default=None)
+    run_task.add_argument("--stop-after-guardian", action="store_true")
     run_task.add_argument(
         "--model-adapter",
         default=None,
@@ -413,7 +455,9 @@ def main(argv: list[str] | None = None) -> int:
         print(render_json(payload, compact=args.compact))
         return 0
     if args.command == "approval":
-        payload, exit_code = build_approval_payload(args.approval_id, args.approval_path)
+        payload, exit_code = build_approval_payload(
+            args.approval_id, args.approval_path
+        )
         print(render_json(payload, compact=args.compact))
         return exit_code
     if args.command == "approve":
@@ -448,6 +492,11 @@ def main(argv: list[str] | None = None) -> int:
             evidence_dir=args.evidence_dir,
             state_path=args.state_path,
             approval_path=args.approval_path,
+            guardian_mode=args.guardian,
+            guardian_path=args.guardian_path,
+            guardian_contract_reference=args.guardian_reference,
+            ollama_url=args.ollama_url,
+            stop_after_guardian=args.stop_after_guardian,
         )
         print(render_json(payload, compact=args.compact))
         return exit_code

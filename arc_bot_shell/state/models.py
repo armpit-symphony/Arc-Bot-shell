@@ -25,6 +25,19 @@ class StateRunRecord:
     model_preview_called: bool = False
     model_preview_adapter: str | None = None
     model_name: str | None = None
+    guardian_mode: str = "fail_closed"
+    guardian_reason: str | None = None
+    guardian_allowed: bool | None = None
+    guardian_requires_approval: bool | None = None
+    guardian_contract_reference: str | None = None
+    eligible_for_lima: bool = False
+    lima_called: bool = False
+    ollama_called: bool = False
+    lima_entrypoint: str | None = None
+    lima_result_status: str | None = None
+    executor_called: bool = False
+    network_called: bool = False
+    credentials_used: bool = False
 
     @classmethod
     def from_dict(cls, payload: dict[str, Any]) -> "StateRunRecord":
@@ -36,7 +49,9 @@ class StateRunRecord:
             guardian_decision_id=str(payload["guardian_decision_id"]),
             guardian_status=str(payload["guardian_status"]),
             blocked_reason=(
-                None if payload.get("blocked_reason") is None else str(payload["blocked_reason"])
+                None
+                if payload.get("blocked_reason") is None
+                else str(payload["blocked_reason"])
             ),
             runtime_adapter=str(payload["runtime_adapter"]),
             runtime_called=bool(payload["runtime_called"]),
@@ -49,7 +64,50 @@ class StateRunRecord:
                 if payload.get("model_preview_adapter") is None
                 else str(payload["model_preview_adapter"])
             ),
-            model_name=None if payload.get("model_name") is None else str(payload["model_name"]),
+            model_name=(
+                None
+                if payload.get("model_name") is None
+                else str(payload["model_name"])
+            ),
+            guardian_mode=str(payload.get("guardian_mode", "fail_closed")),
+            guardian_reason=(
+                None
+                if payload.get("guardian_reason") is None
+                else str(payload["guardian_reason"])
+            ),
+            guardian_allowed=(
+                None
+                if payload.get("guardian_allowed") is None
+                else bool(payload["guardian_allowed"])
+            ),
+            guardian_requires_approval=(
+                None
+                if payload.get("guardian_requires_approval") is None
+                else bool(payload["guardian_requires_approval"])
+            ),
+            guardian_contract_reference=(
+                None
+                if payload.get("guardian_contract_reference") is None
+                else str(payload["guardian_contract_reference"])
+            ),
+            eligible_for_lima=bool(payload.get("eligible_for_lima", False)),
+            lima_called=bool(
+                payload.get("lima_called", payload.get("runtime_called", False))
+            ),
+            ollama_called=bool(payload.get("ollama_called", False)),
+            lima_entrypoint=(
+                None
+                if payload.get("lima_entrypoint") is None
+                else str(payload["lima_entrypoint"])
+            ),
+            lima_result_status=(
+                None
+                if payload.get("lima_result_status") is None
+                else str(payload["lima_result_status"])
+            ),
+            executor_called=bool(payload.get("executor_called", False)),
+            network_called=bool(payload.get("network_called", False)),
+            credentials_used=bool(payload.get("credentials_used", False)),
         )
 
     def to_dict(self) -> dict[str, Any]:

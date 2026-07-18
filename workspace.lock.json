@@ -4,14 +4,15 @@
     {
       "name": "LIMA-AI-OS",
       "url": "https://github.com/armpit-symphony/LIMA-AI-OS",
-      "path": "../LIMA-AI-OS",
-      "ref": "702b0554203f83002815362c7fce783e18ddbf03"
+      "ref": "lima-runtime-v1-arc-consumer-baseline",
+      "commit": "cd40f486be19e01026d293b374b99d213ca275d9"
     },
     {
       "name": "LIMA-Guardian-Suite",
       "url": "https://github.com/armpit-symphony/LIMA-Guardian-Suite",
       "path": "../LIMA-Guardian-Suite",
-      "ref": "0559d9a6ce7e3dc401185a6732a6c8fa123db477"
+      "ref": "guardian-core-v1.1-local-model-preview-policy",
+      "commit": "69e843218c521b913edcec404dea6b7be8c64f06"
     }
   ]
 }

@@ -22,6 +22,10 @@ class GuardianContractProbe:
     requires_sparkbot_imports: bool | None
     integration_compatible: bool
     blockers: tuple[str, ...] = ()
+    contract_compatible: bool | None = None
+    decision_id_supported: bool | None = None
+    local_preview_policy_supported: bool | None = None
+    policy_reference: str | None = None
 
 
 @dataclass(frozen=True)
@@ -40,6 +44,8 @@ class LimaContractProbe:
     requires_sparkbot_imports: bool | None
     integration_compatible: bool
     blockers: tuple[str, ...] = ()
+    decision_id_propagation_supported: bool | None = None
+    fake_executor_smoke_ready: bool | None = None
 
 
 def build_contract_report(
