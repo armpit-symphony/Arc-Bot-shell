@@ -13,8 +13,16 @@ $InstallRoot = Assert-ArcSafeInstallRoot -InstallRoot $InstallRoot
 $paths = Get-ArcPaths -InstallRoot $InstallRoot
 
 if (-not $TestMode) {
-    & schtasks.exe /Query /TN $script:ArcTaskName *> $null
-    if ($LASTEXITCODE -eq 0) {
+    $previousPreference = $ErrorActionPreference
+    $ErrorActionPreference = "SilentlyContinue"
+    try {
+        & schtasks.exe /Query /TN $script:ArcTaskName *> $null
+        $taskExists = $LASTEXITCODE -eq 0
+    }
+    finally {
+        $ErrorActionPreference = $previousPreference
+    }
+    if ($taskExists) {
         & schtasks.exe /Delete /F /TN $script:ArcTaskName
         if ($LASTEXITCODE -ne 0) {
             throw "Unable to unregister the Arc startup task."

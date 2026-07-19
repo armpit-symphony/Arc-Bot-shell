@@ -264,6 +264,13 @@ function Test-ArcStartupRegistered {
         $state = Get-Content -Raw -LiteralPath $paths.StartupState | ConvertFrom-Json
         return $state.registered -eq $true
     }
-    & schtasks.exe /Query /TN $script:ArcTaskName *> $null
-    return $LASTEXITCODE -eq 0
+    $previousPreference = $ErrorActionPreference
+    $ErrorActionPreference = "SilentlyContinue"
+    try {
+        & schtasks.exe /Query /TN $script:ArcTaskName *> $null
+        return $LASTEXITCODE -eq 0
+    }
+    finally {
+        $ErrorActionPreference = $previousPreference
+    }
 }
