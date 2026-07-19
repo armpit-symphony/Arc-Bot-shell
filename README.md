@@ -158,3 +158,22 @@ Arc Harness Shell is a preview-safe worker shell. Every consequential path passe
 - Phase-0 runtime UI scaffold is locked in the legacy scaffold docs; this branch adds the runnable harness path beside that older material.
 - Legacy preview command reference: `python -m phase0_runtime_ui_scaffold.preview`.
 - Legacy Guardian reference: `LIMA-Guardian-Suite`.
+
+## Windows operator installation (v0.11)
+
+Prerequisites: Windows PowerShell 5.1+, Python 3.11+, Git, Ollama, and the explicitly selected local model (`qwen2.5:7b` by default). Arc installs per-user under `%LOCALAPPDATA%\SparkPitLabs\ArcBot` and does not add a firewall rule or external listener.
+
+```powershell
+.\scripts\windows\install-arc.ps1
+.\scripts\windows\arc.ps1 start
+.\scripts\windows\arc.ps1 status
+.\scripts\windows\arc.ps1 submit .\samples\tasks\local_model_preview.json
+.\scripts\windows\arc.ps1 history
+.\scripts\windows\arc.ps1 startup-enable
+.\scripts\windows\arc.ps1 startup-disable
+.\scripts\windows\upgrade-arc.ps1 -Tag <approved-tag>
+.\scripts\windows\rollback-arc.ps1 -Tag arc-harness-shell-v0.10
+.\scripts\windows\uninstall-arc.ps1
+```
+
+The installer never pulls a model unless `-InstallModel` is supplied. Default uninstall preserves data, evidence, approvals, and logs. Use `arc.ps1 doctor`, `arc.ps1 health`, `arc.ps1 logs`, or `arc.ps1 diagnostics` for troubleshooting. See [docs/ARC_V0_11_WINDOWS_OPERATOR.md](docs/ARC_V0_11_WINDOWS_OPERATOR.md) for layout, lifecycle, rollback, and security details.

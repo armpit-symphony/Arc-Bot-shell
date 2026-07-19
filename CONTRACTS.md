@@ -299,3 +299,7 @@ v0.10 adds one approved runtime contract for `arc.local_model_preview`:
 - Contract changes require proof packet updates.
 - Proof packet changes require test coverage in `tests/test_arc_bot_runtime_ui_scaffold_*`.
 - Fail-closed test checks must block missing fields and unexpected runtime authority.
+
+## Windows operator contract v0.11
+
+The launcher may enqueue task packets and invoke only the selected release's public harness. It must pass local previews through real Guardian and published LIMA with `executor_kind=loopback_ollama`; denied work must remain `execution_allowed=false`. Install, startup, upgrade, rollback, and uninstall events are logged. Upgrade and rollback preserve `data/`, `logs/`, and `config/`; default uninstall preserves them as well.

@@ -39,3 +39,7 @@ Status: Phase-0 decision log
   only HTTP `127.0.0.1` or `localhost` endpoints with no credentials, side
   effects, redirects, or fallback are permitted. Exact Guardian `decision_id`
   lineage and sanitized evidence/state are mandatory.
+
+## Decision: stable manager plus selected runtime release
+
+Arc v0.11 uses a stable non-listening manager and an atomic `current/release.json` pointer instead of making the operator depend on a terminal or an elevated Windows service. This keeps per-user startup and lifecycle management available while allowing the runtime to roll back to the exact `arc-harness-shell-v0.10` trust baseline. No execution authority moves into the manager.

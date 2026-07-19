@@ -55,3 +55,7 @@ All high-risk actions are blocked by design in this branch. Preview UI artifacts
 - Signed envelope handoff and audit chain.
 - Local model seat health proof and raw document redaction policy.
 - Runtime route mutation requiring explicit policy/risk adjudication.
+
+## v0.11 operator lifecycle boundary
+
+The Windows manager has no HTTP listener, binds no port, creates no firewall exception, stores no credentials, and cannot expand Guardian or LIMA authority. Service stop requests are bound to the managed PID and a random lifecycle token; Arc never stops unrelated Python or Ollama processes. Per-user Task Scheduler registration does not request highest privileges. Model pulls and destructive data removal require explicit operator flags.

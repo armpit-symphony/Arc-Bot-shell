@@ -73,3 +73,7 @@ All steps are deterministic and fail-closed when required metadata, policy refer
 - Add remaining operator surfaces in a phased read-only expansion.
 - Introduce validated adapter-to-runtime handoff only after contract and threat-model gates.
 - Keep output contracts stable and versioned through proof packets.
+
+## v0.11 Windows operator layer
+
+Arc v0.11 adds a non-listening per-user manager and PowerShell launcher above the unchanged v0.10 Guardian/LIMA runtime. Mutable queue, evidence, approval, state, diagnostic, and log data lives under `%LOCALAPPDATA%\SparkPitLabs\ArcBot\data` or `logs`, never in the installed release checkout. A current-release pointer allows isolated upgrade and rollback while the manager remains stable. See `docs/ARC_V0_11_WINDOWS_OPERATOR.md`.
