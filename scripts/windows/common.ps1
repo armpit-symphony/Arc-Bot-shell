@@ -202,11 +202,38 @@ function Get-ArcSourceCommit {
 
 function Get-ArcSourceTag {
     param([Parameter(Mandatory = $true)][string]$SourcePath)
-    $tag = (& git -C $SourcePath describe --tags --exact-match 2>$null)
-    if ($LASTEXITCODE -eq 0 -and -not [string]::IsNullOrWhiteSpace($tag)) {
+    $previousPreference = $ErrorActionPreference
+    $ErrorActionPreference = "SilentlyContinue"
+    try {
+        $tag = (& git -C $SourcePath describe --tags --exact-match 2>$null)
+        $tagExitCode = $LASTEXITCODE
+    }
+    finally {
+        $ErrorActionPreference = $previousPreference
+    }
+    if ($tagExitCode -eq 0 -and -not [string]::IsNullOrWhiteSpace($tag)) {
         return $tag.Trim()
     }
     return (& git -C $SourcePath branch --show-current).Trim()
+}
+
+function Assert-ArcRemoteTagPin {
+    param(
+        [Parameter(Mandatory = $true)][string]$Repository,
+        [Parameter(Mandatory = $true)][string]$Tag,
+        [Parameter(Mandatory = $true)][string]$Commit
+    )
+
+    $peeledRef = "refs/tags/$Tag^{}"
+    $lines = @(& git ls-remote --tags $Repository $peeledRef)
+    if ($LASTEXITCODE -ne 0 -or $lines.Count -ne 1) {
+        throw "Unable to verify annotated tag $Tag."
+    }
+    $resolved = (($lines[0] -split "\s+")[0]).Trim()
+    if ($resolved -ne $Commit) {
+        throw "Tag $Tag does not resolve to locked commit $Commit."
+    }
+    return $resolved
 }
 
 function Test-ArcModelInstalled {

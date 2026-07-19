@@ -131,11 +131,17 @@ try {
         if ($LASTEXITCODE -ne 0) {
             throw "Unable to update pip in the Arc virtual environment."
         }
-        & $venvPython -m pip install --disable-pip-version-check "git+https://github.com/armpit-symphony/LIMA-Guardian-Suite.git@$script:GuardianTag"
+        Assert-ArcRemoteTagPin -Repository "https://github.com/armpit-symphony/LIMA-Guardian-Suite.git" -Tag $script:GuardianTag -Commit $script:GuardianCommit | Out-Null
+        Assert-ArcRemoteTagPin -Repository "https://github.com/armpit-symphony/LIMA-AI-OS.git" -Tag $script:LimaTag -Commit $script:LimaCommit | Out-Null
+        & $venvPython -m pip install --disable-pip-version-check "git+https://github.com/armpit-symphony/LIMA-Guardian-Suite.git@$script:GuardianCommit"
         if ($LASTEXITCODE -ne 0) {
             throw "Pinned Guardian installation failed."
         }
-        & $venvPython -m pip install --disable-pip-version-check $paths.App
+        & $venvPython -m pip install --disable-pip-version-check "git+https://github.com/armpit-symphony/LIMA-AI-OS.git@$script:LimaCommit"
+        if ($LASTEXITCODE -ne 0) {
+            throw "Pinned LIMA installation failed."
+        }
+        & $venvPython -m pip install --disable-pip-version-check --no-deps $paths.App
     }
     if ($LASTEXITCODE -ne 0) {
         throw "Arc package installation failed."
