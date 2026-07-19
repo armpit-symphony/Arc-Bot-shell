@@ -2,6 +2,18 @@
 
 Arc Harness Shell is a minimal, local, Guardian-gated worker shell for the Arc/LIMA stack. It is the first credible public baseline for guarded task intake, preview-safe execution, evidence capture, and local operator visibility.
 
+## LIMA v0.1 governed preflight consumer
+
+Arc includes a non-executing governed preflight path:
+
+`ArcActionRequest -> normalize_for_lima -> lima.runtime.run_governed_request -> GovernedDecision`
+
+The dependency is `lima-runtime==0.1.0rc1`, pinned to LIMA commit
+`4e7c648349f0a5a19694ac5f0c57b5cb14dc2b17`. This path is preview/preflight
+only. It grants no execution authority and performs no provider, model, tool,
+connector, external-send, credential, network, background, robotics, IoT, or
+physical-world action.
+
 ## Arc v0.10 local Ollama milestone
 
 The current integration milestone connects real Guardian-approved local model

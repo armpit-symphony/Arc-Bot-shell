@@ -9,7 +9,7 @@ description = "Arc Harness Shell release candidate"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
-  "lima-runtime @ git+https://github.com/armpit-symphony/LIMA-AI-OS.git@lima-runtime-v1.1-loopback-ollama-executor",
+  "lima-runtime @ git+https://github.com/armpit-symphony/LIMA-AI-OS.git@4e7c648349f0a5a19694ac5f0c57b5cb14dc2b17",
 ]
 
 [project.scripts]
@@ -18,4 +18,4 @@ arc-console = "arc_bot_shell.console.commands:main"
 arc-health = "arc_bot_shell.health:main"
 
 [tool.setuptools.packages.find]
-include = ["arc_bot_shell*"]
+include = ["arc_bot_shell*", "arc_guardian_spine*"]
