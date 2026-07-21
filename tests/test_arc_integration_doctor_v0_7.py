@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import importlib
 import json
 from pathlib import Path
 
@@ -231,7 +232,7 @@ def test_contract_report_is_generated_from_probe_results() -> None:
     assert report["editable_install_audit"]["guardian_suite"]["result"] == "pass"
 
 
-def test_cli_reports_installed_lima_without_ollama_probe(
+def test_cli_reports_retired_lima_harness_unavailable(
     monkeypatch: pytest.MonkeyPatch,
     capsys: pytest.CaptureFixture[str],
 ) -> None:
@@ -247,8 +248,16 @@ def test_cli_reports_installed_lima_without_ollama_probe(
     payload = json.loads(capsys.readouterr().out)
     assert payload["local_integration_ready"] is False
     assert payload["guardian_available"] is False
-    assert payload["lima_available"] is True
+
+    from lima.runtime import run_governed_request
+
+    assert callable(run_governed_request)
+    with pytest.raises(ModuleNotFoundError):
+        importlib.import_module("lima.harness")
+    assert payload["lima_available"] is False
     assert payload["lima_public_import_path"] == "lima.harness"
-    assert payload["decision_id_propagation_supported"] is True
-    assert payload["fake_executor_smoke_ready"] is True
+    assert payload["lima_entrypoint_available"] is False
+    assert payload["decision_id_propagation_supported"] is False
+    assert payload["fake_executor_smoke_ready"] is False
     assert payload["ollama_integration_ready"] is False
+    assert "lima_import_failed:ModuleNotFoundError" in payload["blockers"]

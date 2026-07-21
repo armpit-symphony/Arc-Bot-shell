@@ -369,7 +369,7 @@ def _adapter(calls: list[Mapping[str, Any]]) -> LimaRuntimeAdapter:
     )
 
 
-def test_guardian_allow_reaches_lima_and_ollama_once_with_exact_lineage(
+def test_retired_lima_harness_blocks_ollama_before_executor_and_network(
     tmp_path: Path,
 ) -> None:
     calls: list[Mapping[str, Any]] = []
@@ -386,62 +386,54 @@ def test_guardian_allow_reaches_lima_and_ollama_once_with_exact_lineage(
     evidence = json.loads(result.evidence_path.read_text(encoding="utf-8"))
     state = JsonlStateStore(state_path).list_runs()[0]
 
-    assert len(calls) == 1
-    assert calls[0]["guardian_decision_id"] == DECISION_ID
-    assert result.result_status == "lima_ollama_preview_completed"
+    assert calls == []
+    assert result.exit_code == 4
+    assert result.result_status == "runtime_unavailable"
+    assert result.blocked_reason is not None
+    assert "LIMA public import unavailable" in result.blocked_reason
     assert result.guardian_called is True
     assert result.guardian_decision_id == DECISION_ID
-    assert result.lima_input_guardian_decision_id == DECISION_ID
-    assert result.executor_input_guardian_decision_id == DECISION_ID
-    assert result.runtime_output["guardian_decision_id"] == DECISION_ID
-    assert result.runtime_output["evidence"]["guardian_decision_id"] == DECISION_ID
+    assert result.eligible_for_lima is True
+    assert result.lima_input_guardian_decision_id is None
+    assert result.executor_input_guardian_decision_id is None
+    assert result.runtime_output == {}
     assert evidence["guardian_decision_id"] == DECISION_ID
-    assert evidence["runtime_metadata"]["guardian_decision_id"] == DECISION_ID
+    assert evidence["runtime_metadata"] == {}
     assert state.guardian_decision_id == DECISION_ID
-    assert state.lima_input_guardian_decision_id == DECISION_ID
-    assert state.executor_input_guardian_decision_id == DECISION_ID
-    assert result.executor_kind == "loopback_ollama"
-    assert result.executor_call_count == 1
-    assert result.lima_called is True
-    assert result.ollama_called is True
-    assert result.network_called is True
-    assert result.network_scope == "loopback_only"
+    assert state.lima_input_guardian_decision_id is None
+    assert state.executor_input_guardian_decision_id is None
+    assert result.executor_call_count == 0
+    assert state.executor_call_count == 0
+    assert result.lima_called is False
+    assert evidence["lima_called"] is False
+    assert state.lima_called is False
+    assert result.ollama_called is False
+    assert evidence["ollama_called"] is False
+    assert state.ollama_called is False
+    assert result.network_called is False
+    assert evidence["network_called"] is False
+    assert state.network_called is False
     assert result.credentials_used is False
+    assert evidence["credentials_used"] is False
+    assert state.credentials_used is False
     assert result.external_side_effects is False
-    assert result.endpoint == ENDPOINT
-    assert result.model == MODEL
-    assert result.output_text
+    assert evidence["external_side_effects"] is False
+    assert state.external_side_effects is False
+    assert result.execution_allowed is False
+    assert state.execution_allowed is False
     assert result.evidence_written is True
     assert result.state_written is True
-    assert "output_text" not in evidence["runtime_metadata"]
-    assert evidence["output_reference"] == result.output_reference
-    assert state.output_reference == result.output_reference
-    assert state.executor_kind == "loopback_ollama"
-    assert state.executor_call_count == 1
-    assert state.ollama_called is True
-    assert state.network_scope == "loopback_only"
-    assert state.credentials_used is False
 
 
-def test_controlled_unavailable_result_is_written_with_honest_metadata(
+def test_retired_surface_blocks_controlled_ollama_executor(
     tmp_path: Path,
 ) -> None:
+    executor_calls = 0
+
     def unavailable(_payload: Mapping[str, Any]) -> Mapping[str, Any]:
-        return {
-            "provider": "ollama",
-            "model": MODEL,
-            "output_text": "",
-            "endpoint": ENDPOINT,
-            "network_called": True,
-            "network_scope": "loopback_only",
-            "ollama_called": True,
-            "credentials_used": False,
-            "external_side_effects": False,
-            "duration_ms": 3,
-            "status": "unavailable",
-            "error_category": "service_unavailable",
-            "error_message": "Ollama service unavailable",
-        }
+        nonlocal executor_calls
+        executor_calls += 1
+        raise AssertionError("retired Ollama executor must not be called")
 
     adapter = LimaRuntimeAdapter(
         executor=unavailable,
@@ -459,12 +451,20 @@ def test_controlled_unavailable_result_is_written_with_honest_metadata(
         guardian_facade=AllowedGuardianFacade(),  # type: ignore[arg-type]
         runtime_port=adapter,
     )
+
+    assert executor_calls == 0
     assert result.exit_code == 4
-    assert result.result_status == "lima_ollama_preview_unavailable"
-    assert result.lima_called is True
-    assert result.ollama_called is True
-    assert result.network_called is True
-    assert result.error_category == "service_unavailable"
+    assert result.result_status == "runtime_unavailable"
+    assert result.blocked_reason is not None
+    assert "LIMA public import unavailable" in result.blocked_reason
+    assert result.lima_called is False
+    assert result.executor_called is False
+    assert result.executor_call_count == 0
+    assert result.ollama_called is False
+    assert result.network_called is False
+    assert result.credentials_used is False
+    assert result.external_side_effects is False
+    assert result.execution_allowed is False
     assert result.evidence_written is True
     assert result.state_written is True
 

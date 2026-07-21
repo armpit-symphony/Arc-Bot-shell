@@ -12,6 +12,15 @@ from .base import (
     build_arc_guardian_spine_base,
     evaluate_arc_action,
 )
+from .lima_preflight import (
+    ArcLimaFailClosedDecision,
+    ArcLimaGovernedPreflightError,
+    ArcLimaGovernedPreflightResult,
+    call_lima_governed_preflight_for_arc_action,
+    map_arc_action_category,
+    normalize_for_lima,
+    record_lima_governed_preflight_projection,
+)
 from .intent_envelope import (
     ArcIntentEnvelope,
     ArcIntentEnvelopeError,
@@ -31,6 +40,13 @@ __all__ = [
     "ArcSpineLedger",
     "build_arc_guardian_spine_base",
     "evaluate_arc_action",
+    "ArcLimaFailClosedDecision",
+    "ArcLimaGovernedPreflightError",
+    "ArcLimaGovernedPreflightResult",
+    "call_lima_governed_preflight_for_arc_action",
+    "map_arc_action_category",
+    "normalize_for_lima",
+    "record_lima_governed_preflight_projection",
     "ArcIntentEnvelope",
     "ArcIntentEnvelopeError",
     "build_arc_intent_envelope",
