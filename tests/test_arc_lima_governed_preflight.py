@@ -112,9 +112,11 @@ def test_malformed_arc_request_fails_closed() -> None:
     _assert_no_execution_allowed(result)
 
 
-def test_lima_unavailable_path_fails_closed() -> None:
+def test_lima_unavailable_path_fails_closed(caplog: object) -> None:
+    private_detail = r"C:\internal\arc\worker.py provider-token-value"
+
     def unavailable_runner(_: dict[str, object]) -> object:
-        raise RuntimeError("LIMA unavailable for test")
+        raise RuntimeError(private_detail)
 
     result = call_lima_governed_preflight_for_arc_action(
         _arc_request("arc-lima-unavailable-001", "status_read"),
@@ -125,6 +127,11 @@ def test_lima_unavailable_path_fails_closed() -> None:
     assert result.decision.status == "denied"
     assert result.decision.allowed is False
     assert "lima_unavailable" in result.decision.reason_codes
+    assert private_detail not in str(result.response)
+    assert private_detail not in str(result.lima_response)
+    assert result.response["error"] is None
+    assert "error" not in result.lima_response["metadata"]
+    assert private_detail in caplog.text
     _assert_no_execution_allowed(result)
 
 

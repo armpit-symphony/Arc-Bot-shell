@@ -14,6 +14,15 @@ only. It grants no execution authority and performs no provider, model, tool,
 connector, external-send, credential, network, background, robotics, IoT, or
 physical-world action.
 
+## LIMA Office worker control plane
+
+Arc also provides an explicit foreground endpoint for authenticated worker
+registration, heartbeat, and non-executing assignment acknowledgement. The
+boundary starts no hidden service, is loopback-only in the first lab slice,
+and never restores the retired `lima.harness` execution API.
+
+See [the authenticated worker control-plane boundary](docs/arc-worker-control-plane.md).
+
 ## Arc v0.10 local Ollama milestone
 
 The current integration milestone connects real Guardian-approved local model
