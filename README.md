@@ -24,6 +24,14 @@ and never restores the retired `lima.harness` execution API.
 The separate-process launcher is `arc-worker-preview`. It accepts its
 ephemeral lab channel key only on stdin and never persists or prints the key.
 
+The Arc-centered operator path is `arc-preflight`. It submits one authenticated
+request to the foreground LIMA Office Supervisor, displays Guardian, LIMA,
+assignment, and evidence metadata, and always stops before execution. The
+ephemeral operator key is accepted only on stdin. The first lab Supervisor
+transport remains loopback-only.
+
+See [the Arc operator preflight boundary](docs/arc-operator-preflight.md).
+
 See [the authenticated worker control-plane boundary](docs/arc-worker-control-plane.md).
 
 ## Arc v0.10 local Ollama milestone
