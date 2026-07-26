@@ -13,6 +13,13 @@ The endpoint does not start itself or create a hidden background service. A
 caller must explicitly build it with `build_worker_preview_server(...)` and run
 the returned single-threaded server.
 
+For a separate foreground worker process, use `arc-worker-preview` (or
+`python -m arc_bot_shell.control_plane.cli`). The launcher requires
+`--channel-key-stdin`; the ephemeral lab key is read once from stdin and is
+never accepted in command-line arguments, environment variables, logs, or the
+replay database. The command prints one key-free readiness record and then
+serves in the foreground until the operator stops it.
+
 Every channel message binds:
 
 - tenant and worker identity;

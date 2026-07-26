@@ -287,6 +287,18 @@ def test_foreground_http_endpoint_redacts_authentication_failure(
     assert service.received_assignments == []
 
 
+def test_foreground_http_endpoint_rejects_non_loopback_bind(
+    channel_pair: tuple[ArcWorkerChannel, ArcWorkerChannel],
+) -> None:
+    _, worker = channel_pair
+    with pytest.raises(RuntimeError, match="loopback-only"):
+        build_worker_preview_server(
+            host="0.0.0.0",
+            port=0,
+            service=_service(worker),
+        )
+
+
 def test_foreground_http_endpoint_serves_authenticated_registration(
     channel_pair: tuple[ArcWorkerChannel, ArcWorkerChannel],
 ) -> None:

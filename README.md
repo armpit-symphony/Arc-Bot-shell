@@ -21,6 +21,9 @@ registration, heartbeat, and non-executing assignment acknowledgement. The
 boundary starts no hidden service, is loopback-only in the first lab slice,
 and never restores the retired `lima.harness` execution API.
 
+The separate-process launcher is `arc-worker-preview`. It accepts its
+ephemeral lab channel key only on stdin and never persists or prints the key.
+
 See [the authenticated worker control-plane boundary](docs/arc-worker-control-plane.md).
 
 ## Arc v0.10 local Ollama milestone
