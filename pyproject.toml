@@ -18,6 +18,7 @@ arc-console = "arc_bot_shell.console.commands:main"
 arc-health = "arc_bot_shell.health:main"
 arc-worker-preview = "arc_bot_shell.control_plane.cli:main"
 arc-preflight = "arc_bot_shell.control_plane.operator_cli:main"
+arc-workers = "arc_bot_shell.control_plane.worker_inventory_cli:main"
 
 [tool.setuptools.packages.find]
 include = ["arc_bot_shell*", "arc_guardian_spine*"]

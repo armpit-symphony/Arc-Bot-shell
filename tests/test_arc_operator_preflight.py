@@ -10,6 +10,9 @@ from typing import Any
 import pytest
 
 from arc_bot_shell.control_plane.operator_cli import _parser, _read_operator_key
+from arc_bot_shell.control_plane.worker_inventory_cli import (
+    _parser as _inventory_parser,
+)
 from arc_bot_shell.control_plane.operator_client import (
     ArcOperatorAuthenticationError,
     ArcSupervisorPreflightClient,
@@ -114,6 +117,63 @@ def _response_envelope(
     return envelope
 
 
+def _inventory_result(worker_count: int = 1) -> dict[str, Any]:
+    workers = []
+    for index in range(1, worker_count + 1):
+        workers.append(
+            {
+                "worker_id": f"arc-worker-{index:03d}",
+                "role": "general_office_arc_worker",
+                "capabilities": ["document_read"],
+                "state": "healthy",
+                "authenticated": True,
+                "eligible": True,
+                "worker_version": "arc-bot-shell-0.1.0",
+                "last_heartbeat_at": "2026-07-26T01:00:00Z",
+                "control_plane_status": "acknowledged",
+                "guardian_decision_id": f"guardian-decision-{index:03d}",
+                "lima_decision_id": f"lima-decision-{index:03d}",
+                "lima_status": "allowed_dry_run",
+                "assignment_status": "acknowledged",
+                "evidence_refs": [f"event-{index:03d}"],
+                "reason_codes": [],
+                "runtime_authority_blocked": True,
+                "executable": False,
+                "execution_allowed": False,
+                "side_effects_allowed": False,
+            }
+        )
+    return {
+        "contract_name": "operator.worker_inventory.response",
+        "contract_version": "1.0.0",
+        "schema_version": "1.0.0",
+        "taxonomy_version": "taxonomy-recon-v1",
+        "tenant_id": "tenant-lab-001",
+        "customer_context_id": "customer-context-main",
+        "environment": "phase0_lab",
+        "correlation_id": "corr:worker-inventory-001",
+        "causation_id": "worker-inventory-001",
+        "idempotency_key": "response:idem:worker-inventory-001",
+        "producer": {
+            "component": "supervisor",
+            "produced_at": "2026-07-26T01:00:00Z",
+        },
+        "policy_version": "guardian-policy-lab-v1",
+        "request_id": "worker-inventory-001",
+        "actor_id": "operator-lab-001",
+        "status": "healthy",
+        "classification_authority": "supervisor_server_derived",
+        "worker_count": worker_count,
+        "workers": workers,
+        "evidence_refs": [f"event-{index:03d}" for index in range(1, worker_count + 1)],
+        "reason_codes": [],
+        "runtime_authority_blocked": True,
+        "executable": False,
+        "execution_allowed": False,
+        "side_effects_allowed": False,
+    }
+
+
 def test_operator_key_is_stdin_only_and_parser_requires_bound_inputs() -> None:
     assert _read_operator_key(StringIO("11" * 32 + "\n")) == bytes.fromhex(
         "11" * 32
@@ -122,6 +182,8 @@ def test_operator_key_is_stdin_only_and_parser_requires_bound_inputs() -> None:
         _read_operator_key(StringIO(""))
     with pytest.raises(SystemExit):
         _parser().parse_args([])
+    with pytest.raises(SystemExit):
+        _inventory_parser().parse_args([])
 
 
 def test_signed_request_contains_no_classification_or_execution_authority(
@@ -196,3 +258,116 @@ def test_operator_client_rejects_non_loopback_or_credentialed_url(
     operator_channel, _ = channel
     with pytest.raises(ArcOperatorAuthenticationError):
         ArcSupervisorPreflightClient(base_url=url, channel=operator_channel)
+
+
+def test_inventory_refresh_contains_no_client_worker_or_authority_selection(
+    channel: tuple[SupervisorOperatorChannel, OperatorResponseReplayStore],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    operator_channel, _ = channel
+    client = ArcSupervisorPreflightClient(
+        base_url="http://127.0.0.1:8123",
+        channel=operator_channel,
+    )
+    captured: dict[str, Any] = {}
+    result = _inventory_result()
+
+    def fake_post(
+        body: dict[str, Any],
+        *,
+        path: str = "/v1/operator/preflight",
+    ) -> dict[str, Any]:
+        captured["body"] = body
+        captured["path"] = path
+        return {
+            "envelope": _response_envelope(operator_channel, result),
+            "payload": result,
+        }
+
+    monkeypatch.setattr(client, "_post", fake_post)
+    actual = client.refresh_workers(
+        request_id="worker-inventory-001",
+        idempotency_key="idem:worker-inventory-001",
+    )
+    payload = captured["body"]["payload"]
+    assert captured["path"] == "/v1/operator/workers"
+    assert actual["worker_count"] == 1
+    assert payload["operation"] == "refresh_non_executing_worker_status"
+    for forbidden in (
+        "worker_id",
+        "worker_ids",
+        "role",
+        "capabilities",
+        "eligible",
+        "action",
+        "action_category",
+        "classification_authority",
+        "actor_role",
+    ):
+        assert forbidden not in payload
+
+
+@pytest.mark.parametrize("worker_count", [1, 2, 8])
+def test_inventory_validates_one_to_eight_governed_workers(
+    channel: tuple[SupervisorOperatorChannel, OperatorResponseReplayStore],
+    worker_count: int,
+) -> None:
+    operator_channel, _ = channel
+    client = ArcSupervisorPreflightClient(
+        base_url="http://127.0.0.1:8123",
+        channel=operator_channel,
+    )
+    result = _inventory_result(worker_count)
+    client._validate_inventory_result(
+        result,
+        expected_request_id="worker-inventory-001",
+    )
+    assert all(worker["eligible"] for worker in result["workers"])
+    assert all(
+        worker["runtime_authority_blocked"]
+        and not worker["executable"]
+        and not worker["execution_allowed"]
+        and not worker["side_effects_allowed"]
+        for worker in result["workers"]
+    )
+
+
+def test_inventory_tampering_fails_closed(
+    channel: tuple[SupervisorOperatorChannel, OperatorResponseReplayStore],
+) -> None:
+    operator_channel, _ = channel
+    client = ArcSupervisorPreflightClient(
+        base_url="http://127.0.0.1:8123",
+        channel=operator_channel,
+    )
+    tampered = _inventory_result(2)
+    tampered["workers"][1]["worker_id"] = tampered["workers"][0]["worker_id"]
+    with pytest.raises(ArcOperatorAuthenticationError):
+        client._validate_inventory_result(
+            tampered,
+            expected_request_id="worker-inventory-001",
+        )
+
+    tampered = _inventory_result()
+    tampered["workers"][0]["execution_allowed"] = True
+    with pytest.raises(ArcOperatorAuthenticationError):
+        client._validate_inventory_result(
+            tampered,
+            expected_request_id="worker-inventory-001",
+        )
+
+    tampered = _inventory_result()
+    tampered["workers"][0]["state"] = "offline"
+    with pytest.raises(ArcOperatorAuthenticationError):
+        client._validate_inventory_result(
+            tampered,
+            expected_request_id="worker-inventory-001",
+        )
+
+    tampered = _inventory_result()
+    tampered["producer"]["component"] = "worker"
+    with pytest.raises(ArcOperatorAuthenticationError):
+        client._validate_inventory_result(
+            tampered,
+            expected_request_id="worker-inventory-001",
+        )

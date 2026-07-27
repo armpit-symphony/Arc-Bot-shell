@@ -44,3 +44,22 @@ any execution-authorizing flag.
 This path performs no model/provider/Ollama call, tool or connector execution,
 external send, credential access, file mutation, approval execution, hidden
 background work, robotics, IoT, drone, or physical-world action.
+
+## Explicit worker inventory refresh
+
+`arc-workers --refresh` is the Arc operator's worker observation surface. The
+explicit foreground command asks the Supervisor to refresh its server-owned
+registry. Arc cannot provide worker identities, roles, classifications,
+eligibility, or authority in this request.
+
+For each of the Supervisor's 1-8 registered workers, the Supervisor derives a
+status preflight and requires Guardian, LIMA, durable evidence, and a
+non-executing Arc acknowledgement. The signed result shows health, eligibility,
+last heartbeat time, policy decision identities, and evidence references.
+Offline or quarantined workers remain visible but ineligible. A missing or
+invalid Guardian/LIMA decision fails the whole inventory closed without
+exposing ungoverned worker details.
+
+The refresh uses the same stdin-only operator key and loopback-only lab
+transport as `arc-preflight`. It has no background polling and performs no
+worker action beyond the non-executing heartbeat and assignment-preview path.
