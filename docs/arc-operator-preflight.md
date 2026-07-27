@@ -63,3 +63,26 @@ exposing ungoverned worker details.
 The refresh uses the same stdin-only operator key and loopback-only lab
 transport as `arc-preflight`. It has no background polling and performs no
 worker action beyond the non-executing heartbeat and assignment-preview path.
+
+## Explicit durable evidence read
+
+`arc-evidence --read --target-request-id <request-id>` displays one persisted,
+redacted control-plane trace through the same authenticated operator channel.
+Arc supplies the target request reference only. It cannot choose the Arc
+worker, classification, actor role, capability, eligibility, or authority.
+
+The Supervisor derives a safe-read evidence operation, selects an
+authenticated Arc worker, and requires mandatory Guardian, Guardian-backed
+LIMA, and a non-executing Arc acknowledgement before reading the trace.
+Available events must belong to the channel-bound tenant and operator. Missing
+and other-actor records both return `not_found`; neither leaks target events.
+The client validates the exact response and event allowlists, identity
+bindings, payload hashes, reason codes, and all blocked execution flags.
+
+The trace survives a Supervisor restart because it is read from the
+Supervisor's SQLite evidence spine. The evidence query creates its own durable
+authorization chain and `evidence_read` record. Query replay, missing
+Guardian/LIMA authority, unavailable workers, invalid signatures, and
+evidence-writer failure all fail closed. The command does not execute the
+recorded action or perform provider, model, tool, connector, network, file,
+credential, approval, background, or physical-world work.
