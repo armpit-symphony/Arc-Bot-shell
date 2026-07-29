@@ -261,7 +261,7 @@ def probe_guardian_contract(path: Path | None) -> GuardianContractProbe:
 
 
 def probe_lima_contract(path: Path | None) -> LimaContractProbe:
-    """Inspect the narrow public LIMA injected-executor harness contract."""
+    """Inspect and safely exercise LIMA's supported non-executing runtime API."""
 
     if path is not None and not path.is_dir():
         return LimaContractProbe(
@@ -279,15 +279,12 @@ def probe_lima_contract(path: Path | None) -> LimaContractProbe:
             blockers=("lima_path_not_found",),
         )
     try:
-        harness = _import_configured_module(path, "lima.harness")
-        guardian_contracts = _import_configured_module(path, "lima.contracts.guardian")
-        entrypoint = getattr(harness, "execute_v1_live_provider_model_call")
-        request_type = getattr(guardian_contracts, "ConsequentialActionRequest")
-        decision_type = getattr(guardian_contracts, "GuardianDecision")
+        runtime = _import_configured_module(path, "lima.runtime")
+        entrypoint = getattr(runtime, "run_governed_request")
     except (AttributeError, ImportError, ModuleNotFoundError) as exc:
         return LimaContractProbe(
             available=False,
-            import_path="lima.harness",
+            import_path="lima.runtime",
             runtime_entrypoint=None,
             runtime_input_type=None,
             runtime_output_type=None,
@@ -301,168 +298,97 @@ def probe_lima_contract(path: Path | None) -> LimaContractProbe:
         )
 
     signature = inspect.signature(entrypoint)
-    execution_request = signature.parameters.get("execution_request")
-    provider_executor = signature.parameters.get("provider_executor")
-    decision_fields = getattr(decision_type, "__dataclass_fields__", {})
-    decision_id_field = "decision_id" if "decision_id" in decision_fields else None
+    governed_request = signature.parameters.get("request")
     decision_id_propagation_supported = False
-    fake_executor_smoke_ready = False
-    loopback_ollama_supported = False
-    smoke_decision_id = "guardian-decision:doctor-v0-9"
+    decision_id_field: str | None = None
+    runtime_output_type: str | None = None
+    non_executing_contract = False
+    request_id = "arc-action:doctor-governed-preflight"
     try:
-        smoke_result = entrypoint(
+        decision = entrypoint(
             {
-                "request_id": "arc-action:doctor-v0-9",
-                "runtime_consumer": "arc_bot_shell",
-                "requested_action": "arc.local_model_preview",
-                "guardian_decision": {
-                    "decision_id": smoke_decision_id,
-                    "status": "allow",
-                    "allowed": True,
-                    "requires_approval": False,
+                "request_id": request_id,
+                "consumer": "arc_bot_shell",
+                "surface": "arc_bot_shell.integrations.doctor",
+                "actor_id": "arc-doctor",
+                "normalized_request": "Read Arc integration status without execution.",
+                "requested_action": "status_read",
+                "action_category": "read",
+                "tool_name": "arc_status_preview",
+                "tool_args": {},
+                "trust_context": {
+                    "tenant_id": "arc-doctor",
+                    "worker_id": "arc-doctor",
+                    "dry_run_only": True,
+                    "execution_requested": False,
+                    "side_effects_requested": False,
                 },
-                "executor_ref": "in_process_fake_executor",
-                "executor_kind": "fake",
-                "normalized_request": {"summary": "doctor fake smoke"},
-            },
-            lambda payload: {
-                "provider": "fake_local_model",
-                "model": "fake-preview-model",
-                "output_text": "Deterministic LIMA runtime preview.",
-                "network_called": False,
-                "credentials_used": False,
-                "ollama_called": False,
-            },
+                "evidence_refs": (),
+            }
         )
-        smoke_evidence = smoke_result.get("evidence", {})
-        decision_id_propagation_supported = all(
-            (
-                smoke_result.get("guardian_decision_id") == smoke_decision_id,
-                isinstance(smoke_evidence, Mapping),
-                smoke_evidence.get("guardian_decision_id") == smoke_decision_id,
-            )
+        decision_payload = (
+            dict(decision.to_dict())
+            if callable(getattr(decision, "to_dict", None))
+            else dict(getattr(decision, "__dict__", {}))
         )
-        fake_executor_smoke_ready = all(
+        decision_id_field = (
+            "decision_id" if isinstance(decision_payload.get("decision_id"), str) else None
+        )
+        runtime_output_type = _type_name(type(decision))
+        decision_id_propagation_supported = (
+            decision_payload.get("request_id") == request_id
+            and decision_id_field == "decision_id"
+        )
+        non_executing_contract = all(
             (
-                smoke_result.get("executor_called") is True,
-                smoke_result.get("network_called") is False,
-                smoke_result.get("credentials_used") is False,
-                smoke_result.get("ollama_called") is False,
+                decision_payload.get("executable") is False,
+                decision_payload.get("execution_allowed") is False,
+                decision_payload.get("side_effects_allowed") is False,
             )
         )
     except Exception:
         decision_id_propagation_supported = False
-        fake_executor_smoke_ready = False
-    loopback_smoke_decision_id = "guardian-decision:doctor-v1-0-loopback"
-    loopback_calls = 0
-    try:
-        def loopback_executor(payload: Mapping[str, object]) -> dict[str, object]:
-            nonlocal loopback_calls
-            loopback_calls += 1
-            if payload.get("guardian_decision_id") != loopback_smoke_decision_id:
-                raise ValueError("Guardian decision_id changed")
-            return {
-                "provider": "ollama",
-                "model": "qwen2.5:7b",
-                "output_text": "Deterministic doctor loopback contract proof.",
-                "endpoint": "http://127.0.0.1:11434",
-                "network_called": True,
-                "network_scope": "loopback_only",
-                "ollama_called": True,
-                "credentials_used": False,
-                "external_side_effects": False,
-                "duration_ms": 0,
-                "status": "completed",
-                "error_category": None,
-                "error_message": None,
-            }
-
-        loopback_result = entrypoint(
-            {
-                "request_id": "arc-action:doctor-v1-0-loopback",
-                "runtime_consumer": "arc_bot_shell",
-                "requested_action": "arc.local_model_preview",
-                "guardian_decision": {
-                    "decision_id": loopback_smoke_decision_id,
-                    "status": "allow",
-                    "allowed": True,
-                    "requires_approval": False,
-                },
-                "executor_ref": "arc_loopback_ollama_executor",
-                "executor_kind": "loopback_ollama",
-                "network_scope": "loopback_only",
-                "credentials_used": False,
-                "external_side_effects": False,
-                "endpoint": "http://127.0.0.1:11434",
-                "model": "qwen2.5:7b",
-                "normalized_request": {"summary": "doctor loopback smoke"},
-            },
-            loopback_executor,
-        )
-        loopback_evidence = loopback_result.get("evidence", {})
-        loopback_ollama_supported = all(
-            (
-                loopback_calls == 1,
-                loopback_result.get("executor_kind") == "loopback_ollama",
-                loopback_result.get("guardian_decision_id")
-                == loopback_smoke_decision_id,
-                isinstance(loopback_evidence, Mapping),
-                loopback_evidence.get("guardian_decision_id")
-                == loopback_smoke_decision_id,
-                loopback_result.get("network_called") is True,
-                loopback_result.get("network_scope") == "loopback_only",
-                loopback_result.get("ollama_called") is True,
-                loopback_result.get("credentials_used") is False,
-            )
-        )
-    except Exception:
-        loopback_ollama_supported = False
+        non_executing_contract = False
     blockers_list: list[str] = []
     if decision_id_field is None:
         blockers_list.append("lima_contract_missing_decision_id")
     if not decision_id_propagation_supported:
         blockers_list.append("lima_decision_id_propagation_failed")
-    if not fake_executor_smoke_ready:
-        blockers_list.append("lima_fake_executor_smoke_failed")
-    if not loopback_ollama_supported:
-        blockers_list.append("lima_loopback_ollama_contract_not_supported")
+    if not non_executing_contract:
+        blockers_list.append("lima_non_executing_contract_failed")
+    blockers_list.extend(
+        (
+            "retired_lima_harness_execution_disabled",
+            "lima_loopback_ollama_execution_disabled",
+        )
+    )
     lima_source_root = (
         path / "lima"
         if path is not None
-        else Path(str(getattr(harness, "__file__"))).resolve().parents[1]
+        else Path(str(getattr(runtime, "__file__"))).resolve().parents[1]
     )
 
     return LimaContractProbe(
         available=True,
-        import_path="lima.harness",
-        runtime_entrypoint="lima.harness.execute_v1_live_provider_model_call",
+        import_path="lima.runtime",
+        runtime_entrypoint="lima.runtime.run_governed_request",
         runtime_input_type=(
             None
-            if execution_request is None
-            else _annotation_text(execution_request.annotation)
+            if governed_request is None
+            else _annotation_text(governed_request.annotation)
         ),
-        runtime_output_type=_annotation_text(signature.return_annotation),
-        provider_executor_interface=(
-            None
-            if provider_executor is None
-            else _annotation_text(provider_executor.annotation)
-        ),
-        guardian_request_type=_type_name(request_type),
-        guardian_decision_type=_type_name(decision_type),
+        runtime_output_type=runtime_output_type,
+        provider_executor_interface=None,
+        guardian_request_type=None,
+        guardian_decision_type=None,
         decision_id_field=decision_id_field,
         requires_sparkbot_imports=_source_requires_sparkbot_imports(lima_source_root),
-        integration_compatible=all(
-            (
-                decision_id_field is not None,
-                decision_id_propagation_supported,
-                fake_executor_smoke_ready,
-                loopback_ollama_supported,
-            )
-        ),
+        integration_compatible=non_executing_contract
+        and decision_id_propagation_supported,
         blockers=tuple(blockers_list),
         decision_id_propagation_supported=decision_id_propagation_supported,
-        fake_executor_smoke_ready=fake_executor_smoke_ready,
-        loopback_ollama_supported=loopback_ollama_supported,
+        fake_executor_smoke_ready=False,
+        loopback_ollama_supported=False,
     )
 
 
@@ -573,18 +499,8 @@ def run_doctor(
     ollama_configured = ollama_url is not None and config.ollama_model is not None
     ollama_reachable = False
     ollama_model_available = False
-    if ollama_configured and ollama_url is not None and config.ollama_model is not None:
-        ollama_result = probes.ollama(
-            ollama_url,
-            config.ollama_model,
-            DEFAULT_OLLAMA_TIMEOUT_SECONDS,
-        )
-        ollama_reachable = ollama_result.reachable
-        ollama_model_available = ollama_result.model_available
-        if not ollama_reachable:
-            blockers.append("ollama_unreachable")
-        elif not ollama_model_available:
-            blockers.append("ollama_model_unavailable")
+    if ollama_configured:
+        blockers.append("ollama_probe_disabled_non_executing_control_plane")
 
     loopback_ollama_supported = (
         lima.integration_compatible

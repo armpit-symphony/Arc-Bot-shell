@@ -28,6 +28,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 LOCAL_PREVIEW = REPO_ROOT / "samples" / "tasks" / "local_model_preview.json"
 EXTERNAL_EMAIL = REPO_ROOT / "samples" / "tasks" / "external_email_send.json"
 DECISION_ID = "guardian-decision:test-v0-10-loopback-ollama"
+RETIRED_DISABLED = "retired lima.harness execution surface is disabled"
 ENDPOINT = "http://127.0.0.1:11434"
 MODEL = "qwen2.5:7b"
 
@@ -390,7 +391,7 @@ def test_retired_lima_harness_blocks_ollama_before_executor_and_network(
     assert result.exit_code == 4
     assert result.result_status == "runtime_unavailable"
     assert result.blocked_reason is not None
-    assert "LIMA public import unavailable" in result.blocked_reason
+    assert RETIRED_DISABLED in result.blocked_reason
     assert result.guardian_called is True
     assert result.guardian_decision_id == DECISION_ID
     assert result.eligible_for_lima is True
@@ -456,7 +457,7 @@ def test_retired_surface_blocks_controlled_ollama_executor(
     assert result.exit_code == 4
     assert result.result_status == "runtime_unavailable"
     assert result.blocked_reason is not None
-    assert "LIMA public import unavailable" in result.blocked_reason
+    assert RETIRED_DISABLED in result.blocked_reason
     assert result.lima_called is False
     assert result.executor_called is False
     assert result.executor_call_count == 0

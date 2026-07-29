@@ -98,7 +98,7 @@ def test_operator_config_rejects_non_loopback_or_malformed_endpoints(
 def test_operator_config_preserves_v0_10_authority_pins(tmp_path: Path) -> None:
     config = _config(tmp_path)
     assert config.guardian_reference == "guardian-core-v1.1-local-model-preview-policy"
-    assert config.lima_reference == "lima-runtime-v1.1-loopback-ollama-executor"
+    assert config.lima_reference == "lima-runtime==0.1.0rc1"
     assert ARC_V0_10_ROLLBACK_TAG == "arc-harness-shell-v0.10"
     assert ARC_V0_10_COMMIT == "fa1e93ff18203218a863b679f3d3608aa46bd5a4"
     assert config.startup_task_name == ARC_STARTUP_TASK_NAME

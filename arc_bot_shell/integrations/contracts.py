@@ -30,7 +30,7 @@ class GuardianContractProbe:
 
 @dataclass(frozen=True)
 class LimaContractProbe:
-    """Observed LIMA public harness and type contract."""
+    """Observed LIMA supported non-executing runtime contract."""
 
     available: bool
     import_path: str | None
@@ -77,7 +77,9 @@ def build_contract_report(
             },
             "lima_runtime": {
                 "result": "pass",
-                "clean_import_path": "lima.harness",
+                "clean_import_path": "lima.runtime",
+                "supported_entrypoint": "lima.runtime.run_governed_request",
+                "retired_execution_surface_enabled": False,
             },
         },
     }
