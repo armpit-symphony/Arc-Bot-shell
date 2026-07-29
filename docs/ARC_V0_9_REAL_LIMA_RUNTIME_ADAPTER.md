@@ -1,5 +1,9 @@
 # Arc v0.9 Real LIMA Runtime Adapter
 
+> Historical record: the `lima.harness` API and fake-executor route described
+> below are retired and unavailable. The supported Arc consumer API is
+> `lima.runtime.run_governed_request`, and the current path is non-executing.
+
 Arc v0.9 proves the bounded runtime chain:
 
 `ArcActionRequest -> real Guardian allow -> installed LIMA harness -> in-process fake executor -> Arc result/evidence/state`

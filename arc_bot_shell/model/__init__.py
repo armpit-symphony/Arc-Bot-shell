@@ -4,7 +4,6 @@ from .adapters import (
     DeterministicPreviewAdapter,
     LocalModelPreviewAdapter,
     ModelPreviewUnavailableAdapter,
-    OllamaPreviewAdapter,
 )
 from .preview import (
     build_model_preview_adapter,
@@ -18,7 +17,6 @@ __all__ = [
     "DeterministicPreviewAdapter",
     "LocalModelPreviewAdapter",
     "ModelPreviewUnavailableAdapter",
-    "OllamaPreviewAdapter",
     "build_model_preview_adapter",
     "deterministic_model_adapter_available",
     "model_preview_available",

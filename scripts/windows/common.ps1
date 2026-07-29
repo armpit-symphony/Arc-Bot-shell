@@ -6,8 +6,8 @@ $script:ArcRollbackTag = "arc-harness-shell-v0.10"
 $script:ArcRollbackCommit = "fa1e93ff18203218a863b679f3d3608aa46bd5a4"
 $script:GuardianTag = "guardian-core-v1.1-local-model-preview-policy"
 $script:GuardianCommit = "69e843218c521b913edcec404dea6b7be8c64f06"
-$script:LimaTag = "lima-runtime-v1.1-loopback-ollama-executor"
-$script:LimaCommit = "deea1c4f5b6d3455a7e97e4b621e22b8d22a6244"
+$script:LimaTag = "lima-runtime==0.1.0rc1"
+$script:LimaCommit = "4e7c648349f0a5a19694ac5f0c57b5cb14dc2b17"
 
 function Get-ArcDefaultInstallRoot {
     if ([string]::IsNullOrWhiteSpace($env:LOCALAPPDATA)) {
@@ -238,15 +238,9 @@ function Assert-ArcRemoteTagPin {
 
 function Test-ArcModelInstalled {
     param([Parameter(Mandatory = $true)][string]$Model)
-    $lines = & ollama list 2>$null
-    if ($LASTEXITCODE -ne 0) {
-        return $false
-    }
-    foreach ($line in $lines) {
-        if ($line -match ("^" + [regex]::Escape($Model) + "\s")) {
-            return $true
-        }
-    }
+    $null = $Model
+    # Retained for installer compatibility. Model discovery is disabled and
+    # must not invoke a provider or local model process.
     return $false
 }
 

@@ -1,18 +1,13 @@
-"""Loopback-only Ollama executor supplied to the public LIMA harness."""
+"""Retired Ollama compatibility validators with no model or network execution."""
 
 from __future__ import annotations
 
 from collections.abc import Mapping
-import json
 import math
 import os
 import re
-import socket
-import time
 from typing import Any
-from urllib.error import HTTPError, URLError
 from urllib.parse import urlsplit
-from urllib.request import HTTPRedirectHandler, Request, build_opener
 
 
 DEFAULT_OLLAMA_URL = "http://127.0.0.1:11434"
@@ -21,8 +16,9 @@ DEFAULT_OLLAMA_TIMEOUT_SECONDS = 60.0
 LOOPBACK_OLLAMA_EXECUTOR_KIND = "loopback_ollama"
 LOOPBACK_OLLAMA_EXECUTOR_NAME = "arc_loopback_ollama_executor"
 MAX_PROMPT_CHARACTERS = 2_000
-MAX_OUTPUT_CHARACTERS = 32_000
-MAX_RESPONSE_BYTES = 1_048_576
+RETIRED_OLLAMA_EXECUTION_DISABLED = (
+    "retired direct Ollama execution is disabled; use Arc governed preflight"
+)
 
 _SENSITIVE_ASSIGNMENT = re.compile(
     r"(?i)\b(api[_ -]?key|authorization|bearer|credential|password|secret|token)"
@@ -32,22 +28,6 @@ _SENSITIVE_ASSIGNMENT = re.compile(
 
 class OllamaExecutorValidationError(ValueError):
     """Raised before network when LIMA executor input is not safe to invoke."""
-
-
-class _NoRedirectHandler(HTTPRedirectHandler):
-    """Turn every redirect into an HTTPError instead of following it."""
-
-    def redirect_request(  # type: ignore[override]
-        self,
-        req: Request,
-        fp: Any,
-        code: int,
-        msg: str,
-        headers: Any,
-        newurl: str,
-    ) -> None:
-        del req, fp, code, msg, headers, newurl
-        return None
 
 
 def normalize_loopback_ollama_url(value: str) -> str:
@@ -196,178 +176,13 @@ def build_local_preview_prompt(runtime_input: Mapping[str, Any]) -> str:
     return prompt[:MAX_PROMPT_CHARACTERS]
 
 
-def _open_ollama_request(request: Request, timeout_seconds: float) -> Any:
-    opener = build_opener(_NoRedirectHandler())
-    return opener.open(request, timeout=timeout_seconds)
-
-
-def _base_result(
-    *,
-    endpoint: str,
-    model: str,
-    duration_ms: int,
-    status: str,
-    output_text: str = "",
-    error_category: str | None = None,
-    error_message: str | None = None,
-) -> dict[str, Any]:
-    return {
-        "provider": "ollama",
-        "model": model,
-        "output_text": output_text,
-        "endpoint": endpoint,
-        "network_called": True,
-        "network_scope": "loopback_only",
-        "ollama_called": True,
-        "credentials_used": False,
-        "external_side_effects": False,
-        "duration_ms": max(0, duration_ms),
-        "status": status,
-        "error_category": error_category,
-        "error_message": error_message,
-    }
-
-
-def _controlled_failure(
-    *,
-    endpoint: str,
-    model: str,
-    started_at: float,
-    category: str,
-    message: str,
-) -> dict[str, Any]:
-    duration_ms = int(max(0.0, time.perf_counter() - started_at) * 1000)
-    return _base_result(
-        endpoint=endpoint,
-        model=model,
-        duration_ms=duration_ms,
-        status="unavailable",
-        error_category=category,
-        error_message=message[:512].replace("\r", " ").replace("\n", " "),
-    )
-
-
-def _http_error_category(exc: HTTPError) -> tuple[str, str]:
-    if 300 <= exc.code < 400:
-        return "executor_error", "Ollama redirect rejected"
-    body = b""
-    try:
-        body = exc.read(MAX_RESPONSE_BYTES)
-    except OSError:
-        body = b""
-    detail = body.decode("utf-8", errors="replace").lower()
-    if exc.code == 404 and ("model" in detail or "not found" in detail):
-        return "model_unavailable", "Configured Ollama model unavailable"
-    if exc.code >= 500:
-        return "service_unavailable", "Ollama service unavailable"
-    return "executor_error", f"Ollama request failed with HTTP {exc.code}"
-
-
 def execute_loopback_ollama(
     runtime_input: Mapping[str, Any],
 ) -> Mapping[str, Any]:
-    """Invoke one non-streaming localhost Ollama preview after LIMA validation."""
+    """Fail closed: the retired direct model executor is not an active Arc API."""
 
-    endpoint, model = _validate_runtime_input(runtime_input)
-    timeout_seconds = resolve_ollama_timeout_seconds()
-    prompt = build_local_preview_prompt(runtime_input)
-    payload = {"model": model, "prompt": prompt, "stream": False}
-    http_request = Request(
-        f"{endpoint}/api/generate",
-        data=json.dumps(payload).encode("utf-8"),
-        headers={"Accept": "application/json", "Content-Type": "application/json"},
-        method="POST",
-    )
-    started_at = time.perf_counter()
-    try:
-        with _open_ollama_request(http_request, timeout_seconds) as response:
-            status_code = int(getattr(response, "status", 0))
-            if not 200 <= status_code < 300:
-                return _controlled_failure(
-                    endpoint=endpoint,
-                    model=model,
-                    started_at=started_at,
-                    category="executor_error",
-                    message=f"Ollama request failed with HTTP {status_code}",
-                )
-            raw_body = response.read(MAX_RESPONSE_BYTES + 1)
-    except HTTPError as exc:
-        category, message = _http_error_category(exc)
-        return _controlled_failure(
-            endpoint=endpoint,
-            model=model,
-            started_at=started_at,
-            category=category,
-            message=message,
-        )
-    except (TimeoutError, socket.timeout):
-        return _controlled_failure(
-            endpoint=endpoint,
-            model=model,
-            started_at=started_at,
-            category="timeout",
-            message="Ollama request timed out",
-        )
-    except (URLError, ConnectionError, OSError):
-        return _controlled_failure(
-            endpoint=endpoint,
-            model=model,
-            started_at=started_at,
-            category="service_unavailable",
-            message="Ollama service unavailable",
-        )
-    except Exception:
-        return _controlled_failure(
-            endpoint=endpoint,
-            model=model,
-            started_at=started_at,
-            category="executor_error",
-            message="Ollama executor failed",
-        )
-
-    if len(raw_body) > MAX_RESPONSE_BYTES:
-        return _controlled_failure(
-            endpoint=endpoint,
-            model=model,
-            started_at=started_at,
-            category="malformed_response",
-            message="Ollama response exceeded the safe size limit",
-        )
-    try:
-        response_payload = json.loads(raw_body.decode("utf-8"))
-    except (UnicodeDecodeError, json.JSONDecodeError):
-        return _controlled_failure(
-            endpoint=endpoint,
-            model=model,
-            started_at=started_at,
-            category="malformed_response",
-            message="Ollama returned malformed JSON",
-        )
-    if not isinstance(response_payload, Mapping):
-        return _controlled_failure(
-            endpoint=endpoint,
-            model=model,
-            started_at=started_at,
-            category="malformed_response",
-            message="Ollama returned an invalid response object",
-        )
-    output_text = response_payload.get("response")
-    if not isinstance(output_text, str) or not output_text.strip():
-        return _controlled_failure(
-            endpoint=endpoint,
-            model=model,
-            started_at=started_at,
-            category="malformed_response",
-            message="Ollama response text was missing",
-        )
-    duration_ms = int(max(0.0, time.perf_counter() - started_at) * 1000)
-    return _base_result(
-        endpoint=endpoint,
-        model=model,
-        duration_ms=duration_ms,
-        status="completed",
-        output_text=output_text.strip()[:MAX_OUTPUT_CHARACTERS],
-    )
+    del runtime_input
+    raise OllamaExecutorValidationError(RETIRED_OLLAMA_EXECUTION_DISABLED)
 
 
 __all__ = [
@@ -377,8 +192,8 @@ __all__ = [
     "LOOPBACK_OLLAMA_EXECUTOR_KIND",
     "LOOPBACK_OLLAMA_EXECUTOR_NAME",
     "OllamaExecutorValidationError",
+    "RETIRED_OLLAMA_EXECUTION_DISABLED",
     "build_local_preview_prompt",
-    "execute_loopback_ollama",
     "normalize_loopback_ollama_url",
     "resolve_ollama_model",
     "resolve_ollama_timeout_seconds",

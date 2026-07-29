@@ -31,6 +31,15 @@ from .views import (
 )
 
 
+EXPECTED_NONEXECUTING_DOCTOR_BLOCKERS = frozenset(
+    {
+        "retired_lima_harness_execution_disabled",
+        "lima_loopback_ollama_execution_disabled",
+        "ollama_probe_disabled_non_executing_control_plane",
+    }
+)
+
+
 def _utc_now() -> str:
     return datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
 
@@ -108,6 +117,28 @@ def doctor(config: OperatorConfig) -> dict[str, Any]:
         accepted_exit_codes={0},
     )
     return payload
+
+
+def _doctor_ready_for_nonexecuting_control_plane(
+    payload: dict[str, Any],
+) -> bool:
+    blockers = payload.get("blockers")
+    if not isinstance(blockers, list) or not all(
+        isinstance(blocker, str) for blocker in blockers
+    ):
+        return False
+    unexpected = set(blockers) - EXPECTED_NONEXECUTING_DOCTOR_BLOCKERS
+    return all(
+        (
+            payload.get("real_guardian_ready") is True,
+            payload.get("guardian_to_lima_contract_compatible") is True,
+            payload.get("lima_available") is True,
+            payload.get("full_local_integration_ready") is False,
+            payload.get("ollama_reachable") is False,
+            payload.get("ollama_model_available") is False,
+            not unexpected,
+        )
+    )
 
 
 def health(config: OperatorConfig) -> dict[str, Any]:
@@ -308,7 +339,9 @@ def main(argv: list[str] | None = None) -> int:
         payload = status(config)
     elif args.command == "doctor":
         payload = doctor(config)
-        exit_code = 0 if not payload.get("blockers") else 4
+        exit_code = (
+            0 if _doctor_ready_for_nonexecuting_control_plane(payload) else 4
+        )
     elif args.command == "health":
         payload = health(config)
     elif args.command == "submit":

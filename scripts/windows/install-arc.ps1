@@ -48,24 +48,10 @@ if ($pythonVersion -lt [version]"3.11") {
 if ($null -eq (Get-Command git -ErrorAction SilentlyContinue)) {
     throw "Git is required for audited Arc release installation."
 }
-if ($null -eq (Get-Command ollama -ErrorAction SilentlyContinue)) {
-    throw "Ollama is required but was not found. Arc will not install it silently."
+if ($InstallModel) {
+    throw "Model installation is disabled in the non-executing Arc control plane."
 }
-$ollamaVersion = (& ollama --version 2>&1 | Select-Object -First 1).ToString().Trim()
-$modelInstalled = Test-ArcModelInstalled -Model $Model
-if (-not $modelInstalled -and $InstallModel) {
-    if ($NonInteractive -and -not $InstallModel) {
-        throw "Non-interactive model installation requires -InstallModel."
-    }
-    & ollama pull $Model
-    if ($LASTEXITCODE -ne 0) {
-        throw "Ollama model installation failed."
-    }
-    $modelInstalled = Test-ArcModelInstalled -Model $Model
-}
-if (-not $modelInstalled) {
-    throw "Configured model '$Model' is not installed. Re-run with -InstallModel only after explicit operator approval."
-}
+$ollamaVersion = "retired-not-required"
 
 if (Test-Path -LiteralPath $paths.Manifest -PathType Leaf) {
     if (-not $Force) {
@@ -132,7 +118,6 @@ try {
             throw "Unable to update pip in the Arc virtual environment."
         }
         Assert-ArcRemoteTagPin -Repository "https://github.com/armpit-symphony/LIMA-Guardian-Suite.git" -Tag $script:GuardianTag -Commit $script:GuardianCommit | Out-Null
-        Assert-ArcRemoteTagPin -Repository "https://github.com/armpit-symphony/LIMA-AI-OS.git" -Tag $script:LimaTag -Commit $script:LimaCommit | Out-Null
         & $venvPython -m pip install --disable-pip-version-check "git+https://github.com/armpit-symphony/LIMA-Guardian-Suite.git@$script:GuardianCommit"
         if ($LASTEXITCODE -ne 0) {
             throw "Pinned Guardian installation failed."

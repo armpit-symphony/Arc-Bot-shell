@@ -1,8 +1,8 @@
 # Arc v0.11 Windows operator layer
 
-Arc v0.11 is an operator-experience layer over the tagged v0.10 runtime. It
-does not change Guardian policy, LIMA executor authority, connector access, or
-the loopback-only Ollama boundary.
+Arc v0.11 is an operator-experience layer over the historical v0.10 runtime.
+The current supported milestone is non-executing. Retired provider/model
+surfaces fail closed and grant no LIMA executor authority.
 
 ## Architecture
 
@@ -15,9 +15,8 @@ PowerShell launcher
   -> selected release public CLI
   -> task queue
   -> real Guardian
-  -> published LIMA Runtime
-  -> loopback_ollama executor
-  -> localhost Ollama
+  -> lima.runtime governed preflight
+  -> blocked legacy submission or Supervisor assignment preview
   -> evidence/state/history under the install data directory
 ```
 
@@ -50,15 +49,16 @@ upgrade, rollback, and default uninstall.
 
 ## Security invariants
 
-- Guardian remains mandatory for every model call.
-- Ollama is invoked only by the LIMA `loopback_ollama` executor.
-- Only `http://127.0.0.1:<port>` or `http://localhost:<port>` is accepted.
+- Guardian remains mandatory for every governed preflight.
+- Ollama is not invoked, probed, installed, or required.
+- Retained Ollama configuration fields exist only for backward-compatible
+  parsing and cannot grant runtime authority.
 - The Arc manager has no listener and creates no firewall exception.
 - Startup is a current-user Task Scheduler entry without highest privileges.
 - No credentials or private environment dumps are stored.
 - Diagnostics exclude task payloads, evidence bodies, raw prompts, and model
   output.
-- Model installation requires the explicit `-InstallModel` flag.
+- Model installation is disabled; `-InstallModel` fails closed.
 - Uninstall preserves data unless `-RemoveData` is explicitly requested.
 - Upgrade failure restores the previous release pointer before restarting.
 
@@ -102,7 +102,8 @@ unless the operator also supplies an automation-oriented force flag.
 ## Acceptance
 
 `scripts/windows/smoke-arc-windows-operator.ps1` installs into a unique
-temporary root, uses mocked Task Scheduler state, runs one real local preview,
-proves external email remains denied before execution, checks failed-upgrade
-recovery, verifies the v0.10 rollback anchor, and confirms uninstall preserves
-data. It never changes a production Arc installation.
+temporary root, uses mocked Task Scheduler state, proves the retired local
+preview fails closed before LIMA/Ollama/network, proves external email remains
+denied, checks failed-upgrade recovery, verifies the v0.10 rollback anchor, and
+confirms uninstall preserves data. It never changes a production Arc
+installation.

@@ -12,7 +12,6 @@ import os
 from pathlib import Path
 import sys
 from typing import Callable, Iterator, Mapping
-from urllib.request import Request, urlopen
 
 from .contracts import (
     GuardianContractProbe,
@@ -403,33 +402,10 @@ def probe_ollama_reachability(
     model: str,
     timeout_seconds: float,
 ) -> OllamaProbeResult:
-    """Perform a bounded loopback Ollama tags request."""
+    """Fail closed without network; direct model probes are retired."""
 
-    request = Request(
-        f"{url}/api/tags",
-        headers={"Accept": "application/json"},
-        method="GET",
-    )
-    try:
-        with urlopen(request, timeout=timeout_seconds) as response:
-            if not 200 <= int(response.status) < 300:
-                return OllamaProbeResult(reachable=False, model_available=False)
-            payload = json.load(response)
-    except (OSError, TimeoutError, ValueError, json.JSONDecodeError):
-        return OllamaProbeResult(reachable=False, model_available=False)
-
-    models = payload.get("models", []) if isinstance(payload, dict) else []
-    available_names = {
-        str(item.get(field_name)).strip()
-        for item in models
-        if isinstance(item, dict)
-        for field_name in ("name", "model")
-        if item.get(field_name)
-    }
-    return OllamaProbeResult(
-        reachable=True,
-        model_available=model in available_names,
-    )
+    del url, model, timeout_seconds
+    return OllamaProbeResult(reachable=False, model_available=False)
 
 
 DEFAULT_PROBES = DoctorProbes(
@@ -534,8 +510,9 @@ def run_doctor(
             lima.available,
             lima.integration_compatible,
             lima.decision_id_propagation_supported is True,
-            lima.fake_executor_smoke_ready is True,
-            loopback_ollama_supported is True,
+            lima.runtime_entrypoint == "lima.runtime.run_governed_request",
+            lima.fake_executor_smoke_ready is False,
+            loopback_ollama_supported is False,
         )
     )
 

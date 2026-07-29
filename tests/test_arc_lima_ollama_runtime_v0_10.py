@@ -2,11 +2,9 @@
 
 from __future__ import annotations
 
-from io import BytesIO
 import json
 from pathlib import Path
 from typing import Any, Mapping
-from urllib.error import HTTPError, URLError
 
 import pytest
 
@@ -17,10 +15,11 @@ from arc_bot_shell.lima import (
     LOOPBACK_OLLAMA_EXECUTOR_NAME,
     LimaRuntimeAdapter,
     OllamaExecutorValidationError,
-    execute_loopback_ollama,
+    RETIRED_OLLAMA_EXECUTION_DISABLED,
     normalize_loopback_ollama_url,
 )
 from arc_bot_shell.state import JsonlStateStore
+import arc_bot_shell.lima as lima_package
 import arc_bot_shell.lima.ollama_executor as ollama_executor_module
 
 
@@ -91,23 +90,6 @@ def _runtime_input(**overrides: Any) -> dict[str, Any]:
     return payload
 
 
-class _Response:
-    def __init__(self, payload: bytes, status: int = 200) -> None:
-        self.payload = payload
-        self.status = status
-
-    def __enter__(self) -> "_Response":
-        return self
-
-    def __exit__(self, *_args: object) -> None:
-        return None
-
-    def read(self, amount: int | None = None) -> bytes:
-        if amount is None:
-            return self.payload
-        return self.payload[:amount]
-
-
 class AllowedGuardianFacade:
     def evaluate(self, request: ArcActionRequest, **_kwargs: object) -> GuardianDecision:
         return _decision(action_id=request.action_id)
@@ -145,41 +127,27 @@ class ExplodingRuntime:
         raise AssertionError("LIMA/Ollama must not be called")
 
 
-@pytest.mark.parametrize(
-    "value",
-    (
-        "http://example.com:11434",
-        "http://192.168.1.20:11434",
-        "http://0.0.0.0:11434",
-        "http://[::1]:11434",
-        "http://user:password@127.0.0.1:11434",
-        "https://127.0.0.1:11434",
-        "http://127.0.0.1:11434/api/generate",
-        "http://127.0.0.1:11434?query=1",
-        "http://127.0.0.1:11434#fragment",
-        "http://127.0.0.1",
-        "http://127.0.0.1:not-a-port",
-        " http://127.0.0.1:11434",
-    ),
-)
-def test_unapproved_endpoint_is_rejected_before_network(
-    value: str,
+def test_retired_direct_ollama_executor_is_not_public() -> None:
+    assert not hasattr(lima_package, "execute_loopback_ollama")
+
+
+def test_retired_direct_ollama_executor_fails_before_network(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     network_calls = 0
 
-    def unexpected_network(_request: object, _timeout: float) -> object:
+    def unexpected_network(*_args: object, **_kwargs: object) -> object:
         nonlocal network_calls
         network_calls += 1
         raise AssertionError("network must not be called")
 
-    monkeypatch.setattr(
-        ollama_executor_module,
-        "_open_ollama_request",
-        unexpected_network,
-    )
-    with pytest.raises(OllamaExecutorValidationError):
-        execute_loopback_ollama(_runtime_input(endpoint=value))
+    monkeypatch.setattr("urllib.request.urlopen", unexpected_network)
+    assert not hasattr(ollama_executor_module, "_open_ollama_request")
+    with pytest.raises(
+        OllamaExecutorValidationError,
+        match=RETIRED_OLLAMA_EXECUTION_DISABLED,
+    ):
+        ollama_executor_module.execute_loopback_ollama(_runtime_input())
     assert network_calls == 0
 
 
@@ -192,150 +160,6 @@ def test_unapproved_endpoint_is_rejected_before_network(
 )
 def test_valid_loopback_endpoint_is_accepted(value: str, expected: str) -> None:
     assert normalize_loopback_ollama_url(value) == expected
-
-
-def test_missing_model_is_rejected_before_network(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    monkeypatch.setattr(
-        ollama_executor_module,
-        "_open_ollama_request",
-        lambda *_args: pytest.fail("network must not be called"),
-    )
-    with pytest.raises(OllamaExecutorValidationError, match="model"):
-        execute_loopback_ollama(_runtime_input(model=""))
-
-
-def test_valid_ollama_response_is_normalized_without_credentials(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    observed: dict[str, Any] = {}
-
-    def open_request(request: Any, timeout: float) -> _Response:
-        observed["url"] = request.full_url
-        observed["timeout"] = timeout
-        observed["payload"] = json.loads(request.data.decode("utf-8"))
-        return _Response(json.dumps({"response": "Local operator draft."}).encode())
-
-    monkeypatch.setattr(
-        ollama_executor_module,
-        "_open_ollama_request",
-        open_request,
-    )
-    result = dict(execute_loopback_ollama(_runtime_input()))
-
-    assert observed["url"] == f"{ENDPOINT}/api/generate"
-    assert observed["payload"]["model"] == MODEL
-    assert observed["payload"]["stream"] is False
-    assert "no external action" in observed["payload"]["prompt"].lower()
-    assert "do not mention or imply cloud-provider use" in observed["payload"][
-        "prompt"
-    ].lower()
-    assert result["status"] == "completed"
-    assert result["output_text"] == "Local operator draft."
-    assert result["network_called"] is True
-    assert result["network_scope"] == "loopback_only"
-    assert result["ollama_called"] is True
-    assert result["credentials_used"] is False
-    assert result["external_side_effects"] is False
-    assert result["duration_ms"] >= 0
-    assert result["error_category"] is None
-
-
-@pytest.mark.parametrize(
-    ("raised", "category"),
-    (
-        (URLError("connection refused"), "service_unavailable"),
-        (TimeoutError("slow"), "timeout"),
-    ),
-)
-def test_transport_failures_are_controlled_and_honest(
-    raised: Exception,
-    category: str,
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    def fail(_request: object, _timeout: float) -> object:
-        raise raised
-
-    monkeypatch.setattr(ollama_executor_module, "_open_ollama_request", fail)
-    result = dict(execute_loopback_ollama(_runtime_input()))
-
-    assert result["status"] == "unavailable"
-    assert result["error_category"] == category
-    assert result["network_called"] is True
-    assert result["ollama_called"] is True
-    assert result["credentials_used"] is False
-    assert result["output_text"] == ""
-
-
-def test_missing_model_http_result_is_controlled(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    def missing_model(_request: object, _timeout: float) -> object:
-        raise HTTPError(
-            f"{ENDPOINT}/api/generate",
-            404,
-            "not found",
-            {},
-            BytesIO(b'{"error":"model qwen2.5:7b not found"}'),
-        )
-
-    monkeypatch.setattr(
-        ollama_executor_module,
-        "_open_ollama_request",
-        missing_model,
-    )
-    result = dict(execute_loopback_ollama(_runtime_input()))
-    assert result["status"] == "unavailable"
-    assert result["error_category"] == "model_unavailable"
-    assert result["model"] == MODEL
-
-
-@pytest.mark.parametrize(
-    "body",
-    (
-        b"not-json",
-        b"[]",
-        b'{"response":""}',
-        b'{"other":"missing response"}',
-    ),
-)
-def test_malformed_or_empty_response_is_controlled(
-    body: bytes,
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    monkeypatch.setattr(
-        ollama_executor_module,
-        "_open_ollama_request",
-        lambda *_args: _Response(body),
-    )
-    result = dict(execute_loopback_ollama(_runtime_input()))
-    assert result["status"] == "unavailable"
-    assert result["error_category"] == "malformed_response"
-    assert result["network_called"] is True
-    assert result["ollama_called"] is True
-
-
-def test_remote_redirect_is_not_followed(monkeypatch: pytest.MonkeyPatch) -> None:
-    calls = 0
-
-    def redirect(_request: object, _timeout: float) -> object:
-        nonlocal calls
-        calls += 1
-        raise HTTPError(
-            f"{ENDPOINT}/api/generate",
-            302,
-            "redirect",
-            {"Location": "http://example.com/api/generate"},
-            BytesIO(b""),
-        )
-
-    monkeypatch.setattr(ollama_executor_module, "_open_ollama_request", redirect)
-    result = dict(execute_loopback_ollama(_runtime_input()))
-    assert calls == 1
-    assert result["status"] == "unavailable"
-    assert result["error_category"] == "executor_error"
-    assert result["error_message"] == "Ollama redirect rejected"
 
 
 def _realistic_executor(calls: list[Mapping[str, Any]]):

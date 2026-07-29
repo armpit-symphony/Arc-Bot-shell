@@ -52,8 +52,11 @@ try {
     if ($manifest.guardian_tag -ne "guardian-core-v1.1-local-model-preview-policy") {
         throw "Guardian pin changed during installation."
     }
-    if ($manifest.lima_tag -ne "lima-runtime-v1.1-loopback-ollama-executor") {
+    if ($manifest.lima_tag -ne "lima-runtime==0.1.0rc1") {
         throw "LIMA pin changed during installation."
+    }
+    if ($manifest.lima_commit -ne "4e7c648349f0a5a19694ac5f0c57b5cb14dc2b17") {
+        throw "LIMA commit changed during installation."
     }
 
     $secondInstall = & $installScript `
@@ -79,24 +82,27 @@ try {
     if ($status.network_listener -ne $null) {
         throw "Arc service unexpectedly reported a network listener."
     }
-    if ($status.integrated_runtime_ready -ne $true) {
-        throw "Installed Arc runtime is not ready."
+    if ($status.integrated_runtime_ready -ne $false) {
+        throw "Retired Arc execution runtime unexpectedly reported ready."
     }
 
     $previewLines = & $sourceLauncher submit $previewTask -InstallRoot $InstallRoot -TestMode
     $previewExit = $LASTEXITCODE
     $preview = Convert-ArcOutputToJson $previewLines
-    if ($previewExit -ne 0 -or $preview.result_status -ne "lima_ollama_preview_completed") {
-        throw "Installed local preview failed."
+    if ($previewExit -ne 4 -or $preview.result_status -ne "runtime_unavailable") {
+        throw "Installed retired local preview did not fail closed."
     }
     if ($preview.guardian_status -ne "allow" -or [string]::IsNullOrWhiteSpace($preview.guardian_decision_id)) {
         throw "Installed local preview did not preserve Guardian allow lineage."
     }
-    if ($preview.lima_called -ne $true -or $preview.executor_call_count -ne 1 -or $preview.ollama_called -ne $true) {
-        throw "Installed local preview did not follow Guardian -> LIMA -> Ollama."
-    }
-    if ([string]::IsNullOrWhiteSpace($preview.output_text)) {
-        throw "Installed local preview returned empty output."
+    if (
+        $preview.lima_called -ne $false -or
+        $preview.executor_call_count -ne 0 -or
+        $preview.ollama_called -ne $false -or
+        $preview.network_called -ne $false -or
+        $preview.execution_allowed -ne $false
+    ) {
+        throw "Installed retired local preview crossed the execution boundary."
     }
     if (-not (Test-Path -LiteralPath $preview.evidence_path -PathType Leaf)) {
         throw "Installed local preview evidence was not written."
@@ -200,7 +206,9 @@ try {
             lima_called = $preview.lima_called
             executor_call_count = $preview.executor_call_count
             ollama_called = $preview.ollama_called
-            output_nonempty = -not [string]::IsNullOrWhiteSpace($preview.output_text)
+            network_called = $preview.network_called
+            execution_allowed = $preview.execution_allowed
+            result_status = $preview.result_status
             evidence_written = $true
         }
         external_email = @{
