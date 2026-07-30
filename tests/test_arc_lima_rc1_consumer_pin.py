@@ -18,7 +18,7 @@ from lima.runtime import run_governed_request
 
 
 LIMA_VERSION = "0.1.0rc1"
-LIMA_COMMIT = "4e7c648349f0a5a19694ac5f0c57b5cb14dc2b17"
+LIMA_COMMIT = "0463b6963f0d5cb9a3af9a6f323dfd847594d546"
 
 
 def _request(action_id: str, action_kind: str) -> ArcActionRequest:
