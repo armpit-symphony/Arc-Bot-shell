@@ -26,6 +26,8 @@ OPERATOR_REQUEST_CONTRACT = "operator.control_plane.request"
 OPERATOR_RESPONSE_CONTRACT = "operator.control_plane.response"
 WORKER_INVENTORY_REQUEST_CONTRACT = "operator.worker_inventory.request"
 WORKER_INVENTORY_RESPONSE_CONTRACT = "operator.worker_inventory.response"
+EVIDENCE_TRACE_REQUEST_CONTRACT = "operator.evidence_trace.request"
+EVIDENCE_TRACE_RESPONSE_CONTRACT = "operator.evidence_trace.response"
 VERSION = "1.0.0"
 MAX_RESPONSE_BYTES = 256 * 1024
 SIGNATURE_PATTERN = re.compile(r"^[a-f0-9]{64}$")
@@ -448,6 +450,61 @@ class ArcSupervisorPreflightClient:
         self._validate_inventory_result(result, expected_request_id=identity)
         return result
 
+    def read_evidence(
+        self,
+        *,
+        target_request_id: str,
+        request_id: str | None = None,
+        idempotency_key: str | None = None,
+    ) -> dict[str, Any]:
+        """Request one Guardian-bound redacted evidence trace."""
+
+        if not isinstance(target_request_id, str) or not target_request_id.strip():
+            raise ArcOperatorAuthenticationError(
+                "target evidence request identity is required"
+            )
+        now = self.channel._utc(self.channel.clock())
+        identity = request_id or f"evidence-query:{uuid4().hex}"
+        if identity == target_request_id:
+            raise ArcOperatorAuthenticationError(
+                "evidence query cannot target its own authorization request"
+            )
+        payload = {
+            "contract_name": EVIDENCE_TRACE_REQUEST_CONTRACT,
+            "contract_version": VERSION,
+            "schema_version": VERSION,
+            "taxonomy_version": "taxonomy-recon-v1",
+            "tenant_id": self.channel.tenant_id,
+            "customer_context_id": self.channel.customer_context_id,
+            "environment": "phase0_lab",
+            "correlation_id": f"corr:{identity}",
+            "causation_id": None,
+            "idempotency_key": idempotency_key or f"idem:{identity}",
+            "producer": {"component": "operator_client", "produced_at": now},
+            "policy_version": self.channel.policy_version,
+            "request_id": identity,
+            "actor_id": self.channel.actor_id,
+            "operation": "read_redacted_evidence_trace",
+            "target_request_id": target_request_id,
+            "runtime_authority_blocked": True,
+            "executable": False,
+            "execution_allowed": False,
+            "side_effects_allowed": False,
+        }
+        envelope = self.channel.sign_request(payload)
+        response = self._post(
+            {"envelope": envelope, "payload": payload},
+            path="/v1/operator/evidence",
+        )
+        self.channel.verify_response(response["envelope"], response["payload"])
+        result = dict(response["payload"])
+        self._validate_evidence_result(
+            result,
+            expected_request_id=identity,
+            expected_target_request_id=target_request_id,
+        )
+        return result
+
     def _post(
         self,
         body: dict[str, Any],
@@ -612,6 +669,239 @@ class ArcSupervisorPreflightClient:
             raise ArcOperatorAuthenticationError(
                 "Supervisor worker inventory status is invalid"
             )
+
+    def _validate_evidence_result(
+        self,
+        result: Mapping[str, Any],
+        *,
+        expected_request_id: str,
+        expected_target_request_id: str,
+    ) -> None:
+        required = {
+            "contract_name",
+            "contract_version",
+            "schema_version",
+            "taxonomy_version",
+            "tenant_id",
+            "customer_context_id",
+            "environment",
+            "correlation_id",
+            "causation_id",
+            "idempotency_key",
+            "producer",
+            "policy_version",
+            "request_id",
+            "target_request_id",
+            "actor_id",
+            "status",
+            "classification_authority",
+            "worker_id",
+            "guardian_decision_id",
+            "lima_decision_id",
+            "authorization_evidence_refs",
+            "event_count",
+            "events",
+            "reason_codes",
+            "runtime_authority_blocked",
+            "executable",
+            "execution_allowed",
+            "side_effects_allowed",
+        }
+        if set(result) != required:
+            raise ArcOperatorAuthenticationError(
+                "Supervisor evidence trace shape is invalid"
+            )
+        expected = {
+            "contract_name": EVIDENCE_TRACE_RESPONSE_CONTRACT,
+            "contract_version": VERSION,
+            "schema_version": VERSION,
+            "taxonomy_version": "taxonomy-recon-v1",
+            "tenant_id": self.channel.tenant_id,
+            "customer_context_id": self.channel.customer_context_id,
+            "environment": "phase0_lab",
+            "correlation_id": f"corr:{expected_request_id}",
+            "causation_id": expected_request_id,
+            "policy_version": self.channel.policy_version,
+            "request_id": expected_request_id,
+            "target_request_id": expected_target_request_id,
+            "actor_id": self.channel.actor_id,
+            "classification_authority": "supervisor_server_derived",
+        }
+        if any(result.get(key) != value for key, value in expected.items()):
+            raise ArcOperatorAuthenticationError(
+                "Supervisor evidence trace identity or policy binding mismatch"
+            )
+        producer = result.get("producer")
+        if (
+            not isinstance(producer, Mapping)
+            or set(producer) != {"component", "produced_at"}
+            or producer.get("component") != "supervisor"
+            or not isinstance(producer.get("produced_at"), str)
+            or not producer["produced_at"]
+        ):
+            raise ArcOperatorAuthenticationError(
+                "Supervisor evidence trace producer is invalid"
+            )
+        self._assert_blocked_flags(result, "evidence trace")
+        if not self._is_unique_text_list(
+            result.get("authorization_evidence_refs")
+        ) or not self._is_unique_text_list(result.get("reason_codes")):
+            raise ArcOperatorAuthenticationError(
+                "Supervisor evidence trace references are invalid"
+            )
+        events = result.get("events")
+        event_count = result.get("event_count")
+        if (
+            not isinstance(events, list)
+            or not isinstance(event_count, int)
+            or not 0 <= event_count <= 128
+            or event_count != len(events)
+        ):
+            raise ArcOperatorAuthenticationError(
+                "Supervisor evidence trace count is invalid"
+            )
+        event_ids: list[str] = []
+        for event in events:
+            self._validate_evidence_event(
+                event,
+                expected_target_request_id=expected_target_request_id,
+            )
+            event_ids.append(event["event_id"])
+        if len(event_ids) != len(set(event_ids)):
+            raise ArcOperatorAuthenticationError(
+                "Supervisor evidence trace contains duplicate events"
+            )
+
+        status = result.get("status")
+        governed_fields = (
+            result.get("worker_id"),
+            result.get("guardian_decision_id"),
+            result.get("lima_decision_id"),
+        )
+        if status == "available":
+            if (
+                not events
+                or not all(
+                    isinstance(value, str) and bool(value)
+                    for value in governed_fields
+                )
+                or not result["authorization_evidence_refs"]
+            ):
+                raise ArcOperatorAuthenticationError(
+                    "available evidence trace lacks governed authority"
+                )
+        elif status == "not_found":
+            if (
+                events
+                or result.get("reason_codes") != ["missing_ref"]
+                or not all(
+                    isinstance(value, str) and bool(value)
+                    for value in governed_fields
+                )
+                or not result["authorization_evidence_refs"]
+            ):
+                raise ArcOperatorAuthenticationError(
+                    "not-found evidence trace is not fail-closed"
+                )
+        elif status in {"denied", "unavailable"}:
+            if events:
+                raise ArcOperatorAuthenticationError(
+                    "failed-closed evidence trace exposed events"
+                )
+        else:
+            raise ArcOperatorAuthenticationError(
+                "Supervisor evidence trace status is invalid"
+            )
+
+    def _validate_evidence_event(
+        self,
+        event: Any,
+        *,
+        expected_target_request_id: str,
+    ) -> None:
+        required = {
+            "event_id",
+            "event_type",
+            "actor_id",
+            "worker_id",
+            "request_id",
+            "decision_id",
+            "guardian_decision_id",
+            "parent_event_id",
+            "payload_hash",
+            "redacted_summary",
+            "outcome",
+            "reason_codes",
+            "created_at",
+            "runtime_authority_blocked",
+            "executable",
+            "execution_allowed",
+            "side_effects_allowed",
+        }
+        if not isinstance(event, Mapping) or set(event) != required:
+            raise ArcOperatorAuthenticationError(
+                "Supervisor evidence event shape is invalid"
+            )
+        self._assert_blocked_flags(event, "evidence event")
+        if (
+            event.get("actor_id") != self.channel.actor_id
+            or event.get("request_id") != expected_target_request_id
+            or not isinstance(event.get("event_id"), str)
+            or not event["event_id"]
+            or not HASH_PATTERN.fullmatch(str(event.get("payload_hash", "")))
+            or not isinstance(event.get("redacted_summary"), str)
+            or not event["redacted_summary"]
+            or len(event["redacted_summary"]) > 240
+            or not isinstance(event.get("created_at"), str)
+            or not event["created_at"]
+            or not self._is_unique_text_list(event.get("reason_codes"))
+        ):
+            raise ArcOperatorAuthenticationError(
+                "Supervisor evidence event binding is invalid"
+            )
+        if event.get("event_type") not in {
+            "request_received",
+            "guardian_request",
+            "guardian_decision",
+            "lima_decision",
+            "assignment_preview",
+            "worker_acknowledgement",
+            "worker_registration",
+            "worker_heartbeat",
+            "evidence_read",
+            "denial",
+            "failure",
+            "approval_requested",
+            "approval_expired",
+            "replay_rejected",
+        } or event.get("outcome") not in {
+            "received",
+            "allowed_dry_run",
+            "confirm_required",
+            "privileged_required",
+            "acknowledged",
+            "rejected",
+            "denied",
+            "blocked",
+            "expired",
+            "failed_closed",
+        }:
+            raise ArcOperatorAuthenticationError(
+                "Supervisor evidence event taxonomy is invalid"
+            )
+        for field in (
+            "worker_id",
+            "decision_id",
+            "guardian_decision_id",
+            "parent_event_id",
+        ):
+            value = event.get(field)
+            if value is not None and (
+                not isinstance(value, str) or not value
+            ):
+                raise ArcOperatorAuthenticationError(
+                    "Supervisor evidence event reference is invalid"
+                )
 
     def _validate_inventory_worker(self, worker: Any) -> None:
         required = {
