@@ -24,6 +24,8 @@ from .channel import canonical_json, payload_hash
 OPERATOR_CHANNEL_CONTRACT = "operator.channel.envelope"
 OPERATOR_REQUEST_CONTRACT = "operator.control_plane.request"
 OPERATOR_RESPONSE_CONTRACT = "operator.control_plane.response"
+WORKER_INVENTORY_REQUEST_CONTRACT = "operator.worker_inventory.request"
+WORKER_INVENTORY_RESPONSE_CONTRACT = "operator.worker_inventory.response"
 VERSION = "1.0.0"
 MAX_RESPONSE_BYTES = 256 * 1024
 SIGNATURE_PATTERN = re.compile(r"^[a-f0-9]{64}$")
@@ -405,10 +407,56 @@ class ArcSupervisorPreflightClient:
         self._validate_result(result, expected_request_id=identity)
         return result
 
-    def _post(self, body: dict[str, Any]) -> dict[str, Any]:
+    def refresh_workers(
+        self,
+        *,
+        request_id: str | None = None,
+        idempotency_key: str | None = None,
+    ) -> dict[str, Any]:
+        """Explicitly refresh the Supervisor-owned non-executing inventory."""
+
+        now = self.channel._utc(self.channel.clock())
+        identity = request_id or f"worker-inventory:{uuid4().hex}"
+        payload = {
+            "contract_name": WORKER_INVENTORY_REQUEST_CONTRACT,
+            "contract_version": VERSION,
+            "schema_version": VERSION,
+            "taxonomy_version": "taxonomy-recon-v1",
+            "tenant_id": self.channel.tenant_id,
+            "customer_context_id": self.channel.customer_context_id,
+            "environment": "phase0_lab",
+            "correlation_id": f"corr:{identity}",
+            "causation_id": None,
+            "idempotency_key": idempotency_key or f"idem:{identity}",
+            "producer": {"component": "operator_client", "produced_at": now},
+            "policy_version": self.channel.policy_version,
+            "request_id": identity,
+            "actor_id": self.channel.actor_id,
+            "operation": "refresh_non_executing_worker_status",
+            "runtime_authority_blocked": True,
+            "executable": False,
+            "execution_allowed": False,
+            "side_effects_allowed": False,
+        }
+        envelope = self.channel.sign_request(payload)
+        response = self._post(
+            {"envelope": envelope, "payload": payload},
+            path="/v1/operator/workers",
+        )
+        self.channel.verify_response(response["envelope"], response["payload"])
+        result = dict(response["payload"])
+        self._validate_inventory_result(result, expected_request_id=identity)
+        return result
+
+    def _post(
+        self,
+        body: dict[str, Any],
+        *,
+        path: str = "/v1/operator/preflight",
+    ) -> dict[str, Any]:
         encoded = json.dumps(body, sort_keys=True).encode("utf-8")
         request = urllib_request.Request(
-            self.base_url + "/v1/operator/preflight",
+            self.base_url + path,
             data=encoded,
             headers={"Content-Type": "application/json"},
             method="POST",
@@ -433,7 +481,7 @@ class ArcSupervisorPreflightClient:
             urllib_error.URLError,
         ) as exc:
             raise ArcOperatorAuthenticationError(
-                "Supervisor is unavailable; Arc preflight failed closed"
+                "Supervisor is unavailable; Arc operator request failed closed"
             ) from exc
         if len(raw) > MAX_RESPONSE_BYTES:
             raise ArcOperatorAuthenticationError(
@@ -455,6 +503,255 @@ class ArcSupervisorPreflightClient:
                 "Supervisor response shape is invalid"
             )
         return body
+
+    def _validate_inventory_result(
+        self,
+        result: Mapping[str, Any],
+        *,
+        expected_request_id: str,
+    ) -> None:
+        required = {
+            "contract_name",
+            "contract_version",
+            "schema_version",
+            "taxonomy_version",
+            "tenant_id",
+            "customer_context_id",
+            "environment",
+            "correlation_id",
+            "causation_id",
+            "idempotency_key",
+            "producer",
+            "policy_version",
+            "request_id",
+            "actor_id",
+            "status",
+            "classification_authority",
+            "worker_count",
+            "workers",
+            "evidence_refs",
+            "reason_codes",
+            "runtime_authority_blocked",
+            "executable",
+            "execution_allowed",
+            "side_effects_allowed",
+        }
+        if set(result) != required:
+            raise ArcOperatorAuthenticationError(
+                "Supervisor worker inventory shape is invalid"
+            )
+        expected = {
+            "contract_name": WORKER_INVENTORY_RESPONSE_CONTRACT,
+            "contract_version": VERSION,
+            "schema_version": VERSION,
+            "taxonomy_version": "taxonomy-recon-v1",
+            "tenant_id": self.channel.tenant_id,
+            "customer_context_id": self.channel.customer_context_id,
+            "environment": "phase0_lab",
+            "actor_id": self.channel.actor_id,
+            "request_id": expected_request_id,
+            "classification_authority": "supervisor_server_derived",
+            "policy_version": self.channel.policy_version,
+        }
+        if any(result.get(key) != value for key, value in expected.items()):
+            raise ArcOperatorAuthenticationError(
+                "Supervisor worker inventory identity or policy binding mismatch"
+            )
+        producer = result.get("producer")
+        if (
+            not isinstance(producer, Mapping)
+            or set(producer) != {"component", "produced_at"}
+            or producer.get("component") != "supervisor"
+            or not isinstance(producer.get("produced_at"), str)
+            or not producer["produced_at"]
+        ):
+            raise ArcOperatorAuthenticationError(
+                "Supervisor worker inventory producer is invalid"
+            )
+        if not self._is_unique_text_list(
+            result.get("evidence_refs")
+        ) or not self._is_unique_text_list(result.get("reason_codes")):
+            raise ArcOperatorAuthenticationError(
+                "Supervisor worker inventory evidence is invalid"
+            )
+        self._assert_blocked_flags(result, "worker inventory")
+        workers = result.get("workers")
+        worker_count = result.get("worker_count")
+        if (
+            not isinstance(workers, list)
+            or not isinstance(worker_count, int)
+            or not 0 <= worker_count <= 8
+            or worker_count != len(workers)
+        ):
+            raise ArcOperatorAuthenticationError(
+                "Supervisor worker inventory count is invalid"
+            )
+        worker_ids = [worker.get("worker_id") for worker in workers if isinstance(worker, Mapping)]
+        if (
+            len(worker_ids) != len(workers)
+            or len(set(worker_ids)) != len(worker_ids)
+            or worker_ids != sorted(worker_ids)
+        ):
+            raise ArcOperatorAuthenticationError(
+                "Supervisor worker inventory identities are invalid"
+            )
+        for worker in workers:
+            self._validate_inventory_worker(worker)
+        status = result.get("status")
+        if status == "healthy" and (
+            not workers or not all(worker["eligible"] is True for worker in workers)
+        ):
+            raise ArcOperatorAuthenticationError(
+                "healthy inventory contains an ineligible worker"
+            )
+        if status in {"denied", "unavailable"} and workers:
+            raise ArcOperatorAuthenticationError(
+                "failed-closed inventory exposed ungoverned worker details"
+            )
+        if status not in {"healthy", "degraded_read_only", "denied", "unavailable"}:
+            raise ArcOperatorAuthenticationError(
+                "Supervisor worker inventory status is invalid"
+            )
+
+    def _validate_inventory_worker(self, worker: Any) -> None:
+        required = {
+            "worker_id",
+            "role",
+            "capabilities",
+            "state",
+            "authenticated",
+            "eligible",
+            "worker_version",
+            "last_heartbeat_at",
+            "control_plane_status",
+            "guardian_decision_id",
+            "lima_decision_id",
+            "lima_status",
+            "assignment_status",
+            "evidence_refs",
+            "reason_codes",
+            "runtime_authority_blocked",
+            "executable",
+            "execution_allowed",
+            "side_effects_allowed",
+        }
+        if not isinstance(worker, Mapping) or set(worker) != required:
+            raise ArcOperatorAuthenticationError(
+                "Supervisor worker inventory entry shape is invalid"
+            )
+        self._assert_blocked_flags(worker, "worker inventory entry")
+        if not all(
+            isinstance(worker.get(field), str) and worker[field]
+            for field in (
+                "worker_id",
+                "role",
+                "control_plane_status",
+                "guardian_decision_id",
+                "lima_decision_id",
+                "lima_status",
+            )
+        ):
+            raise ArcOperatorAuthenticationError(
+                "Supervisor worker inventory authority evidence is incomplete"
+            )
+        if not isinstance(worker.get("authenticated"), bool) or not isinstance(
+            worker.get("eligible"), bool
+        ):
+            raise ArcOperatorAuthenticationError(
+                "Supervisor worker eligibility values are invalid"
+            )
+        if worker.get("state") not in {
+            "registered",
+            "healthy",
+            "degraded",
+            "offline",
+            "quarantined",
+            "revoked",
+            "replaced",
+        }:
+            raise ArcOperatorAuthenticationError(
+                "Supervisor worker lifecycle state is invalid"
+            )
+        if worker.get("control_plane_status") not in {
+            "acknowledged",
+            "rejected",
+            "blocked",
+            "denied",
+            "confirm_required",
+            "privileged_required",
+            "unavailable",
+        } or worker.get("lima_status") not in {
+            "allowed_dry_run",
+            "confirm_required",
+            "privileged_required",
+            "denied",
+        }:
+            raise ArcOperatorAuthenticationError(
+                "Supervisor worker governed status is invalid"
+            )
+        if worker.get("assignment_status") not in {
+            "acknowledged",
+            "rejected",
+            None,
+        }:
+            raise ArcOperatorAuthenticationError(
+                "Supervisor worker assignment status is invalid"
+            )
+        if not self._is_unique_text_list(
+            worker.get("capabilities")
+        ) or not self._is_unique_text_list(
+            worker.get("evidence_refs")
+        ) or not self._is_unique_text_list(worker.get("reason_codes")):
+            raise ArcOperatorAuthenticationError(
+                "Supervisor worker inventory lists are invalid"
+            )
+        if not (
+            worker.get("worker_version") is None
+            or (
+                isinstance(worker.get("worker_version"), str)
+                and bool(worker["worker_version"])
+            )
+        ) or not (
+            worker.get("last_heartbeat_at") is None
+            or (
+                isinstance(worker.get("last_heartbeat_at"), str)
+                and bool(worker["last_heartbeat_at"])
+            )
+        ):
+            raise ArcOperatorAuthenticationError(
+                "Supervisor worker version or heartbeat is invalid"
+            )
+        if worker["eligible"] and (
+            worker["authenticated"] is not True
+            or worker.get("state") not in {"registered", "healthy"}
+            or worker.get("control_plane_status") != "acknowledged"
+            or worker.get("lima_status") != "allowed_dry_run"
+            or worker.get("assignment_status") != "acknowledged"
+        ):
+            raise ArcOperatorAuthenticationError(
+                "Supervisor marked an unqualified worker eligible"
+            )
+
+    @staticmethod
+    def _is_unique_text_list(value: Any) -> bool:
+        return (
+            isinstance(value, list)
+            and all(isinstance(item, str) and bool(item) for item in value)
+            and len(value) == len(set(value))
+        )
+
+    @staticmethod
+    def _assert_blocked_flags(
+        value: Mapping[str, Any],
+        label: str,
+    ) -> None:
+        if value.get("runtime_authority_blocked") is not True or any(
+            value.get(field) is not False
+            for field in ("executable", "execution_allowed", "side_effects_allowed")
+        ):
+            raise ArcOperatorAuthenticationError(
+                f"Supervisor {label} cannot authorize execution"
+            )
 
     def _validate_result(
         self,
