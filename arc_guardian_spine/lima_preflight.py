@@ -10,6 +10,7 @@ from __future__ import annotations
 
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass
+import logging
 from typing import Any
 
 from .base import ArcActionRequest
@@ -18,6 +19,7 @@ from .base import ArcActionRequest
 ARC_LIMA_SOURCE_POLICY = "arc_guardian_spine.lima_preflight:v0.1"
 ARC_LIMA_CONSUMER = "arc_bot_shell"
 ARC_LIMA_SURFACE = "arc_guardian_spine.lima_preflight"
+logger = logging.getLogger(__name__)
 
 
 class ArcLimaGovernedPreflightError(RuntimeError):
@@ -128,24 +130,24 @@ def call_lima_governed_preflight_for_arc_action(
 
     try:
         lima_request = normalize_for_lima(request)
-    except Exception as exc:
+    except Exception:
+        logger.exception("Arc LIMA request normalization failed closed")
         return _fail_closed_result(
             request,
             request_id="malformed-arc-action",
             reason_codes=("malformed_arc_action_request", "fail_closed"),
-            error=str(exc),
         )
 
     try:
         runner = lima_runner or _load_lima_runner()
         decision = runner(lima_request)
-    except Exception as exc:
+    except Exception:
+        logger.exception("Arc LIMA governed preflight failed closed")
         return _fail_closed_result(
             request,
             request_id=lima_request["request_id"],
             lima_request=lima_request,
             reason_codes=("lima_unavailable", "fail_closed"),
-            error=str(exc),
         )
 
     return ArcLimaGovernedPreflightResult(
@@ -306,7 +308,6 @@ def _fail_closed_result(
     *,
     request_id: str,
     reason_codes: tuple[str, ...],
-    error: str,
     lima_request: dict[str, Any] | None = None,
 ) -> ArcLimaGovernedPreflightResult:
     arc_action_id = getattr(request, "action_id", None) or request_id
@@ -339,14 +340,14 @@ def _fail_closed_result(
             "status": "denied",
             "reason_codes": reason_codes,
         },
-        metadata={"error": error, "dry_run_only": True},
+        metadata={"dry_run_only": True},
     )
     return ArcLimaGovernedPreflightResult(
         arc_action_id=str(arc_action_id),
         lima_request=safe_request,
         decision=decision,
         lima_available=False,
-        error=error,
+        error=None,
     )
 
 
