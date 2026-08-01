@@ -24,6 +24,21 @@ from typing import Any
 
 
 HONOURED_CAPABILITIES = frozenset({"document_read"})
+# Arc's own view of which capability an action implies. Kept here so Arc can
+# check the grant against the action the operator actually asked for, rather
+# than against the grant's own claim about itself.
+ACTION_CAPABILITIES = {
+    "safe_read": "document_read",
+    "status": "it_diagnostics_read_only",
+    "external_write": "draft_workspace",
+    "file_mutation": "file_organize",
+}
+
+
+def expected_capability_for(action: str) -> str | None:
+    """Capability Arc expects for an action, or None if the action is unknown."""
+
+    return ACTION_CAPABILITIES.get(action)
 MAX_DOCUMENT_BYTES = 1024 * 1024
 GRANT_CONTRACT = "lima.governed_execution_grant"
 GRANT_VERSION = "v0.1"

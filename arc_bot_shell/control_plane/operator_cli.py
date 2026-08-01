@@ -1,13 +1,23 @@
-"""Operator CLI for the authenticated non-executing Supervisor preflight path."""
+"""Operator CLI for the authenticated Supervisor preflight path.
+
+The preflight itself executes nothing. A granted read-only capability is
+performed only when the operator passes Arc's own execution opt-in.
+"""
 
 from __future__ import annotations
 
 import argparse
+from collections.abc import Mapping
 import json
 from pathlib import Path
 import sys
-from typing import TextIO
+from typing import Any, TextIO
 
+from .execution import (
+    ArcExecutionDenied,
+    ArcGrantExecutor,
+    expected_capability_for,
+)
 from .operator_client import (
     ArcSupervisorPreflightClient,
     OperatorResponseReplayStore,
@@ -56,6 +66,23 @@ def _parser() -> argparse.ArgumentParser:
         required=True,
         help="Read one hex-encoded ephemeral operator key from stdin.",
     )
+    parser.add_argument(
+        "--execute-granted-capability",
+        action="store_true",
+        help=(
+            "Arc's own execution opt-in. Off unless passed. Even with a valid "
+            "Supervisor grant, Arc performs no side effect without this."
+        ),
+    )
+    parser.add_argument(
+        "--document-root",
+        type=Path,
+        default=None,
+        help=(
+            "Directory a granted document_read may read from. There is no "
+            "default, so without it no document can be read."
+        ),
+    )
     return parser
 
 
@@ -100,10 +127,52 @@ def main(argv: list[str] | None = None) -> int:
             request_id=args.request_id,
             idempotency_key=args.idempotency_key,
         )
-        print(json.dumps(result, indent=2, sort_keys=True))
+        output = dict(result)
+        output["execution"] = _honour_grant(args, result)
+        print(json.dumps(output, indent=2, sort_keys=True))
     finally:
         replay_store.close()
     return 0
+
+
+def _honour_grant(args: Any, result: Mapping[str, Any]) -> dict[str, Any]:
+    """Act on a grant if Arc was opted in, and report why not otherwise.
+
+    A refusal is reported rather than raised so the preflight result is still
+    printed. Nothing here runs unless the operator passed Arc's own opt-in.
+    """
+
+    executor = ArcGrantExecutor(
+        execution_opt_in=args.execute_granted_capability,
+        document_root=args.document_root,
+    )
+    try:
+        performed = executor.honour(
+            result.get("execution_grant"),
+            request_id=str(result.get("request_id") or ""),
+            tenant_id=args.tenant_id,
+            worker_id=args.worker_id,
+            action_type=args.action,
+            # Derived from the action Arc asked for, never read back off the
+            # grant, so a grant naming a different capability is rejected.
+            capability=expected_capability_for(args.action) or "",
+            resource_id=args.resource_id,
+        )
+    except ArcExecutionDenied as denial:
+        return {
+            "performed": False,
+            "reason_code": denial.reason_code,
+            "side_effects_performed": False,
+        }
+    return {
+        "performed": True,
+        "reason_code": None,
+        "capability": performed["capability"],
+        "resource_id": performed["resource_id"],
+        "byte_count": performed["byte_count"],
+        "grant_id": performed["grant_id"],
+        "side_effects_performed": performed["side_effects_performed"],
+    }
 
 
 if __name__ == "__main__":
