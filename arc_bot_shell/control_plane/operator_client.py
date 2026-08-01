@@ -1079,7 +1079,13 @@ class ArcSupervisorPreflightClient:
             "execution_allowed",
             "side_effects_allowed",
         }
-        if set(result) != required:
+        # execution_grant is optional so this client works against a Supervisor
+        # that does not send one and against a newer Supervisor that does.
+        # Every other key is still an exact match, so nothing else may be
+        # added, renamed, or dropped.
+        optional = {"execution_grant"}
+        present = set(result)
+        if not required <= present or not (present - required) <= optional:
             raise ArcOperatorAuthenticationError(
                 "Supervisor result shape is invalid"
             )
