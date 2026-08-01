@@ -1,6 +1,8 @@
 ﻿# Arc Harness Shell Release Candidate
 
-Arc Harness Shell is a minimal, local, Guardian-gated worker shell for the Arc/LIMA stack. It is the first credible public baseline for guarded task intake, preview-safe execution, evidence capture, and local operator visibility.
+Arc Harness Shell is a minimal, local, Guardian-gated worker shell for the
+Arc/LIMA stack. Its current control-plane path supports guarded task intake,
+non-executing preflight, evidence capture, and local operator visibility.
 
 ## LIMA v0.1 governed preflight consumer
 
@@ -34,22 +36,19 @@ See [the Arc operator preflight boundary](docs/arc-operator-preflight.md).
 
 See [the authenticated worker control-plane boundary](docs/arc-worker-control-plane.md).
 
-## Arc v0.10 local Ollama milestone
+## Retired v0.10 Ollama experiment
 
-The current integration milestone connects real Guardian-approved local model
-preview requests to the installed public LIMA v1.1 harness and its explicit
-`loopback_ollama` executor contract. Arc supplies a bounded executor callable;
-LIMA validates the Guardian decision and loopback scope before the callable
-may issue one non-streaming request to local Ollama. Guardian `decision_id`
-lineage is preserved across LIMA input, executor input, result, evidence, and
-state. Credentials, cloud fallback, remote endpoints, and external actions
-remain disabled.
+The former Guardian -> `lima.harness` -> loopback Ollama experiment is
+historical and permanently quarantined. Its retained entry points fail closed
+before provider, model, network, credential, tool, connector, or side-effect
+activity. The supported path is `lima.runtime.run_governed_request` and stops
+at a non-executing governed decision.
 
 See [docs/ARC_V0_10_GUARDIAN_LIMA_OLLAMA.md](docs/ARC_V0_10_GUARDIAN_LIMA_OLLAMA.md).
 
 ## What Works Now
 
-- Guardian-gated task packet execution through `ArcActionRequest -> GuardianDecision -> harness result`
+- Guardian-gated task packet evaluation through `ArcActionRequest -> GuardianDecision -> harness result`
 - Fake runtime preview path for deterministic harness runs
 - Deterministic local model preview path for operator-safe draft generation
 - Local JSONL task queue with `intake`, `tasks`, `task`, and `run-task`
@@ -92,19 +91,10 @@ python -m arc_bot_shell.console run-task <task_id> --runtime fake --model-adapte
 python -m arc_bot_shell.harness run samples/tasks/local_model_preview.json --runtime fake --model-adapter deterministic
 ```
 
-Explicit local Ollama preview is available only through Guardian and LIMA:
-
-```powershell
-$env:ARC_OLLAMA_URL = "http://127.0.0.1:11434"
-$env:ARC_OLLAMA_MODEL = "qwen2.5:7b"
-python -m arc_bot_shell.harness run `
-  samples/tasks/local_model_preview.json `
-  --guardian guardian_core `
-  --runtime lima `
-  --executor ollama
-```
-
-The harness and console reject the legacy direct Ollama model-adapter route.
+The legacy `lima.harness`, direct Ollama executor, model probe, and completion
+smoke are permanently quarantined. They fail closed before model, provider,
+tool, connector, credential, filesystem, or network activity. Use the
+non-executing Arc governed-preflight path instead.
 
 ## Local Integration Doctor
 
@@ -113,9 +103,9 @@ then run:
 
     python -m arc_bot_shell.integrations doctor
 
-The JSON report verifies imports, the LIMA `loopback_ollama` contract, and
-loopback Ollama/model reachability. It does not generate model output or grant
-runtime authority.
+The JSON report verifies the supported Guardian and `lima.runtime` imports and
+reports the retired Ollama surface as unavailable. It does not probe a model,
+generate output, use network, or grant runtime authority.
 
 Guardian-only v0.8 proof, stopped before LIMA and Ollama:
 
@@ -164,18 +154,17 @@ Approvals and denials are durable local records only. In v0.6, approving a block
 - Explicit `guardian_core` mode fails closed without falling back to a fake allow decision.
 - Guardian allow in v0.8 only records eligibility for later LIMA routing; no LIMA or Ollama call occurs.
 - `FakeLimaRuntimePort` and `DeterministicPreviewAdapter` require no network or credentials.
-- The Ollama HTTP request exists only in the callable injected into
-  `execute_v1_live_provider_model_call`; Arc console/queue/harness services do
-  not call Ollama directly.
-- Ollama endpoints are restricted to HTTP `127.0.0.1` or `localhost` with an
-  explicit port. No redirects, credentials, retry endpoint, or cloud fallback
-  are allowed.
+- Retained direct Ollama adapters, executor helpers, probes, installer flags,
+  and smokes fail closed without calling a model process or network.
 - `LocalLimaImportRuntimePort` only resolves from `ARC_LIMA_PATH`, `workspace.lock.json`, or an installed `lima` package.
 - Missing Guardian or missing LIMA import support fails closed; CI does not require sibling checkouts, Ollama, or network access.
 
 ## Safety Boundary
 
-Arc Harness Shell is a preview-safe worker shell. Every consequential path passes through a Guardian decision object before runtime or model execution, and every run writes evidence plus state. There are no hidden background actions.
+Arc Harness Shell is a preview-safe worker shell. Every consequential path
+passes through a Guardian decision and stops before runtime, model, tool, or
+side-effect execution. Every run writes evidence plus state. There are no
+hidden background actions.
 
 ## Release Guardrails
 
@@ -193,7 +182,10 @@ Arc Harness Shell is a preview-safe worker shell. Every consequential path passe
 
 ## Windows operator installation (v0.11)
 
-Prerequisites: Windows PowerShell 5.1+, Python 3.11+, Git, Ollama, and the explicitly selected local model (`qwen2.5:7b` by default). Arc installs per-user under `%LOCALAPPDATA%\SparkPitLabs\ArcBot` and does not add a firewall rule or external listener.
+Prerequisites: Windows PowerShell 5.1+, Python 3.11+, and Git. Ollama and a
+local model are not required for the non-executing control plane. Arc installs
+per-user under `%LOCALAPPDATA%\SparkPitLabs\ArcBot` and does not add a firewall
+rule or external listener.
 
 ```powershell
 .\scripts\windows\install-arc.ps1
@@ -208,4 +200,9 @@ Prerequisites: Windows PowerShell 5.1+, Python 3.11+, Git, Ollama, and the expli
 .\scripts\windows\uninstall-arc.ps1
 ```
 
-The installer never pulls a model unless `-InstallModel` is supplied. Default uninstall preserves data, evidence, approvals, and logs. Use `arc.ps1 doctor`, `arc.ps1 health`, `arc.ps1 logs`, or `arc.ps1 diagnostics` for troubleshooting. See [docs/ARC_V0_11_WINDOWS_OPERATOR.md](docs/ARC_V0_11_WINDOWS_OPERATOR.md) for layout, lifecycle, rollback, and security details.
+The installer never invokes or installs Ollama; `-InstallModel` fails closed.
+Default uninstall preserves data, evidence, approvals, and logs. Use
+`arc.ps1 doctor`, `arc.ps1 health`, `arc.ps1 logs`, or `arc.ps1 diagnostics`
+for troubleshooting. See
+[docs/ARC_V0_11_WINDOWS_OPERATOR.md](docs/ARC_V0_11_WINDOWS_OPERATOR.md) for
+layout, lifecycle, rollback, and security details.

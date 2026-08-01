@@ -2,12 +2,12 @@
 
 from __future__ import annotations
 
-import importlib
 import json
 from pathlib import Path
 
 import pytest
 
+import arc_bot_shell.integrations as integrations_package
 from arc_bot_shell.integrations import (
     DoctorConfig,
     DoctorProbes,
@@ -18,7 +18,7 @@ from arc_bot_shell.integrations import (
     normalize_ollama_url,
     run_doctor,
 )
-from arc_bot_shell.integrations.doctor import main
+from arc_bot_shell.integrations.doctor import main, probe_ollama_reachability
 
 
 def _guardian(*, compatible: bool = True) -> GuardianContractProbe:
@@ -33,27 +33,41 @@ def _guardian(*, compatible: bool = True) -> GuardianContractProbe:
         requires_sparkbot_imports=False,
         integration_compatible=compatible,
         blockers=() if compatible else ("guardian_contract_missing_decision_id",),
+        contract_compatible=compatible,
+        decision_id_supported=compatible,
+        local_preview_policy_supported=compatible,
+        policy_reference=(
+            "guardian-core-v1.1-local-model-preview-policy"
+            if compatible
+            else None
+        ),
     )
 
 
 def _lima(*, compatible: bool = True) -> LimaContractProbe:
     return LimaContractProbe(
         available=True,
-        import_path="lima.harness",
-        runtime_entrypoint="lima.harness.execute_v1_live_provider_model_call",
-        runtime_input_type="Mapping[str, Any]",
-        runtime_output_type="dict[str, Any]",
-        provider_executor_interface=(
-            "Callable[[Mapping[str, Any]], Mapping[str, Any]]"
-        ),
-        guardian_request_type="ConsequentialActionRequest",
-        guardian_decision_type="GuardianDecision",
+        import_path="lima.runtime",
+        runtime_entrypoint="lima.runtime.run_governed_request",
+        runtime_input_type="GovernedRequest | dict[str, Any]",
+        runtime_output_type="GovernedDecision",
+        provider_executor_interface=None,
+        guardian_request_type=None,
+        guardian_decision_type=None,
         decision_id_field="decision_id" if compatible else None,
         requires_sparkbot_imports=False,
         integration_compatible=compatible,
-        blockers=() if compatible else ("lima_contract_missing_decision_id",),
+        blockers=(
+            (
+                "retired_lima_harness_execution_disabled",
+                "lima_loopback_ollama_execution_disabled",
+            )
+            if compatible
+            else ("lima_contract_missing_decision_id",)
+        ),
         decision_id_propagation_supported=compatible,
-        fake_executor_smoke_ready=compatible,
+        fake_executor_smoke_ready=False,
+        loopback_ollama_supported=False,
     )
 
 
@@ -96,18 +110,23 @@ def test_missing_configuration_uses_installed_lima_without_network() -> None:
 
     assert report["guardian_available"] is False
     assert report["lima_available"] is True
+    assert report["guardian_to_lima_contract_compatible"] is False
     assert report["ollama_configured"] is False
     assert report["ollama_reachable"] is False
     assert report["ollama_model_available"] is False
     assert report["local_integration_ready"] is False
     assert report["blockers"] == [
         "ARC_GUARDIAN_PATH_not_configured",
+        "retired_lima_harness_execution_disabled",
+        "lima_loopback_ollama_execution_disabled",
         "ARC_OLLAMA_URL_not_configured",
         "ARC_OLLAMA_MODEL_not_configured",
     ]
 
 
-def test_available_fake_contracts_and_ollama_report_ready(tmp_path: Path) -> None:
+def test_supported_lima_is_visible_but_ollama_execution_stays_disabled(
+    tmp_path: Path,
+) -> None:
     observed: dict[str, object] = {}
 
     def reachable(url: str, model: str, timeout: float) -> OllamaProbeResult:
@@ -128,15 +147,38 @@ def test_available_fake_contracts_and_ollama_report_ready(tmp_path: Path) -> Non
     assert report["arc_available"] is True
     assert report["guardian_available"] is True
     assert report["lima_available"] is True
+    assert report["guardian_to_lima_contract_compatible"] is True
     assert report["ollama_configured"] is True
-    assert report["ollama_reachable"] is True
-    assert report["ollama_model_available"] is True
+    assert report["ollama_reachable"] is False
+    assert report["ollama_model_available"] is False
     assert report["ollama_model"] == "qwen2.5:7b"
-    assert report["local_integration_ready"] is True
-    assert report["blockers"] == []
-    assert observed["url"] == "http://127.0.0.1:11434"
-    assert observed["model"] == "qwen2.5:7b"
-    assert float(observed["timeout"]) < 1.0
+    assert report["local_integration_ready"] is False
+    assert report["blockers"] == [
+        "retired_lima_harness_execution_disabled",
+        "lima_loopback_ollama_execution_disabled",
+        "ollama_probe_disabled_non_executing_control_plane",
+    ]
+    assert observed == {}
+
+
+def test_retired_ollama_probe_is_not_public_and_never_uses_network(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    network_calls = 0
+
+    def unexpected_network(*_args: object, **_kwargs: object) -> object:
+        nonlocal network_calls
+        network_calls += 1
+        raise AssertionError("retired Ollama probe must not use network")
+
+    monkeypatch.setattr("urllib.request.urlopen", unexpected_network)
+    assert not hasattr(integrations_package, "probe_ollama_reachability")
+    assert probe_ollama_reachability(
+        "http://127.0.0.1:11434",
+        "qwen2.5:7b",
+        0.1,
+    ) == OllamaProbeResult(reachable=False, model_available=False)
+    assert network_calls == 0
 
 
 def test_guardian_without_decision_id_blocks_readiness(tmp_path: Path) -> None:
@@ -188,10 +230,10 @@ def test_missing_ollama_model_is_controlled_unavailable(tmp_path: Path) -> None:
         ),
     )
 
-    assert report["ollama_reachable"] is True
+    assert report["ollama_reachable"] is False
     assert report["ollama_model_available"] is False
     assert report["local_integration_ready"] is False
-    assert "ollama_model_unavailable" in report["blockers"]
+    assert "ollama_probe_disabled_non_executing_control_plane" in report["blockers"]
 
 
 @pytest.mark.parametrize(
@@ -252,12 +294,13 @@ def test_cli_reports_retired_lima_harness_unavailable(
     from lima.runtime import run_governed_request
 
     assert callable(run_governed_request)
-    with pytest.raises(ModuleNotFoundError):
-        importlib.import_module("lima.harness")
-    assert payload["lima_available"] is False
-    assert payload["lima_public_import_path"] == "lima.harness"
-    assert payload["lima_entrypoint_available"] is False
-    assert payload["decision_id_propagation_supported"] is False
+    assert payload["lima_available"] is True
+    assert payload["lima_public_import_path"] == "lima.runtime"
+    assert payload["lima_entrypoint_available"] is True
+    assert payload["decision_id_propagation_supported"] is True
+    assert payload["guardian_to_lima_contract_compatible"] is False
     assert payload["fake_executor_smoke_ready"] is False
+    assert payload["lima_loopback_ollama_supported"] is False
     assert payload["ollama_integration_ready"] is False
-    assert "lima_import_failed:ModuleNotFoundError" in payload["blockers"]
+    assert "retired_lima_harness_execution_disabled" in payload["blockers"]
+    assert "lima_loopback_ollama_execution_disabled" in payload["blockers"]

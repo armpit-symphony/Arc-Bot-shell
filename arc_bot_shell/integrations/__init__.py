@@ -13,7 +13,6 @@ from .doctor import (
     normalize_ollama_url,
     probe_guardian_contract,
     probe_lima_contract,
-    probe_ollama_reachability,
     run_doctor,
 )
 
@@ -28,6 +27,5 @@ __all__ = [
     "normalize_ollama_url",
     "probe_guardian_contract",
     "probe_lima_contract",
-    "probe_ollama_reachability",
     "run_doctor",
 ]

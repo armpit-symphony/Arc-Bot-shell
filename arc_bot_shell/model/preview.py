@@ -8,7 +8,7 @@ from arc_bot_shell.model.adapters import (
     DeterministicPreviewAdapter,
     LocalModelPreviewAdapter,
     ModelPreviewUnavailableAdapter,
-    OllamaPreviewAdapter,
+    RETIRED_OLLAMA_MODEL_PREVIEW_DISABLED,
 )
 
 DEFAULT_MODEL_ADAPTER = "deterministic"
@@ -28,9 +28,10 @@ def build_model_preview_adapter(
     if resolved == "deterministic":
         return DeterministicPreviewAdapter(model_name=model_name or "deterministic-preview-v1")
     if resolved == "ollama":
-        return OllamaPreviewAdapter(
+        return ModelPreviewUnavailableAdapter(
+            adapter_name="ollama",
             model_name=model_name or os.environ.get("ARC_MODEL_NAME", "llama3.1"),
-            base_url=os.environ.get("ARC_OLLAMA_URL", DEFAULT_OLLAMA_URL),
+            reason=RETIRED_OLLAMA_MODEL_PREVIEW_DISABLED,
         )
     return ModelPreviewUnavailableAdapter(
         adapter_name=resolved,

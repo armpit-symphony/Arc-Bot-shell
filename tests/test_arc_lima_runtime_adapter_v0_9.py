@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-import importlib
 import json
 from pathlib import Path
 import socket
+import sys
 import threading
 from typing import Any, Mapping
 
@@ -23,6 +23,7 @@ from lima.runtime import run_governed_request
 REPO_ROOT = Path(__file__).resolve().parents[1]
 LOCAL_PREVIEW = REPO_ROOT / 'samples' / 'tasks' / 'local_model_preview.json'
 DECISION_ID = 'guardian-decision:test-v0-9'
+RETIRED_DISABLED = 'retired lima.harness execution surface is disabled'
 
 
 def _request() -> ArcActionRequest:
@@ -93,8 +94,8 @@ class CountingLimaAdapter(LimaRuntimeAdapter):
 
 def test_supported_lima_rc_import_and_retired_harness_boundary() -> None:
     assert callable(run_governed_request)
-    with pytest.raises(ModuleNotFoundError):
-        importlib.import_module("lima.harness")
+    with pytest.raises(LimaRuntimeUnavailableError, match=RETIRED_DISABLED):
+        LimaRuntimeAdapter._load_entrypoint()
 
 
 def test_retired_harness_fails_closed_before_supported_preflight(
@@ -109,7 +110,7 @@ def test_retired_harness_fails_closed_before_supported_preflight(
 
     with pytest.raises(
         LimaRuntimeUnavailableError,
-        match="LIMA public import unavailable",
+        match=RETIRED_DISABLED,
     ):
         LimaRuntimeAdapter().execute(_request(), _decision(), executor)
     assert executor_calls == 0
@@ -224,38 +225,46 @@ def test_missing_guardian_decision_fails_before_lima(
     assert entrypoint_loads == 0
 
 
-def test_missing_lima_fails_closed_in_explicit_mode(
+def test_monkeypatched_legacy_entrypoint_cannot_restore_execution(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    def missing() -> object:
-        raise LimaRuntimeUnavailableError('LIMA public import unavailable')
+    entrypoint_calls = 0
 
-    monkeypatch.setattr(LimaRuntimeAdapter, '_load_entrypoint', staticmethod(missing))
-    with pytest.raises(LimaRuntimeUnavailableError, match='unavailable'):
-        LimaRuntimeAdapter().invoke(_request(), _decision())
-
-
-def test_contract_mismatch_fails_closed(monkeypatch: pytest.MonkeyPatch) -> None:
-    def mismatched(
-        request: Mapping[str, Any],
-        executor: object,
-    ) -> dict[str, Any]:
-        return {
-            'guardian_decision_id': 'guardian-decision:changed',
-            'evidence': {'guardian_decision_id': 'guardian-decision:changed'},
-            'executor_called': True,
-            'network_called': False,
-            'credentials_used': False,
-            'ollama_called': False,
-        }
+    def forbidden_entrypoint() -> object:
+        nonlocal entrypoint_calls
+        entrypoint_calls += 1
+        raise AssertionError("retired LIMA entrypoint must not be loaded")
 
     monkeypatch.setattr(
         LimaRuntimeAdapter,
         '_load_entrypoint',
-        staticmethod(lambda: mismatched),
+        staticmethod(forbidden_entrypoint),
     )
-    with pytest.raises(LimaRuntimeUnavailableError, match='lineage changed'):
+    with pytest.raises(LimaRuntimeUnavailableError, match=RETIRED_DISABLED):
         LimaRuntimeAdapter().invoke(_request(), _decision())
+    assert entrypoint_calls == 0
+
+
+def test_visible_retired_harness_module_cannot_restore_execution(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    legacy_calls = 0
+
+    class VisibleLegacyHarness:
+        @staticmethod
+        def execute_v1_live_provider_model_call(*_args: object) -> object:
+            nonlocal legacy_calls
+            legacy_calls += 1
+            raise AssertionError("retired LIMA harness must not execute")
+
+    monkeypatch.setitem(
+        sys.modules,
+        "lima.harness",
+        VisibleLegacyHarness(),  # type: ignore[arg-type]
+    )
+    with pytest.raises(LimaRuntimeUnavailableError, match=RETIRED_DISABLED):
+        LimaRuntimeAdapter().invoke(_request(), _decision())
+    assert legacy_calls == 0
 
 
 def test_missing_retired_surface_blocks_executor_errors_and_output() -> None:
@@ -266,14 +275,14 @@ def test_missing_retired_surface_blocks_executor_errors_and_output() -> None:
         executor_calls += 1
         raise AssertionError("retired executor must not be called")
 
-    with pytest.raises(LimaRuntimeUnavailableError, match='public import unavailable'):
+    with pytest.raises(LimaRuntimeUnavailableError, match=RETIRED_DISABLED):
         LimaRuntimeAdapter().execute(
             _request(),
             _decision(),
             unreachable_executor,
         )
 
-    with pytest.raises(LimaRuntimeUnavailableError, match='public import unavailable'):
+    with pytest.raises(LimaRuntimeUnavailableError, match=RETIRED_DISABLED):
         LimaRuntimeAdapter().execute(
             _request(),
             _decision(),
@@ -304,7 +313,7 @@ def test_harness_records_fail_closed_when_retired_surface_is_missing(
     assert result.exit_code == 4
     assert result.result_status == 'runtime_unavailable'
     assert result.blocked_reason is not None
-    assert 'LIMA public import unavailable' in result.blocked_reason
+    assert RETIRED_DISABLED in result.blocked_reason
     assert result.guardian_decision_id == DECISION_ID
     assert result.runtime_output == {}
     assert evidence['guardian_decision_id'] == DECISION_ID

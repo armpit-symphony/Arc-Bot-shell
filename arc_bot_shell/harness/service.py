@@ -148,7 +148,7 @@ def run_task_packet(
             if selected_model_adapter_name == "ollama":
                 blocked_reason = (
                     "direct Ollama model adapters are disabled; use "
-                    "--runtime lima --executor ollama"
+                    "Arc governed preflight"
                 )
                 runtime_adapter = "lima_runtime_required"
                 result_status = "runtime_unavailable"

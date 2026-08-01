@@ -10,7 +10,13 @@ import sys
 from arc_bot_shell.contracts import ArcActionRequest, GuardianDecision
 from arc_bot_shell.health import build_health_report
 from arc_bot_shell.harness import load_task_packet, run_task_packet
-from arc_bot_shell.model import DeterministicPreviewAdapter, OllamaPreviewAdapter
+from arc_bot_shell.model import (
+    DeterministicPreviewAdapter,
+    ModelPreviewUnavailableAdapter,
+    build_model_preview_adapter,
+)
+import arc_bot_shell.model as model_package
+import arc_bot_shell.model.adapters as model_adapters
 from arc_bot_shell.state import JsonlStateStore
 
 
@@ -24,11 +30,6 @@ class ExplodingModelPreviewAdapter:
 
     def preview(self, task_packet, request, guardian_decision):  # pragma: no cover - test double
         raise AssertionError("model preview adapter should not be called")
-
-
-class FailingOllamaPreviewAdapter(OllamaPreviewAdapter):
-    def _invoke_ollama(self, prompt_summary: str) -> dict[str, object]:
-        raise OSError("no local Ollama listener")
 
 
 def test_deterministic_model_preview_adapter_creates_draft_without_network_or_credentials() -> None:
@@ -195,7 +196,9 @@ def test_health_reports_deterministic_model_adapter_availability() -> None:
     assert payload["samples"]["local_model_preview"] is True
 
 
-def test_ollama_adapter_unavailable_path_is_controlled() -> None:
+def test_retired_ollama_adapter_is_not_public_and_fails_without_network(
+    monkeypatch,
+) -> None:
     request = ArcActionRequest.from_dict(json.loads(LOCAL_MODEL_PREVIEW_TASK.read_text(encoding="utf-8")))
     decision = GuardianDecision(
         decision_id=f"guardian-decision:{request.action_id}",
@@ -205,9 +208,30 @@ def test_ollama_adapter_unavailable_path_is_controlled() -> None:
         reason="preview-only test request",
     )
 
-    result = FailingOllamaPreviewAdapter().preview(request.payload, request, decision)
+    network_calls = 0
+
+    def unexpected_network(*_args, **_kwargs):
+        nonlocal network_calls
+        network_calls += 1
+        raise AssertionError("retired Ollama adapter must not use network")
+
+    monkeypatch.setattr("urllib.request.urlopen", unexpected_network)
+    assert not hasattr(model_package, "OllamaPreviewAdapter")
+    adapter = model_adapters.OllamaPreviewAdapter()
+    result = adapter.preview(request.payload, request, decision)
 
     assert result.status == "preview_unavailable"
-    assert result.used_network is True
+    assert result.used_network is False
     assert result.used_credentials is False
-    assert result.error_message == "no local Ollama listener"
+    assert result.error_message == (
+        model_adapters.RETIRED_OLLAMA_MODEL_PREVIEW_DISABLED
+    )
+    assert network_calls == 0
+
+
+def test_ollama_builder_returns_fail_closed_adapter() -> None:
+    adapter = build_model_preview_adapter("ollama", model_name="qwen2.5:7b")
+
+    assert isinstance(adapter, ModelPreviewUnavailableAdapter)
+    assert adapter.adapter_name == "ollama"
+    assert adapter.reason == model_adapters.RETIRED_OLLAMA_MODEL_PREVIEW_DISABLED

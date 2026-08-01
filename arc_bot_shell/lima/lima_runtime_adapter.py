@@ -3,7 +3,6 @@ from __future__ import annotations
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass
 import hashlib
-import importlib
 from typing import Any
 
 from arc_bot_shell.contracts import ArcActionRequest, GuardianDecision, LimaRuntimeResult
@@ -11,10 +10,14 @@ from arc_bot_shell.contracts import ArcActionRequest, GuardianDecision, LimaRunt
 from .ports import LimaRuntimeUnavailableError
 
 
-LIMA_ENTRYPOINT = "lima.harness.execute_v1_live_provider_model_call"
-LIMA_PINNED_REFERENCE = "lima-runtime-v1.1-loopback-ollama-executor"
-LIMA_PINNED_COMMIT = "deea1c4f5b6d3455a7e97e4b621e22b8d22a6244"
-LIMA_PINNED_TAG_OBJECT = "23470f3341fe6f70ebf3595efb9aef07791beed8"
+LIMA_ENTRYPOINT = "lima.runtime.run_governed_request"
+LIMA_PINNED_REFERENCE = "lima-runtime==0.1.0rc1"
+LIMA_PINNED_COMMIT = "4e7c648349f0a5a19694ac5f0c57b5cb14dc2b17"
+LIMA_PINNED_TAG_OBJECT = None
+RETIRED_EXECUTION_DISABLED = (
+    "retired lima.harness execution surface is disabled; "
+    "use lima.runtime.run_governed_request through Arc governed preflight"
+)
 FAKE_EXECUTOR_KIND = "fake"
 FAKE_EXECUTOR_NAME = "in_process_fake_executor"
 
@@ -69,100 +72,8 @@ class LimaRuntimeAdapter:
         executor: Callable[[Mapping[str, Any]], Mapping[str, Any]],
     ) -> LimaRuntimeResult:
         self._validate_preconditions(request, guardian_decision)
-        entrypoint = self._load_entrypoint()
-        runtime_request = self.build_runtime_request(
-            request,
-            guardian_decision,
-            executor_kind=self.executor_kind,
-            executor_ref=self.executor_name,
-            endpoint=self.endpoint,
-            model=self.model,
-        )
-        executor_call_count = 0
-        executor_decision_id: str | None = None
-
-        def counted_executor(payload: Mapping[str, Any]) -> Mapping[str, Any]:
-            nonlocal executor_call_count, executor_decision_id
-            executor_call_count += 1
-            if executor_call_count != 1:
-                raise RuntimeError("LIMA executor must be called exactly once")
-            executor_decision_id = str(payload.get("guardian_decision_id", ""))
-            if executor_decision_id != guardian_decision.decision_id:
-                raise RuntimeError("Guardian decision_id changed before the executor")
-            return executor(payload)
-
-        try:
-            raw_result = entrypoint(runtime_request, counted_executor)
-        except Exception as exc:
-            raise LimaRuntimeUnavailableError(
-                f"LIMA runtime execution failed closed: {type(exc).__name__}: {exc}"
-            ) from exc
-        if not isinstance(raw_result, Mapping):
-            raise LimaRuntimeUnavailableError(
-                "LIMA runtime contract mismatch: result must be a mapping"
-            )
-        result = dict(raw_result)
-        decision_id = guardian_decision.decision_id
-        evidence = result.get("evidence")
-        result_decision = result.get("guardian_decision")
-        if (
-            result.get("guardian_decision_id") != decision_id
-            or not isinstance(result_decision, Mapping)
-            or result_decision.get("decision_id") != decision_id
-            or not isinstance(evidence, Mapping)
-            or evidence.get("guardian_decision_id") != decision_id
-            or executor_decision_id != decision_id
-        ):
-            raise LimaRuntimeUnavailableError(
-                "LIMA runtime contract mismatch: Guardian decision_id lineage changed"
-            )
-        if result.get("executor_called") is not True or executor_call_count != 1:
-            raise LimaRuntimeUnavailableError(
-                "LIMA runtime contract mismatch: executor was not called exactly once"
-            )
-        if result.get("executor_kind") != self.executor_kind:
-            raise LimaRuntimeUnavailableError(
-                "LIMA runtime contract mismatch: executor_kind changed"
-            )
-        if result.get("credentials_used") is not False:
-            raise LimaRuntimeUnavailableError(
-                "LIMA runtime contract mismatch: credentials are not allowed"
-            )
-
-        if self.executor_kind == FAKE_EXECUTOR_KIND:
-            self._validate_fake_result(result)
-            result_status = "lima_preview_completed"
-        elif self.executor_kind == "loopback_ollama":
-            self._validate_loopback_ollama_result(result)
-            result_status = (
-                "lima_ollama_preview_completed"
-                if result.get("status") == "completed"
-                else "lima_ollama_preview_unavailable"
-            )
-        else:
-            raise LimaRuntimeUnavailableError("unsupported LIMA executor_kind")
-
-        output_summary, output_reference = _safe_output_metadata(result)
-        result.update(
-            {
-                "lima_adapter": self.adapter_name,
-                "lima_entrypoint": LIMA_ENTRYPOINT,
-                "lima_pinned_reference": LIMA_PINNED_REFERENCE,
-                "lima_pinned_commit": LIMA_PINNED_COMMIT,
-                "lima_pinned_tag_object": LIMA_PINNED_TAG_OBJECT,
-                "executor_name": self.executor_name,
-                "executor_call_count": executor_call_count,
-                "lima_input_guardian_decision_id": decision_id,
-                "executor_input_guardian_decision_id": executor_decision_id,
-                "normalized_output_summary": output_summary,
-                "output_reference": output_reference,
-            }
-        )
-        return LimaRuntimeResult(
-            runtime_adapter=self.adapter_name,
-            result_status=result_status,
-            output=result,
-        )
+        del executor
+        raise LimaRuntimeUnavailableError(RETIRED_EXECUTION_DISABLED)
 
     def invoke(
         self,
@@ -303,16 +214,7 @@ class LimaRuntimeAdapter:
         [Mapping[str, Any], Callable[[Mapping[str, Any]], Mapping[str, Any]]],
         dict[str, Any],
     ]:
-        try:
-            harness = importlib.import_module("lima.harness")
-            entrypoint = getattr(harness, "execute_v1_live_provider_model_call")
-        except (AttributeError, ImportError, ModuleNotFoundError) as exc:
-            raise LimaRuntimeUnavailableError(
-                f"LIMA public import unavailable: {type(exc).__name__}"
-            ) from exc
-        if not callable(entrypoint):
-            raise LimaRuntimeUnavailableError("LIMA public entrypoint is not callable")
-        return entrypoint
+        raise LimaRuntimeUnavailableError(RETIRED_EXECUTION_DISABLED)
 
 
 def build_lima_runtime_adapter(
@@ -321,31 +223,11 @@ def build_lima_runtime_adapter(
     endpoint: str | None = None,
     model: str | None = None,
 ) -> LimaRuntimeAdapter:
-    """Build only the two published LIMA executor kinds."""
+    """Return a fail-closed adapter for the retired execution route."""
 
     if executor_name in {None, "fake"}:
         return LimaRuntimeAdapter()
     if executor_name == "ollama":
-        from .ollama_executor import (
-            LOOPBACK_OLLAMA_EXECUTOR_KIND,
-            LOOPBACK_OLLAMA_EXECUTOR_NAME,
-            execute_loopback_ollama,
-            normalize_loopback_ollama_url,
-            resolve_ollama_model,
-        )
-
-        if endpoint is None:
-            raise LimaRuntimeUnavailableError("Ollama endpoint is required")
-        try:
-            normalized_endpoint = normalize_loopback_ollama_url(endpoint)
-            resolved_model = resolve_ollama_model(model)
-        except ValueError as exc:
-            raise LimaRuntimeUnavailableError(str(exc)) from exc
-        return LimaRuntimeAdapter(
-            executor=execute_loopback_ollama,
-            executor_kind=LOOPBACK_OLLAMA_EXECUTOR_KIND,
-            executor_name=LOOPBACK_OLLAMA_EXECUTOR_NAME,
-            endpoint=normalized_endpoint,
-            model=resolved_model,
-        )
+        del endpoint, model
+        raise LimaRuntimeUnavailableError(RETIRED_EXECUTION_DISABLED)
     raise LimaRuntimeUnavailableError("unsupported LIMA executor")

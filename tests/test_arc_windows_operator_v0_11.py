@@ -26,7 +26,10 @@ from arc_bot_shell.service.local_service import (
     run_local_service,
     status_local_service,
 )
-from arc_bot_shell.service.operator_runtime_cli import submit
+from arc_bot_shell.service.operator_runtime_cli import (
+    _doctor_ready_for_nonexecuting_control_plane,
+    submit,
+)
 from arc_bot_shell.service.pidfile import (
     DuplicateServiceError,
     ManagedProcessRecord,
@@ -40,6 +43,43 @@ from arc_bot_shell.tasks import JsonlTaskQueue
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
+
+
+def _nonexecuting_doctor_report() -> dict[str, object]:
+    return {
+        "real_guardian_ready": True,
+        "guardian_to_lima_contract_compatible": True,
+        "lima_available": True,
+        "full_local_integration_ready": False,
+        "ollama_reachable": False,
+        "ollama_model_available": False,
+        "blockers": [
+            "retired_lima_harness_execution_disabled",
+            "lima_loopback_ollama_execution_disabled",
+            "ollama_probe_disabled_non_executing_control_plane",
+        ],
+    }
+
+
+def test_operator_doctor_accepts_only_the_expected_nonexecuting_state() -> None:
+    report = _nonexecuting_doctor_report()
+
+    assert _doctor_ready_for_nonexecuting_control_plane(report) is True
+    assert _doctor_ready_for_nonexecuting_control_plane(
+        {**report, "real_guardian_ready": False}
+    ) is False
+    assert _doctor_ready_for_nonexecuting_control_plane(
+        {**report, "guardian_to_lima_contract_compatible": False}
+    ) is False
+    assert _doctor_ready_for_nonexecuting_control_plane(
+        {**report, "full_local_integration_ready": True}
+    ) is False
+    assert _doctor_ready_for_nonexecuting_control_plane(
+        {**report, "ollama_reachable": True}
+    ) is False
+    assert _doctor_ready_for_nonexecuting_control_plane(
+        {**report, "blockers": [*report["blockers"], "guardian_unavailable"]}
+    ) is False
 
 
 def _config(tmp_path: Path) -> OperatorConfig:
@@ -98,7 +138,7 @@ def test_operator_config_rejects_non_loopback_or_malformed_endpoints(
 def test_operator_config_preserves_v0_10_authority_pins(tmp_path: Path) -> None:
     config = _config(tmp_path)
     assert config.guardian_reference == "guardian-core-v1.1-local-model-preview-policy"
-    assert config.lima_reference == "lima-runtime-v1.1-loopback-ollama-executor"
+    assert config.lima_reference == "lima-runtime==0.1.0rc1"
     assert ARC_V0_10_ROLLBACK_TAG == "arc-harness-shell-v0.10"
     assert ARC_V0_10_COMMIT == "fa1e93ff18203218a863b679f3d3608aa46bd5a4"
     assert config.startup_task_name == ARC_STARTUP_TASK_NAME
@@ -230,7 +270,7 @@ def test_diagnostics_redacts_sensitive_fields_and_omits_evidence(
         assert doctor["credential"] == "[REDACTED]"
 
 
-def test_submit_uses_queue_then_guarded_runtime_without_permission_expansion(
+def test_legacy_windows_submit_uses_queue_and_fails_closed_before_execution(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -245,20 +285,20 @@ def test_submit_uses_queue_then_guarded_runtime_without_permission_expansion(
             {
                 "action_id": "arc-action:local-model-preview-001",
                 "run_id": "arc-run-test",
-                "result_status": "lima_ollama_preview_completed",
+                "result_status": "runtime_unavailable",
                 "guardian_status": "allow",
                 "guardian_decision_id": "guardian-decision:test",
-                "lima_called": True,
-                "executor_called": True,
-                "executor_call_count": 1,
-                "ollama_called": True,
-                "network_called": True,
-                "network_scope": "loopback_only",
+                "lima_called": False,
+                "executor_called": False,
+                "executor_call_count": 0,
+                "ollama_called": False,
+                "network_called": False,
                 "execution_allowed": False,
                 "evidence_path": str(config.paths.evidence_dir / "run.json"),
-                "output_text": "local response",
+                "blocked_reason": "retired execution surface is disabled",
+                "output_text": "",
             },
-            0,
+            4,
         )
 
     monkeypatch.setattr(
@@ -275,9 +315,13 @@ def test_submit_uses_queue_then_guarded_runtime_without_permission_expansion(
     assert "--runtime" in args and "lima" in args
     assert "--executor" in args and "ollama" in args
     assert payload["guardian_decision_id"] == "guardian-decision:test"
+    assert payload["lima_called"] is False
+    assert payload["executor_called"] is False
+    assert payload["ollama_called"] is False
+    assert payload["network_called"] is False
     assert payload["execution_allowed"] is False
     tasks = JsonlTaskQueue(config.paths.task_queue_path).list_tasks()
-    assert tasks[0].status == "completed"
+    assert tasks[0].status == "failed"
 
 
 def test_external_email_submit_remains_blocked_before_runtime(
@@ -337,6 +381,12 @@ def test_windows_scripts_do_not_add_firewall_or_non_loopback_listeners() -> None
     assert "/rl highest" not in text
     assert "ollama uninstall" not in text
     assert "ollama rm" not in text
+    assert "ollama pull" not in text
+    assert "ollama list" not in text
+    assert "ollama --version" not in text
+    assert "lima-runtime==0.1.0rc1" in text
+    assert "4e7c648349f0a5a19694ac5f0c57b5cb14dc2b17" in text
+    assert "lima-runtime-v1.1-loopback-ollama-executor" not in text
 
 
 @pytest.mark.skipif(os.name != "nt", reason="PowerShell parser check is Windows-only")
