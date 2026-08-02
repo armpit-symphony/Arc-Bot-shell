@@ -55,7 +55,7 @@ try {
     if ($manifest.lima_tag -ne "lima-runtime==0.1.0rc1") {
         throw "LIMA pin changed during installation."
     }
-    if ($manifest.lima_commit -ne "4e7c648349f0a5a19694ac5f0c57b5cb14dc2b17") {
+    if ($manifest.lima_commit -ne "40d6f1379284931ee46f05650e9201d6f98975d6") {
         throw "LIMA commit changed during installation."
     }
 

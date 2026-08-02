@@ -1,0 +1,31 @@
+name: Dependency pin currency
+
+# Deliberately not a pull request check. Whether a dependency has merged
+# something new is unrelated to whether the pull request under review is
+# correct, so blocking on it would turn this repository red for reasons no
+# reviewer here can act on. It runs on a schedule instead.
+#
+# Arc's LIMA pin is frozen at the RC1 public API freeze, so this job reports
+# it as intentionally behind main rather than failing on it.
+
+on:
+  schedule:
+    - cron: "23 13 * * 1-5"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  currency:
+    name: Report pins that are behind main
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Compare every pin with its dependency main
+        run: python scripts/check-stack-pins.py --check-currency

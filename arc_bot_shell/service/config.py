@@ -14,6 +14,7 @@ from arc_bot_shell.lima import (
     DEFAULT_OLLAMA_URL,
     LIMA_PINNED_COMMIT,
     LIMA_PINNED_REFERENCE,
+    LIMA_SUPERSEDED_COMMITS,
     normalize_loopback_ollama_url,
     resolve_ollama_model,
 )
@@ -190,7 +191,13 @@ class OperatorConfig:
             raise ValueError("Guardian reference does not match the v0.10 trust baseline")
         if self.lima_reference != LIMA_PINNED_REFERENCE:
             raise ValueError("LIMA reference does not match the v0.10 trust baseline")
-        if self.lima_commit != LIMA_PINNED_COMMIT:
+        if self.lima_commit in LIMA_SUPERSEDED_COMMITS:
+            # Written by an earlier install, before the baseline caught up with
+            # the pin Arc actually installs. Accept it and normalise forward so
+            # health and doctor cannot keep reporting a commit Arc is not
+            # running. Rewritten in place because this dataclass is frozen.
+            object.__setattr__(self, "lima_commit", LIMA_PINNED_COMMIT)
+        elif self.lima_commit != LIMA_PINNED_COMMIT:
             raise ValueError("LIMA commit does not match the v0.10 trust baseline")
         normalize_loopback_ollama_url(self.ollama_url)
         resolve_ollama_model(self.model)
