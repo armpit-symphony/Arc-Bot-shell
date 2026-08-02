@@ -184,14 +184,23 @@ class ArcGrantExecutor:
         if size > MAX_DOCUMENT_BYTES:
             raise ArcExecutionDenied("document_too_large")
 
-        content = candidate.read_text(encoding="utf-8", errors="replace")
+        raw = candidate.read_bytes()
+        # Decoded strictly. A lossy decode would hand the operator plausible
+        # looking text that is not what the file says, which is worse than
+        # refusing to show it. Byte counting still works either way.
+        try:
+            content = raw.decode("utf-8")
+        except UnicodeDecodeError:
+            content = None
+
         return {
             "capability": "document_read",
             "grant_id": grant["grant_id"],
             "request_id": grant["request_id"],
             "resource_id": resource_id,
-            "byte_count": size,
+            "byte_count": len(raw),
             "content": content,
+            "is_utf8_text": content is not None,
             "executed": True,
             "side_effects_performed": False,
         }
