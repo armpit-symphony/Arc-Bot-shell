@@ -1,0 +1,83 @@
+{
+  "lock_version": "1.0.0",
+  "purpose": "Single source of truth for every live dependency pin in Arc Bot Shell. A pin recorded here is duplicated into one or more sites; scripts/check-stack-pins.py proves every site agrees with this file, and scripts/bump-pin.py moves them together. Commit hashes in docs, proof packets, and test fixtures are historical evidence, not live pins, and are deliberately absent from this lock.",
+  "policies": {
+    "tracking": "Expected to equal the dependency's main. Drift is reported by the scheduled currency job.",
+    "frozen": "Deliberately held behind main. Requires a written reason."
+  },
+  "operational_paths": [
+    "pyproject.toml",
+    "workspace.lock.json",
+    "README.md",
+    ".github/workflows/*.yml",
+    "arc_bot_shell/lima/lima_runtime_adapter.py",
+    "tests/test_arc_lima_rc1_consumer_pin.py"
+  ],
+  "dependencies": {
+    "lima-runtime": {
+      "repo": "armpit-symphony/LIMA-AI-OS",
+      "commit": "40d6f1379284931ee46f05650e9201d6f98975d6",
+      "policy": "frozen",
+      "reason": "LIMA v0.1 RC1 public API freeze. tests/test_arc_lima_rc1_consumer_pin.py attests that Arc consumes exactly this commit, so moving it retires that attestation and must be a deliberate, reviewed change rather than a routine bump. Arc does not need newer LIMA: the execution-grant path consumes grants as JSON off the wire and imports nothing from lima.",
+      "package": {
+        "name": "lima-runtime",
+        "version": "0.1.0rc1"
+      },
+      "sites": [
+        {
+          "path": "pyproject.toml",
+          "pattern": "LIMA-AI-OS\\.git@(?P<commit>[0-9a-f]{40})",
+          "occurrences": 1
+        },
+        {
+          "path": "workspace.lock.json",
+          "pattern": "\"ref\": \"(?P<commit>[0-9a-f]{40})\"",
+          "occurrences": 1
+        },
+        {
+          "path": "workspace.lock.json",
+          "pattern": "\"name\": \"LIMA-AI-OS\"[\\s\\S]*?\"commit\": \"(?P<commit>[0-9a-f]{40})\"",
+          "occurrences": 1
+        },
+        {
+          "path": "README.md",
+          "pattern": "pinned to LIMA commit\\s*`(?P<commit>[0-9a-f]{40})`",
+          "occurrences": 1
+        },
+        {
+          "path": "tests/test_arc_lima_rc1_consumer_pin.py",
+          "pattern": "LIMA_COMMIT = \"(?P<commit>[0-9a-f]{40})\"",
+          "occurrences": 1
+        }
+      ]
+    },
+    "guardian-suite": {
+      "repo": "armpit-symphony/LIMA-Guardian-Suite",
+      "commit": "69e843218c521b913edcec404dea6b7be8c64f06",
+      "policy": "tracking",
+      "reason": "",
+      "package": null,
+      "sites": [
+        {
+          "path": "workspace.lock.json",
+          "pattern": "\"name\": \"LIMA-Guardian-Suite\"[\\s\\S]*?\"commit\": \"(?P<commit>[0-9a-f]{40})\"",
+          "occurrences": 1
+        }
+      ]
+    },
+    "lima-adapter-trust-baseline": {
+      "repo": "armpit-symphony/LIMA-AI-OS",
+      "commit": "4e7c648349f0a5a19694ac5f0c57b5cb14dc2b17",
+      "policy": "frozen",
+      "reason": "KNOWN DIVERGENCE, recorded rather than silently corrected. LIMA_PINNED_COMMIT is the v0.10 operator trust baseline reported by arc_bot_shell/health.py and integrations/doctor.py, and validated by ArcOperatorConfig.__post_init__. It was last moved in b62f119 and did not follow the install pin to 40d6f13, so Arc's health output names an older LIMA commit than the one actually installed. Changing it rejects every operator config already persisted with the current value, so it needs a migration decision, not a bump. Registered here so it cannot drift further unnoticed.",
+      "package": null,
+      "sites": [
+        {
+          "path": "arc_bot_shell/lima/lima_runtime_adapter.py",
+          "pattern": "LIMA_PINNED_COMMIT = \"(?P<commit>[0-9a-f]{40})\"",
+          "occurrences": 1
+        }
+      ]
+    }
+  }
+}
