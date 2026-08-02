@@ -3,3 +3,8 @@ __pycache__/
 .pytest_cache/
 *.egg-info/
 artifacts/
+
+# This repository pins lima-runtime to a commit Lima-Office does not, so it
+# needs an interpreter of its own. See docs/ENVIRONMENT.md.
+.venv/
+venv/
