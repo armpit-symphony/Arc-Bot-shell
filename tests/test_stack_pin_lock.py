@@ -89,7 +89,12 @@ def _fixture_repo(root: Path, lock: dict) -> None:
 def test_lock_parses_and_declares_every_pinned_dependency() -> None:
     lock = stack_pins.load_lock(ROOT)
     names = {dependency.name for dependency in lock.dependencies}
-    assert names == {"lima-runtime", "guardian-suite", "lima-adapter-trust-baseline"}
+    assert names == {
+        "lima-runtime",
+        "guardian-suite",
+        "arc-rollback-target",
+        "lima-superseded-operator-baseline",
+    }
 
 
 def test_every_site_agrees_with_the_lock() -> None:
@@ -109,15 +114,19 @@ def test_checker_passes_on_this_repository() -> None:
     assert "is not registered" not in result.stdout
 
 
-def test_install_pin_is_repeated_in_all_five_sites() -> None:
-    """pyproject, both lock entries, the README, and the RC1 attestation."""
+def test_install_pin_is_repeated_in_all_nine_sites() -> None:
+    """Including the adapter baseline and the Windows installer chain."""
 
     dependency = stack_pins.load_lock(ROOT).dependency("lima-runtime")
     paths = sorted(site.path for site in dependency.sites)
     assert paths == [
         "README.md",
+        "arc_bot_shell/lima/lima_runtime_adapter.py",
         "pyproject.toml",
+        "scripts/windows/common.ps1",
+        "scripts/windows/smoke-arc-windows-operator.ps1",
         "tests/test_arc_lima_rc1_consumer_pin.py",
+        "tests/test_arc_windows_operator_v0_11.py",
         "workspace.lock.json",
         "workspace.lock.json",
     ]
@@ -131,20 +140,35 @@ def test_lima_pin_is_frozen_with_a_reason() -> None:
     assert "RC1" in dependency.reason
 
 
-def test_adapter_trust_baseline_divergence_stays_declared() -> None:
-    """LIMA_PINNED_COMMIT does not match the install pin, and that is recorded.
+def test_operator_trust_baseline_is_a_site_of_the_install_pin() -> None:
+    """The adapter baseline and the install pin are now one fact.
 
-    It is reported by health and doctor and validated by the operator config,
-    so correcting it is a migration rather than a bump. This test fails if the
-    divergence is closed or moved without revisiting the recorded reason.
+    They diverged because they were two independent constants that nothing
+    compared. Holding the adapter constant as a site of lima-runtime makes a
+    future divergence a build failure rather than a discovery.
     """
 
+    dependency = stack_pins.load_lock(ROOT).dependency("lima-runtime")
+    paths = {site.path for site in dependency.sites}
+    assert "arc_bot_shell/lima/lima_runtime_adapter.py" in paths
+
+
+def test_superseded_baseline_is_registered_but_never_current() -> None:
+    """The retired baseline is kept only to migrate old operator configs."""
+
     lock = stack_pins.load_lock(ROOT)
-    baseline = lock.dependency("lima-adapter-trust-baseline")
-    install = lock.dependency("lima-runtime")
-    assert baseline.policy == "frozen"
-    assert baseline.commit != install.commit
-    assert "KNOWN DIVERGENCE" in baseline.reason
+    superseded = lock.dependency("lima-superseded-operator-baseline")
+    assert superseded.policy == "frozen"
+    assert superseded.commit != lock.dependency("lima-runtime").commit
+    assert "never be bumped" in superseded.reason
+
+
+def test_rollback_target_agrees_across_config_installer_and_smoke() -> None:
+    """A rollback that restores a different commit in each place is a hazard."""
+
+    dependency = stack_pins.load_lock(ROOT).dependency("arc-rollback-target")
+    assert len(dependency.sites) == 4
+    assert dependency.policy == "frozen"
 
 
 def test_evidence_records_are_not_tracked_as_pins() -> None:

@@ -10,8 +10,12 @@
     "workspace.lock.json",
     "README.md",
     ".github/workflows/*.yml",
+    "scripts/*.py",
+    "scripts/windows/*.ps1",
     "arc_bot_shell/lima/lima_runtime_adapter.py",
-    "tests/test_arc_lima_rc1_consumer_pin.py"
+    "arc_bot_shell/service/config.py",
+    "tests/test_arc_lima_rc1_consumer_pin.py",
+    "tests/test_arc_windows_operator_v0_11.py"
   ],
   "dependencies": {
     "lima-runtime": {
@@ -48,6 +52,26 @@
           "path": "tests/test_arc_lima_rc1_consumer_pin.py",
           "pattern": "LIMA_COMMIT = \"(?P<commit>[0-9a-f]{40})\"",
           "occurrences": 1
+        },
+        {
+          "path": "arc_bot_shell/lima/lima_runtime_adapter.py",
+          "pattern": "LIMA_PINNED_COMMIT = \"(?P<commit>[0-9a-f]{40})\"",
+          "occurrences": 1
+        },
+        {
+          "path": "scripts/windows/common.ps1",
+          "pattern": "\\$script:LimaCommit = \"(?P<commit>[0-9a-f]{40})\"",
+          "occurrences": 1
+        },
+        {
+          "path": "scripts/windows/smoke-arc-windows-operator.ps1",
+          "pattern": "\\$manifest\\.lima_commit -ne \"(?P<commit>[0-9a-f]{40})\"",
+          "occurrences": 1
+        },
+        {
+          "path": "tests/test_arc_windows_operator_v0_11.py",
+          "pattern": "assert \"(?P<commit>[0-9a-f]{40})\" in text",
+          "occurrences": 1
         }
       ]
     },
@@ -62,19 +86,53 @@
           "path": "workspace.lock.json",
           "pattern": "\"name\": \"LIMA-Guardian-Suite\"[\\s\\S]*?\"commit\": \"(?P<commit>[0-9a-f]{40})\"",
           "occurrences": 1
+        },
+        {
+          "path": "scripts/windows/common.ps1",
+          "pattern": "\\$script:GuardianCommit = \"(?P<commit>[0-9a-f]{40})\"",
+          "occurrences": 1
         }
       ]
     },
-    "lima-adapter-trust-baseline": {
+    "arc-rollback-target": {
+      "repo": "armpit-symphony/Arc-Bot-shell",
+      "commit": "fa1e93ff18203218a863b679f3d3608aa46bd5a4",
+      "policy": "frozen",
+      "reason": "Arc's own v0.10 rollback target, not a dependency. It is repeated in the operator config, the Windows installer, and the installer smoke, so all four copies must agree or a rollback would restore something nobody reviewed. It moves only when the rollback baseline is deliberately re-cut.",
+      "package": null,
+      "sites": [
+        {
+          "path": "arc_bot_shell/service/config.py",
+          "pattern": "ARC_V0_10_COMMIT = \"(?P<commit>[0-9a-f]{40})\"",
+          "occurrences": 1
+        },
+        {
+          "path": "scripts/windows/common.ps1",
+          "pattern": "\\$script:ArcRollbackCommit = \"(?P<commit>[0-9a-f]{40})\"",
+          "occurrences": 1
+        },
+        {
+          "path": "scripts/windows/smoke-arc-windows-operator.ps1",
+          "pattern": "\\$rollback\\.commit -ne \"(?P<commit>[0-9a-f]{40})\"",
+          "occurrences": 1
+        },
+        {
+          "path": "tests/test_arc_windows_operator_v0_11.py",
+          "pattern": "ARC_V0_10_COMMIT == \"(?P<commit>[0-9a-f]{40})\"",
+          "occurrences": 1
+        }
+      ]
+    },
+    "lima-superseded-operator-baseline": {
       "repo": "armpit-symphony/LIMA-AI-OS",
       "commit": "4e7c648349f0a5a19694ac5f0c57b5cb14dc2b17",
       "policy": "frozen",
-      "reason": "KNOWN DIVERGENCE, recorded rather than silently corrected. LIMA_PINNED_COMMIT is the v0.10 operator trust baseline reported by arc_bot_shell/health.py and integrations/doctor.py, and validated by ArcOperatorConfig.__post_init__. It was last moved in b62f119 and did not follow the install pin to 40d6f13, so Arc's health output names an older LIMA commit than the one actually installed. Changing it rejects every operator config already persisted with the current value, so it needs a migration decision, not a bump. Registered here so it cannot drift further unnoticed.",
+      "reason": "Not a live pin. This is the retired v0.10/v0.11 trust baseline, kept only so an operator config persisted by an earlier install still loads and is normalised forward to the current pin. It is registered so the scan stays complete and so nobody mistakes it for something that should move. It must never be bumped; when support for that config generation is dropped, delete the entry and the frozenset member together.",
       "package": null,
       "sites": [
         {
           "path": "arc_bot_shell/lima/lima_runtime_adapter.py",
-          "pattern": "LIMA_PINNED_COMMIT = \"(?P<commit>[0-9a-f]{40})\"",
+          "pattern": "LIMA_SUPERSEDED_COMMITS[\\s\\S]*?\"(?P<commit>[0-9a-f]{40})\"",
           "occurrences": 1
         }
       ]

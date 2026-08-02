@@ -55,21 +55,43 @@ that commit. Arc does not need newer LIMA: the execution-grant path consumes
 grants as JSON off the wire and imports nothing from `lima`. Moving it retires
 that attestation and is a reviewed decision, never a routine bump.
 
-## A known divergence, recorded on purpose
+## The operator trust baseline
 
 `LIMA_PINNED_COMMIT` in `arc_bot_shell/lima/lima_runtime_adapter.py` is the
-v0.10 operator trust baseline. It is reported by `health.py` and
-`integrations/doctor.py` and validated by `ArcOperatorConfig.__post_init__`.
+operator trust baseline. It is reported by `health.py` and
+`integrations/doctor.py`, validated by `OperatorConfig`, and baked into the
+deployed manifest by `scripts/windows/common.ps1`.
 
-It was last moved in `b62f119` and did not follow the install pin, so **Arc's
-health output names an older LIMA commit than the one actually installed**.
+It last moved in `b62f119` and did not follow the install pin, so for a period
+**Arc's health output and Windows installer named an older LIMA commit than
+the one actually installed**. Nothing compared the two constants, which is why
+it drifted.
 
-It is registered in the lock as `lima-adapter-trust-baseline` rather than
-quietly corrected, because changing the constant rejects every operator config
-already persisted with the current value. That is a migration decision, not a
-bump. Registering it means it cannot drift further without being noticed, and
-a test fails if the divergence is closed without revisiting the recorded
-reason.
+It is now a site of `lima-runtime` rather than an independent constant, so the
+two cannot disagree without failing the build, and
+`tests/test_lima_trust_baseline_migration.py` compares the baseline directly
+against `pyproject.toml`, the RC1 attestation, and the installer.
+
+### Migrating an existing install
+
+`LIMA_SUPERSEDED_COMMITS` lists retired baselines. A config persisted by an
+earlier install still loads, and its `lima_commit` is normalised forward to
+the current pin on load and rewritten on the next save — so an old install
+never keeps reporting a commit it is not running. An unrecognised value is
+still rejected; the migration is not a rubber stamp.
+
+The retired value is registered as `lima-superseded-operator-baseline` so the
+scan stays complete. It must never be bumped. When support for that config
+generation is dropped, delete the lock entry and the frozenset member
+together.
+
+## Pins that are not dependencies
+
+`arc-rollback-target` is Arc's own v0.10 rollback commit. It is not a
+dependency, but it is repeated in the operator config, the Windows installer,
+the installer smoke, and a test — and a rollback that restored a different
+commit in each place would be a hazard, so the lock holds all four in
+agreement.
 
 ## Moving a pin
 

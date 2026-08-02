@@ -12,8 +12,20 @@ from .ports import LimaRuntimeUnavailableError
 
 LIMA_ENTRYPOINT = "lima.runtime.run_governed_request"
 LIMA_PINNED_REFERENCE = "lima-runtime==0.1.0rc1"
-LIMA_PINNED_COMMIT = "4e7c648349f0a5a19694ac5f0c57b5cb14dc2b17"
+LIMA_PINNED_COMMIT = "40d6f1379284931ee46f05650e9201d6f98975d6"
 LIMA_PINNED_TAG_OBJECT = None
+
+# Trust baselines this build still accepts from an operator config written by
+# an earlier install, and normalises forward on load. A config persisted
+# before the baseline moved must keep working; it must not silently keep
+# claiming a LIMA commit that is no longer the one Arc runs.
+LIMA_SUPERSEDED_COMMITS = frozenset(
+    {
+        # v0.10/v0.11 baseline, left behind when the install pin moved to the
+        # LIMA v0.1 RC1 public API freeze.
+        "4e7c648349f0a5a19694ac5f0c57b5cb14dc2b17",
+    }
+)
 RETIRED_EXECUTION_DISABLED = (
     "retired lima.harness execution surface is disabled; "
     "use lima.runtime.run_governed_request through Arc governed preflight"
