@@ -28,19 +28,26 @@ test asserts no evidence path is registered as a site.
 `ARC_V0_10_COMMIT` in `arc_bot_shell/service/config.py` is Arc's own rollback
 target, not a dependency pin, and is deliberately not tracked here.
 
-## The two checks
+## The three checks
 
-| | Consistency | Currency |
-|---|---|---|
-| Question | Do all copies of a pin agree? | Is the pin still the right one? |
-| Needs network | No | Yes |
-| Where | Every pull request, blocking | Scheduled weekday job |
+| | Consistency | Currency | Installation |
+|---|---|---|---|
+| Question | Do all copies of a pin agree? | Is the pin still the right one? | Is the interpreter running it? |
+| Needs network | No | Yes | No |
+| Flag | *(default)* | `--check-currency` | `--check-installed` |
+| Where | Every pull request, blocking | Scheduled weekday job | Before a test run |
 
 Currency does not block pull requests. Whether LIMA merged something this
 morning has nothing to do with whether the change under review is correct.
 
 A pin can pass consistency and fail currency at once — that is exactly the
 state behind the most recent incident in this stack.
+
+A pin can also pass both and still be wrong where it counts. Every file can
+agree with the lock while the interpreter imports a different commit entirely,
+because Lima-Office pins `lima-runtime` to a commit this repository refuses.
+That is what `--check-installed` is for, and it is why each repository needs its
+own environment: [ENVIRONMENT.md](ENVIRONMENT.md).
 
 ## Policies
 

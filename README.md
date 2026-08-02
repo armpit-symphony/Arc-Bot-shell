@@ -70,10 +70,16 @@ Arc Harness Shell does not execute live email, calendar, browser, network, devic
 
 ## Quickstart
 
+This repository needs its own virtual environment. It pins `lima-runtime` to a
+commit Lima-Office does not, so a shared interpreter silently gives one of the
+two repositories the wrong runtime — see [docs/ENVIRONMENT.md](docs/ENVIRONMENT.md).
+
 ```bash
-python -m pip install -e .
-python -m compileall arc_bot_shell
-python -m arc_bot_shell.health
+python -m venv .venv
+.venv/Scripts/python -m pip install -e . pytest    # .venv/bin/python elsewhere
+.venv/Scripts/python scripts/check-stack-pins.py --check-installed
+.venv/Scripts/python -m compileall arc_bot_shell
+.venv/Scripts/python -m arc_bot_shell.health
 ```
 
 ## Task Queue Commands

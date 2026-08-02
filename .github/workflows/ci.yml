@@ -16,6 +16,10 @@ jobs:
         run: python -m pip install -e . pytest
       - name: Check dependency pin lock consistency
         run: python scripts/check-stack-pins.py
+      # Proves the interpreter about to run the tests imports the locked LIMA
+      # commit rather than whatever a previous step happened to leave behind.
+      - name: Check the installed LIMA commit matches the lock
+        run: python scripts/check-stack-pins.py --check-installed
 
       - name: Compile
         run: python -m compileall arc_bot_shell

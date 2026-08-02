@@ -347,3 +347,186 @@ def test_forced_bump_moves_a_frozen_pin(tmp_path: Path) -> None:
         check=True,
     )
     assert stack_pins.load_lock(tmp_path).dependency("demo-dep").commit == COMMIT_B
+
+
+# --- the interpreter, not just the files ----------------------------------
+#
+# Every site can agree and the interpreter can still be importing a different
+# commit. That is not hypothetical here: Lima-Office pins lima-runtime to a
+# commit this repository refuses, so one shared interpreter silently gives one
+# of the two repositories the wrong runtime.
+
+
+def _fake_dist(
+    site: Path,
+    name: str,
+    version: str = "0.1.0rc1",
+    direct_url: dict | None = None,
+) -> None:
+    """Write a distribution importlib.metadata will discover on sys.path."""
+
+    dist_info = site / f"{name.replace('-', '_')}-{version}.dist-info"
+    dist_info.mkdir(parents=True, exist_ok=True)
+    (dist_info / "METADATA").write_text(
+        f"Metadata-Version: 2.1\nName: {name}\nVersion: {version}\n",
+        encoding="utf-8",
+    )
+    if direct_url is not None:
+        (dist_info / "direct_url.json").write_text(
+            json.dumps(direct_url), encoding="utf-8"
+        )
+
+
+def _vcs(commit: str) -> dict:
+    return {
+        "url": "https://github.com/armpit-symphony/LIMA-AI-OS.git",
+        "vcs_info": {"vcs": "git", "commit_id": commit},
+    }
+
+
+@pytest.fixture
+def site(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
+    directory = tmp_path / "site-packages"
+    directory.mkdir()
+    monkeypatch.syspath_prepend(str(directory))
+    importlib.invalidate_caches()
+    return directory
+
+
+def test_a_vcs_install_reports_the_commit_pip_resolved(site: Path) -> None:
+    _fake_dist(site, "demo-pkg", direct_url=_vcs(COMMIT_A))
+    found = stack_pins.installed_package("demo-pkg")
+    assert found is not None
+    assert found.commit == COMMIT_A
+
+
+def test_a_package_that_is_absent_reports_nothing(site: Path) -> None:
+    assert stack_pins.installed_package("demo-pkg-never-installed") is None
+
+
+def test_a_local_checkout_is_not_treated_as_a_verified_commit(site: Path) -> None:
+    """An editable install can contain anything; it must not pass as a pin."""
+
+    _fake_dist(
+        site,
+        "demo-pkg",
+        direct_url={"url": "file:///C:/work/LIMA-AI-OS", "dir_info": {"editable": True}},
+    )
+    found = stack_pins.installed_package("demo-pkg")
+    assert found is not None
+    assert found.commit is None
+    assert "local checkout" in found.described_origin
+
+
+def test_a_registry_install_has_no_commit_to_verify(site: Path) -> None:
+    _fake_dist(site, "demo-pkg")
+    found = stack_pins.installed_package("demo-pkg")
+    assert found is not None
+    assert found.commit is None
+
+
+def test_unreadable_provenance_is_reported_rather_than_raised(site: Path) -> None:
+    dist_info = site / "demo_pkg-0.1.0rc1.dist-info"
+    _fake_dist(site, "demo-pkg", direct_url=_vcs(COMMIT_A))
+    (dist_info / "direct_url.json").write_text("{not json", encoding="utf-8")
+    found = stack_pins.installed_package("demo-pkg")
+    assert found is not None
+    assert found.commit is None
+
+
+def test_a_commit_that_is_not_a_full_lowercase_hash_is_refused(site: Path) -> None:
+    """The same shape rule the lock enforces, applied to what pip recorded."""
+
+    _fake_dist(site, "demo-pkg", direct_url=_vcs("ABCDEF1234"))
+    found = stack_pins.installed_package("demo-pkg")
+    assert found is not None
+    assert found.commit is None
+
+
+def _installed_fixture(root: Path, commit: str = COMMIT_A) -> None:
+    lock = _fixture_lock(commit=commit)
+    lock["dependencies"]["demo-dep"]["package"] = {
+        "name": "demo-pkg",
+        "version": "0.1.0rc1",
+    }
+    _write_fixture(root, lock, commit=commit)
+    (root / "scripts").mkdir(exist_ok=True)
+    for name in ("stack_pins.py", "check-stack-pins.py"):
+        (root / "scripts" / name).write_bytes((ROOT / "scripts" / name).read_bytes())
+
+
+def _run_checker(root: Path, site: Path, *flags: str) -> subprocess.CompletedProcess:
+    import os
+
+    env = dict(os.environ)
+    env["PYTHONPATH"] = str(site)
+    return subprocess.run(
+        [sys.executable, str(root / "scripts" / "check-stack-pins.py"), *flags],
+        capture_output=True,
+        text=True,
+        cwd=str(root),
+        env=env,
+    )
+
+
+def test_the_wrong_interpreter_fails_and_names_both_commits(tmp_path: Path) -> None:
+    """The failure this exists to catch, reported so the cause is obvious."""
+
+    site = tmp_path / "site-packages"
+    site.mkdir()
+    _fake_dist(site, "demo-pkg", direct_url=_vcs(COMMIT_B))
+    _installed_fixture(tmp_path, commit=COMMIT_A)
+
+    result = _run_checker(tmp_path, site, "--check-installed")
+
+    assert result.returncode == 1, result.stdout
+    assert "Result: FAIL" in result.stdout
+    assert COMMIT_A[:7] in result.stdout
+    assert COMMIT_B[:7] in result.stdout
+    # Without the interpreter path the operator cannot tell which environment
+    # is at fault, which is the whole question when two repositories disagree.
+    assert sys.executable in result.stdout
+
+
+def test_the_matching_interpreter_passes(tmp_path: Path) -> None:
+    site = tmp_path / "site-packages"
+    site.mkdir()
+    _fake_dist(site, "demo-pkg", direct_url=_vcs(COMMIT_A))
+    _installed_fixture(tmp_path, commit=COMMIT_A)
+
+    result = _run_checker(tmp_path, site, "--check-installed")
+
+    assert result.returncode == 0, result.stdout
+    assert "Result: PASS" in result.stdout
+
+
+def test_a_missing_package_fails_rather_than_passing_quietly(tmp_path: Path) -> None:
+    site = tmp_path / "site-packages"
+    site.mkdir()
+    _installed_fixture(tmp_path, commit=COMMIT_A)
+
+    result = _run_checker(tmp_path, site, "--check-installed")
+
+    assert result.returncode == 1, result.stdout
+    assert "is not installed" in result.stdout
+
+
+def test_the_default_run_still_ignores_the_environment(tmp_path: Path) -> None:
+    """Consistency must stay offline and environment-independent."""
+
+    site = tmp_path / "site-packages"
+    site.mkdir()
+    _fake_dist(site, "demo-pkg", direct_url=_vcs(COMMIT_B))
+    _installed_fixture(tmp_path, commit=COMMIT_A)
+
+    result = _run_checker(tmp_path, site)
+
+    assert result.returncode == 0, result.stdout
+    assert "installation checked: no" in result.stdout
+
+
+def test_this_repository_declares_lima_runtime_as_an_installable_package() -> None:
+    """Dropping the package block would silently make the check a no-op."""
+
+    dependency = stack_pins.load_lock(ROOT).dependency("lima-runtime")
+    assert dependency.package_name == "lima-runtime"
