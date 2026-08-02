@@ -213,6 +213,7 @@ class InstalledPackage:
     version: str
     commit: str | None
     origin: str | None
+    requested_revision: str | None = None
 
     @property
     def described_origin(self) -> str:
@@ -235,6 +236,11 @@ def installed_package(package_name: str) -> InstalledPackage | None:
     ``commit`` is None when the package is installed but not from a VCS pin -
     an editable local checkout, for instance, whose contents this tool cannot
     vouch for.
+
+    ``requested_revision`` is what the install actually asked for. A caller that
+    needs to prove the install was pinned by commit rather than by a moving ref
+    must compare it too: ``@main`` that happens to resolve to the right commit
+    today records the right ``commit`` and the wrong intent.
     """
 
     try:
@@ -266,13 +272,23 @@ def installed_package(package_name: str) -> InstalledPackage | None:
         return InstalledPackage(
             name=package_name, version=version, commit=None, origin=origin
         )
+    requested = vcs_info.get("requested_revision")
+    requested_revision = requested if isinstance(requested, str) else None
     commit = vcs_info.get("commit_id")
     if not isinstance(commit, str) or not COMMIT_PATTERN.match(commit):
         return InstalledPackage(
-            name=package_name, version=version, commit=None, origin=origin
+            name=package_name,
+            version=version,
+            commit=None,
+            origin=origin,
+            requested_revision=requested_revision,
         )
     return InstalledPackage(
-        name=package_name, version=version, commit=commit, origin=origin
+        name=package_name,
+        version=version,
+        commit=commit,
+        origin=origin,
+        requested_revision=requested_revision,
     )
 
 

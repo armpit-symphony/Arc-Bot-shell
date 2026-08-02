@@ -377,10 +377,14 @@ def _fake_dist(
         )
 
 
-def _vcs(commit: str) -> dict:
+def _vcs(commit: str, requested: str | None = None) -> dict:
     return {
         "url": "https://github.com/armpit-symphony/LIMA-AI-OS.git",
-        "vcs_info": {"vcs": "git", "commit_id": commit},
+        "vcs_info": {
+            "vcs": "git",
+            "commit_id": commit,
+            "requested_revision": commit if requested is None else requested,
+        },
     }
 
 
@@ -402,6 +406,16 @@ def test_a_vcs_install_reports_the_commit_pip_resolved(site: Path) -> None:
 
 def test_a_package_that_is_absent_reports_nothing(site: Path) -> None:
     assert stack_pins.installed_package("demo-pkg-never-installed") is None
+
+
+def test_a_moving_ref_is_distinguishable_from_a_pinned_commit(site: Path) -> None:
+    """An install asking for @main can resolve right and still be unpinned."""
+
+    _fake_dist(site, "demo-pkg", direct_url=_vcs(COMMIT_A, requested="main"))
+    found = stack_pins.installed_package("demo-pkg")
+    assert found is not None
+    assert found.commit == COMMIT_A
+    assert found.requested_revision == "main"
 
 
 def test_a_local_checkout_is_not_treated_as_a_verified_commit(site: Path) -> None:

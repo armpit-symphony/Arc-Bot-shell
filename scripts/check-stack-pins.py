@@ -12,11 +12,14 @@ different checks:
   unrelated merge in a dependency must never turn this repository's pull
   request CI red.
 * Installation - every file agrees, and the interpreter is importing something
-  else entirely. This repository pins lima-runtime to a commit that Lima-Office
-  does not, so a single shared interpreter can only ever satisfy one of them,
-  and the loser's tests pass against the wrong runtime without saying so. That
-  check needs an environment rather than a repository, so it lives behind
+  else entirely. Arc-Bot-shell and Lima-Office pin lima-runtime to different
+  commits deliberately, so one shared interpreter can only ever satisfy one of
+  them, and the loser's tests pass against the wrong runtime without saying so.
+  That check needs an environment rather than a repository, so it lives behind
   ``--check-installed`` and belongs in front of a test run.
+
+This file is byte-identical in both repositories on purpose. Keep it that way:
+nothing here may describe one of them as "this" repository.
 
 The unregistered scan covers operational paths only. Commit hashes in audits,
 proof packets, and fixtures are evidence of what was true at the time; this
