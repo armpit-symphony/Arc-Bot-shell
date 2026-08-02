@@ -4,6 +4,28 @@ Arc Harness Shell is a minimal, local, Guardian-gated worker shell for the
 Arc/LIMA stack. Its current control-plane path supports guarded task intake,
 non-executing preflight, evidence capture, and local operator visibility.
 
+## Start here
+
+Arc is one of four repositories. It is the **worker shell and operator
+client** — the only component in the stack that can perform a side effect, and
+only when handed a grant it has been independently opted in to honour.
+
+- The stack, the request flow, and which LIMA commit each consumer pins:
+  [LIMA-AI-OS `docs/GOVERNED_STACK_MAP.md`](https://github.com/armpit-symphony/LIMA-AI-OS/blob/main/docs/GOVERNED_STACK_MAP.md)
+- Running Arc against a real Supervisor: [docs/RUNNING_THE_LAB.md](docs/RUNNING_THE_LAB.md)
+- Moving a dependency pin: [docs/DEPENDENCY_PIN_LOCK.md](docs/DEPENDENCY_PIN_LOCK.md)
+
+The model is **LIMA decides, shells execute.** A governed decision can never
+authorize execution. Permission arrives separately, as a short-lived
+single-use grant, and even a valid grant does nothing unless Arc was started
+with its own execution opt-in. Arc cannot enable itself from the Supervisor
+side, and the Supervisor cannot enable Arc.
+
+Arc's LIMA pin is deliberately **frozen** at the v0.1 RC1 public API freeze
+and is intentionally older than the commit Lima-Office tracks. That is not
+drift. Arc consumes grants as JSON off the wire and imports nothing from
+`lima`, so it does not need a newer kernel.
+
 ## LIMA v0.1 governed preflight consumer
 
 Arc includes a non-executing governed preflight path:
@@ -55,10 +77,33 @@ See [docs/ARC_V0_10_GUARDIAN_LIMA_OLLAMA.md](docs/ARC_V0_10_GUARDIAN_LIMA_OLLAMA
 - Local JSONL run history plus evidence bundle listing
 - Health output for Guardian, LIMA import readiness, queue/state presence, and sample availability
 - Release smoke path that proves intake -> guarded run -> evidence/state -> blocked external send
+- Authenticated worker control plane and operator preflight against a LIMA Office Supervisor
+- Honouring a Supervisor execution grant for one read-only capability, behind Arc's own opt-in
+
+## Granted Execution
+
+`document_read` is the only capability Arc will act on, and it needs all of:
+
+1. A valid, unexpired, single-use grant issued by the Supervisor.
+2. `--execute-granted-capability` passed to `arc-preflight`. Off by default.
+3. `--document-root` pointing at the directory a read may come from. There is
+   no default, so without it nothing can be read.
+
+Arc derives the expected capability from the action it submitted and compares
+that against the grant, rather than reading the capability back off the grant.
+A grant naming something Arc did not ask for is refused with
+`execution_grant_binding_mismatch`. Path containment is resolved before the
+check, reads are capped at 1 MB, and Arc returns byte counts and identifiers —
+never document content.
+
+Every refusal is reported with a reason code rather than raised, so the
+preflight result still prints.
 
 ## Intentionally Blocked
 
-Arc Harness Shell does not execute live email, calendar, browser, network, device, robotics, credential, or office-system mutation actions. The blocked categories are:
+Outside a valid grant for the capability above, Arc Harness Shell does not
+execute live email, calendar, browser, network, device, robotics, credential,
+or office-system mutation actions. The blocked categories are:
 
 - `external_send`
 - `file_write`
