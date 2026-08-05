@@ -11,20 +11,47 @@ still the oldest blocked task, and the queue stops moving while looking busy.
 
 from __future__ import annotations
 
+from typing import Any
+
 import unittest
 
 from arc_bot_shell.tasks.models import TaskRecord
 from arc_bot_shell.tasks.selection import (
+    RESUMABLE_BLOCKED_RESULTS,
     SELECTION_REASONS,
     TaskSelection,
     TaskSelectionError,
+    is_resumable,
     queue_standing,
     select_next_task,
     selectable_tasks,
 )
 
 
-def _task(task_id: str, status: str, created_at: str) -> TaskRecord:
+# A default that also substitutes for an explicit None would silently rewrite
+# the case under test - "no recorded result" is exactly one of the values that
+# must not be resumable.
+_UNSET = object()
+
+
+def _task(
+    task_id: str,
+    status: str,
+    created_at: str,
+    latest_result_status: Any = _UNSET,
+) -> TaskRecord:
+    """A task record. Blocked ones default to waiting on a person.
+
+    intake maps both ``requires_operator_approval`` and ``blocked`` onto the
+    blocked status, so a fixture that leaves the result unset is not a blocked
+    task at all - it is one whose reason for stopping is unknown, which the
+    selector treats as terminal.
+    """
+
+    if latest_result_status is _UNSET:
+        latest_result_status = (
+            "requires_operator_approval" if status == "blocked" else None
+        )
     return TaskRecord(
         task_id=task_id,
         action_id=f"action-{task_id}",
@@ -35,7 +62,14 @@ def _task(task_id: str, status: str, created_at: str) -> TaskRecord:
         status=status,  # type: ignore[arg-type]
         created_at=created_at,
         updated_at=created_at,
+        latest_result_status=latest_result_status,
     )
+
+
+def _refused(task_id: str, created_at: str) -> TaskRecord:
+    """A task a control refused. It must never come back."""
+
+    return _task(task_id, "blocked", created_at, latest_result_status="blocked")
 
 
 class BlockedBeforeQueuedTests(unittest.TestCase):
@@ -73,6 +107,73 @@ class BlockedBeforeQueuedTests(unittest.TestCase):
                 self.assertIsNone(
                     select_next_task([_task("x", status, "2026-08-01T00:00:00Z")])
                 )
+
+
+class RefusedWorkNeverComesBackTests(unittest.TestCase):
+    """The queue-level form of retrying a forbidden denial.
+
+    intake collapses ``requires_operator_approval`` and ``blocked`` onto one
+    status, so nothing downstream can tell "waiting for a person" apart from
+    "a control refused it" by status alone. Resolution names tasks whose answer
+    arrived, and no answer overturns a refusal.
+    """
+
+    def test_a_refused_task_is_not_offered_even_when_listed_as_resolved(self):
+        selection = select_next_task(
+            [_refused("injection", "2026-08-01T00:00:00Z")],
+            resolved_task_ids=["injection"],
+        )
+        self.assertIsNone(selection)
+
+    def test_a_refused_task_loses_to_a_queued_one(self):
+        selection = select_next_task(
+            [
+                _refused("injection", "2026-08-01T00:00:00Z"),
+                _task("q1", "queued", "2026-08-02T00:00:00Z"),
+            ],
+            resolved_task_ids=["injection"],
+        )
+        self.assertEqual("q1", selection.task.task_id)
+
+    def test_a_waiting_task_beside_a_refused_one_is_still_resumable(self):
+        """The guard must not block the case it exists alongside."""
+
+        selection = select_next_task(
+            [
+                _refused("injection", "2026-08-01T00:00:00Z"),
+                _task("waiting", "blocked", "2026-08-02T00:00:00Z"),
+            ],
+            resolved_task_ids=["injection", "waiting"],
+        )
+        self.assertEqual("waiting", selection.task.task_id)
+
+    def test_only_named_results_are_resumable(self):
+        self.assertTrue(
+            is_resumable(
+                _task("t", "blocked", "2026-08-01T00:00:00Z", "requires_operator_approval")
+            )
+        )
+        for result in ("blocked", "failed", "something_new", None):
+            with self.subTest(result=result):
+                self.assertFalse(
+                    is_resumable(_task("t", "blocked", "2026-08-01T00:00:00Z", result))
+                )
+
+    def test_only_blocked_tasks_are_ever_resumable(self):
+        for status in ("queued", "running", "completed", "failed"):
+            with self.subTest(status=status):
+                self.assertFalse(
+                    is_resumable(_task("t", status, "2026-08-01T00:00:00Z"))
+                )
+
+    def test_a_refused_task_is_never_listed_as_selectable(self):
+        listing = selectable_tasks(
+            [
+                _refused("injection", "2026-08-01T00:00:00Z"),
+                _task("waiting", "blocked", "2026-08-02T00:00:00Z"),
+            ]
+        )
+        self.assertEqual(["waiting"], [record.task_id for record in listing])
 
 
 class OrderingTests(unittest.TestCase):
@@ -190,6 +291,25 @@ class QueueStandingTests(unittest.TestCase):
             _task("q1", "queued", "2026-08-01T00:00:00Z"),
             _task("done", "completed", "2026-08-01T00:00:00Z"),
         ]
+
+    def test_refused_work_is_counted_apart_from_work_awaiting_an_answer(self):
+        """Folding them together makes a queue look like it waits on people
+        who cannot help it."""
+
+        standing = queue_standing(
+            [*self._queue(), _refused("injection", "2026-08-01T00:00:00Z")]
+        )
+        self.assertEqual(3, standing["blocked"])
+        self.assertEqual(2, standing["blocked_waiting"])
+        self.assertEqual(1, standing["blocked_terminal"])
+
+    def test_refused_work_is_never_workable(self):
+        standing = queue_standing(
+            [_refused("injection", "2026-08-01T00:00:00Z")],
+            resolved_task_ids=["injection"],
+        )
+        self.assertEqual(0, standing["workable"])
+        self.assertEqual(0, standing["blocked_ready"])
 
     def test_blocked_waiting_is_the_number_stalled_on_somebody(self):
         standing = queue_standing(self._queue(), resolved_task_ids=["b1"])

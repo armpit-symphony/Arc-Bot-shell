@@ -29,6 +29,20 @@ from .models import TaskRecord
 # running them; completed and failed ones are finished with.
 SELECTABLE_STATUSES = ("blocked", "queued")
 
+# "blocked" means two different things, and only one of them may come back.
+#
+# intake maps both ``requires_operator_approval`` and ``blocked`` onto the
+# blocked status. The first is a task waiting on a person and is exactly what
+# this selector exists to resume. The second is a task a control refused, and
+# resuming it would hand the same request back after something declined it -
+# the queue-level form of retrying a forbidden denial.
+#
+# Fail closed: only results named here may be resumed. A task whose latest
+# result is unrecognised, or which has none, stays put. The cost of that is a
+# task needing a person to close it; the cost of the opposite default is a
+# refused request being tried again because somebody listed its id.
+RESUMABLE_BLOCKED_RESULTS = frozenset({"requires_operator_approval"})
+
 # Why a task was chosen, recorded so a queue's behaviour can be explained
 # after the fact rather than reasoned about from its ordering.
 SELECTION_REASONS = (
@@ -69,6 +83,21 @@ class TaskSelection:
         }
 
 
+def is_resumable(record: TaskRecord) -> bool:
+    """Whether a blocked task may ever be picked up again.
+
+    A task waiting on a person may. A task a control refused may not, however
+    it is listed and whoever lists it: resolution names tasks whose *answer*
+    arrived, and no answer overturns a refusal. This mirrors the denial
+    dispositions in Lima-Office, where a forbidden reason is terminal no matter
+    what else is true of the request.
+    """
+
+    if record.status != "blocked":
+        return False
+    return record.latest_result_status in RESUMABLE_BLOCKED_RESULTS
+
+
 def _ordered(records: Iterable[TaskRecord]) -> list[TaskRecord]:
     """Oldest first, with task_id breaking ties so the order is total.
 
@@ -102,20 +131,24 @@ def select_next_task(
 
     blocked = [record for record in tasks if record.status == "blocked"]
     queued = [record for record in tasks if record.status == "queued"]
-    ready = [record for record in blocked if record.task_id in resolved]
+    # is_resumable first, so naming a refused task in resolved_task_ids cannot
+    # bring it back. Resolution says an answer arrived, and no answer overturns
+    # a refusal.
+    resumable = [record for record in blocked if is_resumable(record)]
+    ready = [record for record in resumable if record.task_id in resolved]
 
     if ready:
         return TaskSelection(
             task=_ordered(ready)[0],
             reason="resumed_after_information_arrived",
-            blocked_waiting=len(blocked) - len(ready),
+            blocked_waiting=len(resumable) - len(ready),
             queued_waiting=len(queued),
         )
     if queued:
         return TaskSelection(
             task=_ordered(queued)[0],
             reason="started_from_the_queue",
-            blocked_waiting=len(blocked),
+            blocked_waiting=len(resumable),
             queued_waiting=len(queued) - 1,
         )
     return None
@@ -128,7 +161,7 @@ def selectable_tasks(tasks: Sequence[TaskRecord]) -> list[TaskRecord]:
     operator what the worker will do next without asking it to do anything.
     """
 
-    blocked = _ordered(record for record in tasks if record.status == "blocked")
+    blocked = _ordered(record for record in tasks if is_resumable(record))
     queued = _ordered(record for record in tasks if record.status == "queued")
     return [*blocked, *queued]
 
@@ -144,11 +177,17 @@ def queue_standing(
     supplies something. It is the honest measure of how much of the queue is
     stalled on people rather than on Arc, and it is the number that should fall
     as SOP accumulates.
+
+    ``blocked_terminal`` is counted separately because it will never move at
+    all. Those tasks were refused by a control, and no answer resumes them -
+    they need closing, not resolving. Folding them into ``blocked_waiting``
+    would make a queue look like it was waiting on people who cannot help.
     """
 
     resolved = {str(task_id) for task_id in resolved_task_ids}
     blocked = [record for record in tasks if record.status == "blocked"]
-    ready = [record for record in blocked if record.task_id in resolved]
+    resumable = [record for record in blocked if is_resumable(record)]
+    ready = [record for record in resumable if record.task_id in resolved]
     counts = {status: 0 for status in SELECTABLE_STATUSES}
     for record in tasks:
         if record.status in counts:
@@ -158,6 +197,7 @@ def queue_standing(
         "queued": counts["queued"],
         "blocked": counts["blocked"],
         "blocked_ready": len(ready),
-        "blocked_waiting": len(blocked) - len(ready),
+        "blocked_waiting": len(resumable) - len(ready),
+        "blocked_terminal": len(blocked) - len(resumable),
         "workable": len(ready) + counts["queued"],
     }

@@ -22,6 +22,33 @@ in progress than anyone is finishing.
 Age does not override this. An older queued task still waits behind a blocked
 task whose answer has arrived, because the answer is the scarce thing.
 
+## "Blocked" means two different things, and only one comes back
+
+`intake.py` maps both results onto the same status:
+
+```python
+if result_status in {"blocked", "requires_operator_approval"}:
+    return "blocked"
+```
+
+- `requires_operator_approval` — waiting on a person. **Resumable.**
+- `blocked` — a control refused it. **Never resumable.**
+
+Nothing downstream can tell them apart by status alone, so the selector reads
+`latest_result_status` and refuses to resume a refused task **regardless of
+`resolved_task_ids`**. Resolution names tasks whose *answer* arrived, and no
+answer overturns a refusal.
+
+Without that guard, listing a refused task's id would hand the same request
+back after a control declined it — the queue-level form of retrying a
+`forbidden` denial, which Lima-Office refuses at the routing level. A control
+that can be walked around one layer up is not a control.
+
+`RESUMABLE_BLOCKED_RESULTS` is an allowlist, so an unrecognised result — or
+none at all — stays put. The cost of that default is a task needing a person to
+close it; the cost of the opposite is a refused request being tried again
+because somebody listed its id.
+
 ## A blocked task is only offered once its answer has arrived
 
 This is the part that looks like a detail and is not.
@@ -48,8 +75,14 @@ arbitrary order would make a run impossible to reproduce.
 
 ```python
 queue_standing(tasks, resolved_task_ids=[...])
-# {"queued": 4, "blocked": 3, "blocked_ready": 1, "blocked_waiting": 2, "workable": 5}
+# {"queued": 4, "blocked": 3, "blocked_ready": 1,
+#  "blocked_waiting": 1, "blocked_terminal": 1, "workable": 5}
 ```
+
+`blocked_terminal` is counted apart from `blocked_waiting` because those tasks
+will never move. They were refused, and no answer resumes them — they need
+closing, not resolving. Folding them together would make a queue look like it
+is waiting on people who cannot help it.
 
 `blocked_waiting` is how much of the queue is stalled on **people** rather than
 on Arc. It is the honest counterpart to Lima-Office's `autonomy_rate`: as SOP
