@@ -1,0 +1,66 @@
+# Which task Arc picks up next
+
+A task manager puts jobs in a queue. Arc returns to open tasks that needed more
+information before it could finish them, and only when there are none of those
+does it start something new.
+
+```
+blocked, and the answer has arrived   ->  resume it
+otherwise, oldest queued              ->  start it
+otherwise                             ->  nothing to do
+```
+
+`arc_bot_shell/tasks/selection.py`.
+
+## Why blocked work comes first
+
+A blocked task is work already begun, and usually work somebody has already
+been asked about. Starting a fresh job while an answer sits unused wastes the
+more expensive thing — a person's attention — and leaves the queue with more
+in progress than anyone is finishing.
+
+Age does not override this. An older queued task still waits behind a blocked
+task whose answer has arrived, because the answer is the scarce thing.
+
+## A blocked task is only offered once its answer has arrived
+
+This is the part that looks like a detail and is not.
+
+`resolved_task_ids` names the blocked tasks whose missing information has since
+arrived — an SOP instruction written, an approval decided. A blocked task not
+named there is **still waiting and is not offered**.
+
+Offer it anyway and the worker loops: the task blocks for the same reason, is
+selected again because it is still the oldest blocked task, and the queue stops
+moving while looking busy. That is the same failure as retrying a denial with
+nothing changed, one level up.
+
+Resolution is an explicit input rather than something the selector infers, so a
+caller cannot hand back a task that is still waiting by accident.
+
+## Ordering is total
+
+Oldest first, with `task_id` breaking ties. A manager queuing a batch will
+create several tasks in the same second, and a selector that returned them in
+arbitrary order would make a run impossible to reproduce.
+
+## The number worth watching
+
+```python
+queue_standing(tasks, resolved_task_ids=[...])
+# {"queued": 4, "blocked": 3, "blocked_ready": 1, "blocked_waiting": 2, "workable": 5}
+```
+
+`blocked_waiting` is how much of the queue is stalled on **people** rather than
+on Arc. It is the honest counterpart to Lima-Office's `autonomy_rate`: as SOP
+accumulates and Arc needs asking less often, this should fall.
+
+`workable` is what Arc can pick up right now. When it is zero and
+`blocked_waiting` is not, Arc is idle and waiting on somebody — which is worth
+seeing, because it looks identical to an idle queue from the outside.
+
+## What this does not do
+
+It selects; it does not run anything. Handing the selected task to the governed
+path, and routing whatever comes back, is Lima-Office's
+`route_task_outcome` — see `docs/TASK_SEAM.md` there.
