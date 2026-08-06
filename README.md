@@ -136,6 +136,12 @@ python -m arc_bot_shell.console task <task_id>
 python -m arc_bot_shell.console run-task <task_id> --runtime fake --model-adapter deterministic
 ```
 
+Arc returns to open tasks that needed more information before starting new
+work, and a blocked task is only offered once the thing it was waiting for has
+arrived — otherwise the worker reselects it, blocks for the same reason, and
+the queue stops moving while looking busy. See
+[docs/TASK_SELECTION.md](docs/TASK_SELECTION.md).
+
 ## Local Model Preview
 
 ```bash
