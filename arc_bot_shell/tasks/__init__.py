@@ -2,6 +2,7 @@
 
 from .intake import TaskQueueError, intake_task, run_queued_task
 from .models import TASK_STATUSES, TaskRecord
+from .operator_ide import ArcOperatorIDE
 from .queue import JsonlTaskQueue, default_task_queue_dir, default_task_queue_path
 from .selection import (
     RESUMABLE_BLOCKED_RESULTS,
@@ -16,6 +17,7 @@ from .selection import (
 )
 
 __all__ = [
+    "ArcOperatorIDE",
     "JsonlTaskQueue",
     "RESUMABLE_BLOCKED_RESULTS",
     "SELECTABLE_STATUSES",
