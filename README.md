@@ -26,6 +26,18 @@ and is intentionally older than the commit Lima-Office tracks. That is not
 drift. Arc consumes grants as JSON off the wire and imports nothing from
 `lima`, so it does not need a newer kernel.
 
+## Physical runtime harness UI
+
+Arc now owns a localhost physical-test renderer with separate **Training** and
+**Working** modes. The LIMA Office harness serves the page and remains the
+authoritative state/evidence owner. Training persists reviewed SOP instructions;
+Working exposes only the existing Guardian-gated `document_read` capability and
+is disabled unless both execution opt-ins and a bounded document root were set
+at launch.
+
+See [the Arc Runtime Harness UI](docs/ARC_RUNTIME_HARNESS_UI.md). Launch it from
+LIMA Office with `scripts/arc-runtime-harness.py`.
+
 ## LIMA v0.1 governed preflight consumer
 
 Arc includes a non-executing governed preflight path:
