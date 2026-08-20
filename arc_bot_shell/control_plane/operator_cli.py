@@ -43,6 +43,7 @@ def _parser() -> argparse.ArgumentParser:
         required=True,
         choices=(
             "safe_read",
+            "safe_list",
             "status",
             "external_write",
             "shell",
@@ -79,8 +80,8 @@ def _parser() -> argparse.ArgumentParser:
         type=Path,
         default=None,
         help=(
-            "Directory a granted document_read may read from. There is no "
-            "default, so without it no document can be read."
+            "Directory a granted document_read or document_list may inspect. "
+            "There is no default, so without it storage cannot be inspected."
         ),
     )
     parser.add_argument(
@@ -206,6 +207,25 @@ def _honour_grant_with_content(
                 "performed": False,
                 "reason_code": denial.reason_code,
                 "side_effects_performed": False,
+                "content_emitted": False,
+                "content_reason_code": None,
+            },
+            None,
+        )
+
+    if performed["capability"] == "document_list":
+        return (
+            {
+                "performed": True,
+                "reason_code": None,
+                "capability": performed["capability"],
+                "resource_id": performed["resource_id"],
+                "entry_count": performed["entry_count"],
+                "entry_limit": performed["entry_limit"],
+                "truncated": performed["truncated"],
+                "entries": performed["entries"],
+                "grant_id": performed["grant_id"],
+                "side_effects_performed": performed["side_effects_performed"],
                 "content_emitted": False,
                 "content_reason_code": None,
             },

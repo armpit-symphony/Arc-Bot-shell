@@ -20,6 +20,10 @@ class ArcOperatorIDEUITests(unittest.TestCase):
             "task-list",
             "next-task",
             "approval-list",
+            "directory-path",
+            "run-list",
+            "document-list",
+            "document-list-count",
             "gap-list",
             "ladder-json",
             "document-output",
@@ -33,6 +37,7 @@ class ArcOperatorIDEUITests(unittest.TestCase):
             "/api/mode",
             "/api/training/instruction",
             "/api/training/resolve-gap",
+            "/api/work/list",
             "/api/training/escalation-ladder",
             "/api/work/read",
             "/api/work/content-page",
@@ -55,6 +60,7 @@ class ArcOperatorIDEUITests(unittest.TestCase):
     def test_ui_restates_guardian_and_non_execution_boundaries(self):
         self.assertIn("Instructions never override Guardian", self.source)
         self.assertIn("no execution authority issued", self.source)
+        self.assertIn("Hidden entries, symlinks, content, timestamps", self.source)
         self.assertIn("No mutation, send, connector", self.source)
 
 

@@ -31,6 +31,7 @@
       <section class="center">
         <section class="panel training-only workbench"><div class="panel-head"><div><h2>SOP training bench</h2><p class="help">Resolve an observed gap or teach ahead of failure.</p></div><span class="pill warn">No execution</span></div><div class="panel-body"><input id="training-gap" type="hidden"><div class="fields"><div class="field"><label for="training-task">Task reference</label><input id="training-task" value="document-review" maxlength="200"></div><div class="field"><label for="training-role">Reviewed by role</label><input id="training-role" value="human operator" maxlength="200"></div><div class="field full"><label for="training-instruction">Reviewed instruction</label><textarea id="training-instruction" maxlength="4000" placeholder="Describe the bounded, repeatable steps Arc should follow."></textarea></div></div><div class="actions"><p class="help" id="training-context">New operator-authored SOP. Instructions never override Guardian.</p><button id="save-training">Save instruction</button></div></div></section>
         <section class="panel training-only workbench"><div class="panel-head"><div><h2>Escalation ladder</h2><p class="help">Customer labels; system-enforced manager, executive, and terminal human.</p></div><span class="pill">Validated server-side</span></div><div class="panel-body"><div class="field"><label for="ladder-json">Tier configuration</label><textarea id="ladder-json" spellcheck="false"></textarea></div><div class="actions"><p class="help">Invalid or non-terminating ladders are refused unchanged.</p><button id="save-ladder">Validate &amp; save</button></div></div></section>
+        <section class="panel working-only workbench"><div class="panel-head"><div><h2>Document discovery</h2><p class="help">Fresh Guardian decision for each bounded, non-recursive listing.</p></div><span class="pill" id="document-list-count">Not listed</span></div><div class="panel-body"><div class="fields"><div class="field full"><label for="directory-path">Directory inside fixed document root</label><input id="directory-path" value="." maxlength="200"></div></div><div class="actions"><p class="help">Names, type, and file size only. Hidden entries, symlinks, content, timestamps, and absolute paths stay excluded.</p><div><button class="secondary" id="list-root">Root</button> <button id="run-list">List documents</button></div></div><div class="list" id="document-list" style="margin-top:12px"><div class="empty">Run a governed list to discover documents.</div></div></div></section>
         <section class="panel working-only workbench"><div class="panel-head"><div><h2>Governed document work</h2><p class="help">One task, fresh decision, single-use grant.</p></div><span class="pill good">Read only</span></div><div class="panel-body"><div class="fields"><div class="field"><label for="working-task">Task reference</label><input id="working-task" value="document-review" maxlength="200"></div><div class="field"><label for="working-path">Path inside fixed document root</label><input id="working-path" placeholder="report.txt" maxlength="200"></div></div><div class="actions"><p class="help">No mutation, send, connector, remediation, network, or device action is exposed.</p><button id="run-read">Run governed read</button></div></div></section>
         <section class="panel working-only workbench"><div class="panel-head"><h2>Document viewer</h2><div><span class="pill" id="page-label">No document</span> <button class="secondary mini" id="next-page" disabled>Next page</button></div></div><div class="panel-body"><pre class="document" id="document-output">Run a governed read to view a bounded page.</pre></div></section>
         <section class="panel"><div class="panel-head"><h2>Decision &amp; result</h2><button class="secondary mini" id="worker-status">Check worker</button></div><div class="panel-body"><pre class="output" id="output" aria-live="polite">Connecting to the local Supervisor…</pre></div></section>
@@ -58,6 +59,45 @@
     function renderGaps(items){const list=$("gap-list");if(!items.length){clear(list,"No gaps recorded.");return}list.replaceChildren();items.forEach(gap=>{const item=document.createElement("div"),top=document.createElement("div"),ref=document.createElement("code"),status=document.createElement("span"),note=document.createElement("p");item.className="item";top.className="item-top";ref.textContent=gap.task_ref;status.className="pill "+(gap.status==="open"?"warn":"good");status.textContent=gap.status;note.textContent=gap.capability+" · "+(gap.reason_codes.join(", ")||gap.source);top.append(ref,status);item.append(top,note);if(gap.status==="open"){const button=document.createElement("button");button.className="secondary mini";button.textContent="Teach this gap";button.addEventListener("click",()=>teachGap(gap));item.append(button)}list.append(item)})}
     function renderEvidence(items){const list=$("evidence-list");if(!items.length){clear(list,"No evidence events.");return}list.replaceChildren();items.slice(0,10).forEach(event=>{const item=document.createElement("div"),top=document.createElement("div"),type=document.createElement("code"),time=document.createElement("span");item.className="item";top.className="item-top";type.textContent=event.event_type;time.className="pill";time.textContent=new Date(event.occurred_at).toLocaleTimeString();top.append(type,time);item.append(top);list.append(item)})}
     function showDocument(page){currentPage=page;if(!page){$("document-output").textContent="No document content returned.";$("page-label").textContent="No document";$("next-page").disabled=true;return}$("document-output").textContent=page.content;$("page-label").textContent="Page "+page.page_number+" · "+page.char_count+"/"+page.total_chars+" chars";$("next-page").disabled=!page.has_more}
+    function renderDocumentList(result){
+      const execution=result.execution||{},entries=execution.entries||[],list=$("document-list");
+      if(!execution.performed){$("document-list-count").textContent="Denied";clear(list,"Listing did not complete.");return}
+      $("document-list-count").textContent=String(execution.entry_count)+(execution.truncated?"+":"")+" entries";
+      if(!entries.length){clear(list,"This directory has no visible document entries.");return}
+      list.replaceChildren();
+      entries.forEach(entry=>{
+        const item=document.createElement("button"),top=document.createElement("div"),name=document.createElement("code"),kind=document.createElement("span"),note=document.createElement("p");
+        item.className="item";
+        item.style.textAlign="left";
+        top.className="item-top";
+        name.textContent=entry.name;
+        kind.className="pill "+(entry.kind==="directory"?"warn":"good");
+        kind.textContent=entry.kind;
+        note.textContent=entry.kind==="directory"?"Open directory":"File size · "+new Intl.NumberFormat().format(entry.byte_count)+" bytes";
+        top.append(name,kind);
+        item.append(top,note);
+        item.addEventListener("click",()=>{
+          if(entry.kind==="directory"){
+            $("directory-path").value=entry.relative_path;
+            runListing();
+          }else{
+            $("working-path").value=entry.relative_path;
+            showResult({message:"Document selected for a separately governed read.",resource_id:entry.relative_path});
+          }
+        });
+        list.append(item);
+      });
+    }
+    async function runListing(){
+      busy(true);
+      try{
+        const result=await api("/api/work/list",{method:"POST",body:JSON.stringify({task_ref:$("working-task").value,resource_id:$("directory-path").value})});
+        renderDocumentList(result);
+        showResult(result);
+        await refresh();
+      }catch(error){showResult(error.message,true)}
+      finally{busy(false)}
+    }
     function render(next){state=next;setMode(next.mode);gate("supervisor-gate",next.gates.supervisor_execution_opt_in);gate("arc-gate",next.gates.arc_execution_opt_in);gate("root-gate",next.gates.document_root_configured);$("working-mode").disabled=!next.working_ready;renderQueue(next.operator_ide||{});renderApprovals((next.operator_ide||{}).pending_approvals||[]);const p=next.training_progress,rate=p.autonomy_rate;$("progress-fill").style.width=(rate===null?0:Math.round(rate*100))+"%";$("autonomy-label").textContent=rate===null?"No attempts":Math.round(rate*100)+"% autonomy";$("completed-count").textContent=p.completed_alone;$("stopped-count").textContent=p.stopped_short;$("gap-count").textContent=p.gap_count;$("gap-status").textContent=p.open_gaps+" open";renderGaps(next.gaps);renderEvidence(next.recent_evidence);if(!ladderLoaded&&next.escalation_ladder){const tiers=next.escalation_ladder.tiers.map(tier=>({role:tier.role,kind:tier.kind,may_permit:tier.may_permit}));$("ladder-json").value=JSON.stringify({tiers},null,2);ladderLoaded=true}}
     async function refresh(){try{render(await api("/api/state"))}catch(error){showResult("State unavailable: "+error.message,true)}}
     async function switchMode(name){busy(true);try{const result=await api("/api/mode",{method:"POST",body:JSON.stringify({mode:name})});showResult({message:"Switched to "+result.mode+" mode",evidence_ref:result.evidence_ref});await refresh();return result}catch(error){showResult(error.message,true);throw error}finally{busy(false)}}
@@ -65,6 +105,8 @@
     $("training-mode").addEventListener("click",()=>switchMode("training"));$("working-mode").addEventListener("click",()=>switchMode("working"));$("refresh-state").addEventListener("click",refresh);
     $("save-training").addEventListener("click",async()=>{busy(true);try{const gapId=$("training-gap").value,path=gapId?"/api/training/resolve-gap":"/api/training/instruction";const payload=gapId?{gap_id:gapId,instruction:$("training-instruction").value,resolved_by_role:$("training-role").value}:{task_ref:$("training-task").value,instruction:$("training-instruction").value,authored_by_role:$("training-role").value};const result=await api(path,{method:"POST",body:JSON.stringify(payload)});showResult({message:gapId?"Observed gap instructed":"Reviewed SOP saved",gap_id:result.gap_id,resolved_task_ref:result.resolved_task_ref,evidence_ref:result.evidence_ref});$("training-gap").value="";$("training-instruction").value="";$("training-context").textContent="New operator-authored SOP. Instructions never override Guardian.";await refresh()}catch(error){showResult(error.message,true)}finally{busy(false)}});
     $("save-ladder").addEventListener("click",async()=>{busy(true);try{const result=await api("/api/training/escalation-ladder",{method:"POST",body:JSON.stringify(JSON.parse($("ladder-json").value))});showResult({message:"Escalation ladder validated and saved",tier_count:result.tier_count,terminal_role:result.terminal_role,evidence_ref:result.evidence_ref});await refresh()}catch(error){showResult(error.message,true)}finally{busy(false)}});
+    $("run-list").addEventListener("click",runListing);
+    $("list-root").addEventListener("click",()=>{$("directory-path").value=".";runListing()});
     $("run-read").addEventListener("click",async()=>{busy(true);try{const result=await api("/api/work/read",{method:"POST",body:JSON.stringify({task_ref:$("working-task").value,resource_id:$("working-path").value})});showDocument(result.document_page);const summary=structuredClone(result);delete summary.document_content;if(summary.document_page)delete summary.document_page.content;showResult(summary);await refresh()}catch(error){showResult(error.message,true)}finally{busy(false)}});
     $("next-page").addEventListener("click",async()=>{if(!currentPage||!currentPage.has_more)return;busy(true);try{showDocument(await api("/api/work/content-page",{method:"POST",body:JSON.stringify({content_id:currentPage.content_id,offset:currentPage.next_offset})}))}catch(error){showResult(error.message,true)}finally{busy(false)}});
     $("worker-status").addEventListener("click",async()=>{busy(true);try{showResult(await api("/api/worker/status",{method:"POST",body:"{}"}));await refresh()}catch(error){showResult(error.message,true)}finally{busy(false)}});

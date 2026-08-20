@@ -22,8 +22,9 @@ A blocked task is ready only when its latest result is
 
 Denied approvals and tasks blocked by a control never become selectable.
 Recording an approval updates evidence/state only and keeps
-`execution_allowed=false`. Any later document read still enters the real
-Supervisor and Guardian path and requires a fresh single-use grant.
+`execution_allowed=false`. Any later document listing or read still enters
+the real Supervisor and Guardian path and requires its own fresh, single-use
+grant.
 
 The adapter serializes access within the IDE process. The JSONL stores remain a
 local test implementation, not a multi-process or multi-worker production

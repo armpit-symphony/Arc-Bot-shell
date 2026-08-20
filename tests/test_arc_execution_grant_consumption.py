@@ -15,7 +15,6 @@ from arc_bot_shell.control_plane.execution import (
     ArcGrantExecutor,
 )
 
-
 NOW = datetime(2026, 8, 1, 12, 0, 0, tzinfo=timezone.utc)
 SUBJECT = {
     "request_id": "request-grant-001",
@@ -175,8 +174,8 @@ def test_substituted_binding_is_refused(document_root: Path, field: str) -> None
     }
 
 
-def test_only_document_read_is_honoured() -> None:
-    assert HONOURED_CAPABILITIES == frozenset({"document_read"})
+def test_only_bounded_document_capabilities_are_honoured() -> None:
+    assert HONOURED_CAPABILITIES == frozenset({"document_list", "document_read"})
 
 
 # ---------------------------------------------------------------------------

@@ -358,6 +358,7 @@ class ArcSupervisorPreflightClient:
     ) -> dict[str, Any]:
         allowed_actions = {
             "safe_read",
+            "safe_list",
             "status",
             "external_write",
             "shell",

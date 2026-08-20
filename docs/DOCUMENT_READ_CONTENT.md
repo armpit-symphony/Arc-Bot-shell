@@ -80,5 +80,6 @@ worse than a refusal.
 - Reads remain capped at 1 MB (`MAX_DOCUMENT_BYTES`).
 - Path containment is resolved before the check, so symlinks and `..` cannot
   escape `--document-root`.
-- `document_read` remains the only honoured capability. Anything that writes,
-  sends, or deletes has no code path in Arc at all.
+- `document_read` and the separately granted, metadata-only `document_list`
+  are the only honoured capabilities. Anything that writes, sends, or deletes
+  has no code path in Arc at all.
