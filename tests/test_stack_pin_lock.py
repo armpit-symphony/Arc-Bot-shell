@@ -133,11 +133,19 @@ def test_install_pin_is_repeated_in_all_nine_sites() -> None:
 
 
 def test_lima_pin_is_frozen_with_a_reason() -> None:
-    """The RC1 API freeze is deliberate, so tooling must not 'fix' it."""
+    """The coordinated preview freeze is deliberate, not routine currency."""
 
     dependency = stack_pins.load_lock(ROOT).dependency("lima-runtime")
     assert dependency.policy == "frozen"
-    assert "RC1" in dependency.reason
+    assert "Lab Preview coherence freeze" in dependency.reason
+
+
+def test_currency_checker_defuses_disposable_git_cleanup_race() -> None:
+    """Scheduled currency checks must not fail after Git already succeeded."""
+
+    source = CHECKER.read_text(encoding="utf-8")
+    assert "maintenance.auto=false" in source
+    assert "ignore_cleanup_errors=True" in source
 
 
 def test_operator_trust_baseline_is_a_site_of_the_install_pin() -> None:
@@ -352,9 +360,8 @@ def test_forced_bump_moves_a_frozen_pin(tmp_path: Path) -> None:
 # --- the interpreter, not just the files ----------------------------------
 #
 # Every site can agree and the interpreter can still be importing a different
-# commit. That is not hypothetical here: Lima-Office pins lima-runtime to a
-# commit this repository refuses, so one shared interpreter silently gives one
-# of the two repositories the wrong runtime.
+# commit. Isolated repository environments keep that mismatch visible even
+# while the coordinated preview currently selects one shared runtime commit.
 
 
 def _fake_dist(

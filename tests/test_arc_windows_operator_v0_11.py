@@ -385,7 +385,7 @@ def test_windows_scripts_do_not_add_firewall_or_non_loopback_listeners() -> None
     assert "ollama list" not in text
     assert "ollama --version" not in text
     assert "lima-runtime==0.1.0rc1" in text
-    assert "40d6f1379284931ee46f05650e9201d6f98975d6" in text
+    assert "4a599405961e786808ea7a7da71ecc65f7358e4f" in text
     assert "lima-runtime-v1.1-loopback-ollama-executor" not in text
 
 

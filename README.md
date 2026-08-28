@@ -45,7 +45,7 @@ Arc includes a non-executing governed preflight path:
 `ArcActionRequest -> normalize_for_lima -> lima.runtime.run_governed_request -> GovernedDecision`
 
 The dependency is `lima-runtime==0.1.0rc1`, pinned to LIMA commit
-`40d6f1379284931ee46f05650e9201d6f98975d6`. This path is preview/preflight
+`4a599405961e786808ea7a7da71ecc65f7358e4f`. This path is preview/preflight
 only. It grants no execution authority and performs no provider, model, tool,
 connector, external-send, credential, network, background, robotics, IoT, or
 physical-world action.
