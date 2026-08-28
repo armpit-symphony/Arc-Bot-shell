@@ -12,7 +12,7 @@ from .ports import LimaRuntimeUnavailableError
 
 LIMA_ENTRYPOINT = "lima.runtime.run_governed_request"
 LIMA_PINNED_REFERENCE = "lima-runtime==0.1.0rc1"
-LIMA_PINNED_COMMIT = "40d6f1379284931ee46f05650e9201d6f98975d6"
+LIMA_PINNED_COMMIT = "4a599405961e786808ea7a7da71ecc65f7358e4f"
 LIMA_PINNED_TAG_OBJECT = None
 
 # Trust baselines this build still accepts from an operator config written by
@@ -22,7 +22,7 @@ LIMA_PINNED_TAG_OBJECT = None
 LIMA_SUPERSEDED_COMMITS = frozenset(
     {
         # v0.10/v0.11 baseline, left behind when the install pin moved to the
-        # LIMA v0.1 RC1 public API freeze.
+        # coordinated Arc + LIMA Office Lab Preview runtime.
         "4e7c648349f0a5a19694ac5f0c57b5cb14dc2b17",
     }
 )

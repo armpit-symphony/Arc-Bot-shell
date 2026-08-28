@@ -7,7 +7,7 @@ $script:ArcRollbackCommit = "fa1e93ff18203218a863b679f3d3608aa46bd5a4"
 $script:GuardianTag = "guardian-core-v1.1-local-model-preview-policy"
 $script:GuardianCommit = "69e843218c521b913edcec404dea6b7be8c64f06"
 $script:LimaTag = "lima-runtime==0.1.0rc1"
-$script:LimaCommit = "40d6f1379284931ee46f05650e9201d6f98975d6"
+$script:LimaCommit = "4a599405961e786808ea7a7da71ecc65f7358e4f"
 
 function Get-ArcDefaultInstallRoot {
     if ([string]::IsNullOrWhiteSpace($env:LOCALAPPDATA)) {

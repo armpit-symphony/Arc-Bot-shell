@@ -20,9 +20,9 @@
   "dependencies": {
     "lima-runtime": {
       "repo": "armpit-symphony/LIMA-AI-OS",
-      "commit": "40d6f1379284931ee46f05650e9201d6f98975d6",
+      "commit": "4a599405961e786808ea7a7da71ecc65f7358e4f",
       "policy": "frozen",
-      "reason": "LIMA v0.1 RC1 public API freeze. tests/test_arc_lima_rc1_consumer_pin.py attests that Arc consumes exactly this commit, so moving it retires that attestation and must be a deliberate, reviewed change rather than a routine bump. Arc does not need newer LIMA: the execution-grant path consumes grants as JSON off the wire and imports nothing from lima.",
+      "reason": "Arc + LIMA Office Lab Preview coherence freeze, reviewed 2026-08-27. tests/test_arc_lima_rc1_consumer_pin.py attests that Arc consumes exactly this commit, so moving it retires that attestation and must be a deliberate, reviewed release change rather than a routine bump. The package version remains 0.1.0rc1 and Guardian-gated execution grants remain the only admitted execution authority.",
       "package": {
         "name": "lima-runtime",
         "version": "0.1.0rc1"

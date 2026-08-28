@@ -1,4 +1,4 @@
-"""Installed LIMA v0.1 RC consumer compatibility proof for Arc."""
+"""Installed LIMA lab-preview consumer compatibility proof for Arc."""
 
 from __future__ import annotations
 
@@ -18,7 +18,7 @@ from lima.runtime import run_governed_request
 
 
 LIMA_VERSION = "0.1.0rc1"
-LIMA_COMMIT = "40d6f1379284931ee46f05650e9201d6f98975d6"
+LIMA_COMMIT = "4a599405961e786808ea7a7da71ecc65f7358e4f"
 
 
 def _request(action_id: str, action_kind: str) -> ArcActionRequest:
@@ -34,7 +34,7 @@ def _request(action_id: str, action_kind: str) -> ArcActionRequest:
     )
 
 
-def test_installed_lima_rc1_uses_exact_commit_and_public_api() -> None:
+def test_installed_lima_preview_uses_exact_commit_and_public_api() -> None:
     matching_distributions = []
     for distribution in importlib.metadata.distributions():
         name = str(distribution.metadata.get("Name", "")).lower()
