@@ -28,6 +28,9 @@ class ArcOperatorIDEUITests(unittest.TestCase):
             "ladder-json",
             "document-output",
             "next-page",
+            "training-goal",
+            "draft-training",
+            "local-model-label",
         ):
             self.assertIn(f'id="{element_id}"', self.source)
 
@@ -36,6 +39,7 @@ class ArcOperatorIDEUITests(unittest.TestCase):
             "/api/state",
             "/api/mode",
             "/api/training/instruction",
+            "/api/training/draft",
             "/api/training/resolve-gap",
             "/api/work/list",
             "/api/training/escalation-ladder",
@@ -62,6 +66,8 @@ class ArcOperatorIDEUITests(unittest.TestCase):
         self.assertIn("no execution authority issued", self.source)
         self.assertIn("Hidden entries, symlinks, content, timestamps", self.source)
         self.assertIn("No mutation, send, connector", self.source)
+        self.assertIn("Synthetic lab data only", self.source)
+        self.assertIn("it has not been saved", self.source)
 
 
 if __name__ == "__main__":
