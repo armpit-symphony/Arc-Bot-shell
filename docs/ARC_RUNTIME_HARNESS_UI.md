@@ -13,6 +13,12 @@ of truth for mode, gates, SOP records, outcomes, counters, and evidence.
 - Persists through LIMA Office as an operator-authored SOP record.
 - Does not expose the governed-read endpoint through the controller.
 - Cannot alter Guardian policy or teach past a forbidden denial.
+- Optionally asks loopback Ollama for a draft SOP only when the launcher has
+  separate Supervisor and Arc local-model opt-ins.
+- Requires a Guardian allow decision and one single-use LIMA execution grant
+  for every inference.
+- Places the result in the transient reviewed-instruction field; it does not
+  save or authorize the draft automatically.
 
 ## Working mode
 
@@ -36,6 +42,7 @@ The page makes same-origin requests only:
 - `GET /api/state`
 - `POST /api/mode`
 - `POST /api/training/instruction`
+- `POST /api/training/draft`
 - `POST /api/work/read`
 - `POST /api/worker/status`
 
@@ -46,8 +53,9 @@ The LIMA Office launcher and full test runbook are documented in its
 
 This UI is not a general-purpose IDE. It has no task-queue editor, arbitrary
 tool runner, terminal, browser automation, connector control, external send,
-file mutation, model invocation, remediation, or physical-device control.
+file mutation, remediation, or physical-device control. The only model surface
+is bounded, loopback-only SOP drafting with no tools and no automatic save.
 
-The next UI slices should be queue visibility, resumable-task state, paged
-document reads, approval review, and customer escalation-ladder configuration.
-Each needs its server-side contract and evidence path before a button is added.
+Any future browser or form capability still needs its server-side contract,
+Guardian policy, single-use grant, evidence path, and separate operator approval
+before a button is added.

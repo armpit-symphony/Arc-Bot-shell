@@ -12,6 +12,12 @@ from .preview import (
     ollama_configured,
     resolve_model_adapter_name,
 )
+from .training_executor import (
+    LOCAL_MODEL_ACTION,
+    LOCAL_MODEL_CAPABILITY,
+    LocalModelExecutionError,
+    OllamaTrainingDraftExecutor,
+)
 
 __all__ = [
     "DeterministicPreviewAdapter",
@@ -22,4 +28,8 @@ __all__ = [
     "model_preview_available",
     "ollama_configured",
     "resolve_model_adapter_name",
+    "LOCAL_MODEL_ACTION",
+    "LOCAL_MODEL_CAPABILITY",
+    "LocalModelExecutionError",
+    "OllamaTrainingDraftExecutor",
 ]
