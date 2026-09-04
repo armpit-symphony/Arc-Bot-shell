@@ -31,6 +31,16 @@ class ArcOperatorIDEUITests(unittest.TestCase):
             "training-goal",
             "draft-training",
             "local-model-label",
+            "registration-practice-panel",
+            "registration-scenario",
+            "registration-status",
+            "registration-score",
+            "registration-profile",
+            "registration-form-fields",
+            "registration-issues",
+            "run-registration",
+            "run-registration-suite",
+            "registration-submit",
         ):
             self.assertIn(f'id="{element_id}"', self.source)
 
@@ -40,6 +50,9 @@ class ArcOperatorIDEUITests(unittest.TestCase):
             "/api/mode",
             "/api/training/instruction",
             "/api/training/draft",
+            "/api/training/registration/catalog",
+            "/api/training/registration/run",
+            "/api/training/registration/run-suite",
             "/api/training/resolve-gap",
             "/api/work/list",
             "/api/training/escalation-ladder",
@@ -68,6 +81,10 @@ class ArcOperatorIDEUITests(unittest.TestCase):
         self.assertIn("No mutation, send, connector", self.source)
         self.assertIn("Synthetic lab data only", self.source)
         self.assertIn("it has not been saved", self.source)
+        self.assertIn("No real people, browser automation", self.source)
+        self.assertIn("Submit blocked", self.source)
+        self.assertIn('id="registration-submit" disabled', self.source)
+        self.assertIn("submission remains blocked", self.source)
 
 
 if __name__ == "__main__":
