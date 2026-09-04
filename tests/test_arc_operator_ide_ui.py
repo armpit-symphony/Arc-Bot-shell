@@ -35,6 +35,10 @@ class ArcOperatorIDEUITests(unittest.TestCase):
             "registration-scenario",
             "registration-status",
             "registration-score",
+            "registration-template",
+            "registration-review-status",
+            "registration-review-approve",
+            "registration-review-reject",
             "registration-profile",
             "registration-form-fields",
             "registration-issues",
@@ -53,6 +57,7 @@ class ArcOperatorIDEUITests(unittest.TestCase):
             "/api/training/registration/catalog",
             "/api/training/registration/run",
             "/api/training/registration/run-suite",
+            "/api/training/registration/review",
             "/api/training/resolve-gap",
             "/api/work/list",
             "/api/training/escalation-ladder",
@@ -81,10 +86,12 @@ class ArcOperatorIDEUITests(unittest.TestCase):
         self.assertIn("No mutation, send, connector", self.source)
         self.assertIn("Synthetic lab data only", self.source)
         self.assertIn("it has not been saved", self.source)
-        self.assertIn("No real people, browser automation", self.source)
-        self.assertIn("Submit blocked", self.source)
+        self.assertIn("browser automation, external submission", self.source)
+        self.assertIn("Approve localhost mock", self.source)
+        self.assertIn("External submit blocked", self.source)
         self.assertIn('id="registration-submit" disabled', self.source)
-        self.assertIn("submission remains blocked", self.source)
+        self.assertIn("nothing was sent", self.source)
+        self.assertIn("external_side_effects", self.source)
 
 
 if __name__ == "__main__":
