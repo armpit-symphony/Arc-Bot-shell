@@ -1,5 +1,11 @@
 # Arc Bot Completion Roadmap
 
+Current status, 2026-09-05: the approved lab.4 exception includes real guarded
+local-model SOP drafting, durable local evidence and instructions, and synthetic
+registration review. See [Arc lab closeout](ARC_LAB_CLOSEOUT.md). The historical
+phase gates below are not a statement that these approved lab capabilities are
+still unimplemented. Full Office MVP and production qualification remain open.
+
 Date: 2026-06-20
 Status: phased build plan
 
