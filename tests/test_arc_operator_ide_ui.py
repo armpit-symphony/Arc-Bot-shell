@@ -45,6 +45,13 @@ class ArcOperatorIDEUITests(unittest.TestCase):
             "run-registration",
             "run-registration-suite",
             "registration-submit",
+            "office-supervisor-panel",
+            "office-status",
+            "office-workers",
+            "office-refresh",
+            "office-evidence-request",
+            "office-read-evidence",
+            "office-evidence",
         ):
             self.assertIn(f'id="{element_id}"', self.source)
 
@@ -65,6 +72,8 @@ class ArcOperatorIDEUITests(unittest.TestCase):
             "/api/work/content-page",
             "/api/work/approval",
             "/api/worker/status",
+            "/api/office/workers",
+            "/api/office/evidence",
         ):
             self.assertIn(endpoint, self.source)
 
@@ -92,6 +101,8 @@ class ArcOperatorIDEUITests(unittest.TestCase):
         self.assertIn('id="registration-submit" disabled', self.source)
         self.assertIn("nothing was sent", self.source)
         self.assertIn("external_side_effects", self.source)
+        self.assertIn("No hidden polling runs", self.source)
+        self.assertIn("This cannot execute tasks or grant authority", self.source)
 
 
 if __name__ == "__main__":

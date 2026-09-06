@@ -3,6 +3,13 @@
 Date: 2026-06-18
 Status: Phase-0 draft
 
+## Current lab.4 runtime exception
+
+Lab.4 adds real Guardian/LIMA local-model SOP drafting, durable local SOP and
+audit records, and synthetic registration mock review. The old Phase-0
+restrictions describe scaffold modules. See `docs/ARC_LAB_CLOSEOUT.md` for
+observed evidence and the new bounded diagnostic/reset/lifecycle controls.
+
 ## Current v0.10 runtime exception
 
 The Phase-0 scaffold controls below remain unchanged. The runnable harness has

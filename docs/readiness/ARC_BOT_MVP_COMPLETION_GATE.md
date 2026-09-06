@@ -1,5 +1,21 @@
 # Arc Bot MVP Completion Gate
 
+## Current lab status (2026-09-05)
+
+The approved lab.4 runtime now executes local Qwen SOP drafting through Guardian
+and LIMA, saves reviewed SOPs and evidence, and runs 25 deterministic synthetic
+registration cases with mock review receipts. Restart persistence passed; the
+operator reports the UI inputs and outputs work. See [Arc lab closeout](../ARC_LAB_CLOSEOUT.md).
+
+`mvp_complete=false` remains correct: this does not qualify a deployed Office
+system or general browser form automation. The command's `current_lab` section
+reports the implemented exception. Authority flags apply to the reporting
+command, not a blanket ban on the separately approved lab runtime.
+
+The June sections below are historical contract-gate requirements. Their claims
+that all model invocation and evidence writing are blocked are superseded for
+the bounded lab only. Remaining dependencies require full deployment evidence.
+
 Date: 2026-06-21
 Status: Phase-12 completion-readiness gate, not complete
 

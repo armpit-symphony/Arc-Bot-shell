@@ -56,9 +56,14 @@ def test_mvp_completion_gate_blocks_runtime_capabilities() -> None:
     blocked = set(projection["must_not_implement_until_unblocked"])
 
     assert "live_supervisor_attachment" in blocked
-    assert "local_model_invocation" in blocked
+    assert "local_model_invocation_outside_approved_lab" in blocked
     assert "approval_token_issuance_or_verification" in blocked
-    assert "durable_evidence_write" in blocked
+    assert "durable_evidence_write_outside_approved_lab" in blocked
+
+    assert projection["current_lab"]["model_weight_training"] is False
+    assert projection["current_lab"]["general_form_automation_proven"] is False
+    model = next(item for item in projection["completion_criteria"] if item["criterion_id"] == "approved_local_model_preview_only")
+    assert model["status"] == "demonstrated_in_local_lab"
     assert "connector_read_or_write" in blocked
     assert "customer_system_mutation" in blocked
     assert "external_message_send" in blocked

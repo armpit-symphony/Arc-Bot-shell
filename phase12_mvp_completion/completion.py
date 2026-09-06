@@ -196,6 +196,16 @@ def build_arc_mvp_completion_gate_projection() -> dict[str, Any]:
     """Build deterministic MVP completion-readiness metadata."""
 
     criteria = [dict(item) for item in MVP_COMPLETION_CRITERIA]
+    # June contracts remain reference material. Lab.4 supplies a narrower,
+    # approved runtime; the product gate still requires deployment evidence.
+    for item in criteria:
+        if item["criterion_id"] == "approved_local_model_preview_only":
+            item["status"] = "demonstrated_in_local_lab"
+            item["evidence_refs"] = ["docs/ARC_LAB_CLOSEOUT.md", "docs/ARC_V0_10_GUARDIAN_LIMA_OLLAMA.md"]
+            item["missing_evidence"] = ["field deployment qualification outside the loopback lab"]
+        elif item["status"] in {"blocked_external_runtime_gate", "planning_ready_runtime_blocked"}:
+            item["missing_evidence"] = ["Full deployment qualification: " + value for value in item["missing_evidence"]]
+            item["evidence_refs"] = [*item["evidence_refs"], "docs/ARC_LAB_CLOSEOUT.md"]
     blocking = [
         item
         for item in criteria
@@ -211,6 +221,18 @@ def build_arc_mvp_completion_gate_projection() -> dict[str, Any]:
         "phase": "phase-12-mvp-completion-gate",
         "status": "not_complete_blocked_by_runtime_dependencies",
         "projection_scope": "completion_readiness_read_only",
+        "authority_flags_scope": "This reporting command grants no runtime authority; approved lab runtime is described separately.",
+        "current_lab": {
+            "baseline": "0.1.0-lab.4",
+            "local_model_preview": "implemented_and_observed_with_guardian_and_lima",
+            "local_sop_and_evidence_persistence": "implemented_and_restart_tested",
+            "registration_curriculum": "25_fixed_synthetic_cases_across_3_layouts",
+            "manual_acceptance": "operator_reports_inputs_and_outputs_work",
+            "model_weight_training": False,
+            "general_form_automation_proven": False,
+            "evidence_ref": "docs/ARC_LAB_CLOSEOUT.md",
+        },
+        "blocking_runtime_dependencies_scope": "Full office deployment qualification; names do not imply the corresponding loopback lab code is absent.",
         "source_access_mode": "repo_artifact_inspection_only",
         "runtime_authority_blocked": True,
         "runtime_execution_blocked": True,
@@ -237,9 +259,9 @@ def build_arc_mvp_completion_gate_projection() -> dict[str, Any]:
         ],
         "must_not_implement_until_unblocked": [
             "live_supervisor_attachment",
-            "local_model_invocation",
+            "local_model_invocation_outside_approved_lab",
             "approval_token_issuance_or_verification",
-            "durable_evidence_write",
+            "durable_evidence_write_outside_approved_lab",
             "connector_read_or_write",
             "customer_system_mutation",
             "external_message_send",
