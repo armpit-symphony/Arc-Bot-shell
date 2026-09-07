@@ -49,10 +49,24 @@ general task metrics and all audit events are preserved. Old attempt IDs
 cannot be reviewed again. Archive tables remain in the local database for
 recovery; reset is not a data-erasure or retention-policy control.
 
-## Qualification still needed
+## Lab.5 qualification evidence
 
-Record clean-install, launch, model detection, restart, SOP restoration and
-login-shortcut results against the actual package. A process restart or direct
-shortcut launch is not an OS reboot. Report the OS reboot check as pending
-until a user-authorized reboot and subsequent login have actually occurred.
-Office integration and production qualification are separate future work.
+The public `0.1.0-lab.5` package was clean-installed from ZIP SHA-256
+`2b4ea676c11d8f37ea60da893938fc4fd86c25f8c8dad13c1c7c512a9789a8d2`.
+It selected Arc commit `72a5221bff908f5427eab5c7b10bea828ba75ddf`
+with no modified-source marker. Exact-pin, one-worker Supervisor, execution
+grant, restart, UI, Qwen detection, SOP restoration, and optional login
+shortcut enable/disable checks passed.
+
+A user-authorized Windows reboot was completed on 2026-09-06. With login
+startup intentionally disabled, Arc correctly remained stopped after login.
+The published Start lifecycle path then returned the loopback UI on port 8766.
+The restored state contained 128 synthetic attempts, 31 reviews, and two SOPs;
+Qwen was ready; the Supervisor classified one authenticated Arc worker as
+healthy and eligible; and a new governed status request returned seven
+redacted evidence events. Runtime execution and external side effects remained
+false.
+
+This closes the personal-PC reboot check. It is not production qualification,
+customer-pilot approval, LAN exposure approval, connector approval, or
+authorization for unattended execution.
